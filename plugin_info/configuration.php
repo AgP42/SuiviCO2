@@ -22,7 +22,7 @@ if (!isConnect()) {
     die();
 }
 ?>
-<form class="form-horizontal">
+<form class="form-horizontal" id="form_configEnergy">
     <fieldset>
         <legend><i class="fa fa-eur"></i> {{Tarification}}</legend>
         <div class="form-group">
@@ -107,9 +107,24 @@ if (!isConnect()) {
 
 <script>
 
+   $('#form_configEnergy').delegate('.enableType','change', function () {
+    if($(this).value() == 1){
+        $('.'+$(this).attr('data-type')+'Config').show();
+    }else{
+       $('.'+$(this).attr('data-type')+'Config').hide();
+   }
+});
+
  $('.configKey[data-l1key=rateMode]').on('change', function () {
     $('.rate').hide();
     $('.rate.' + $(this).value()).show();
+});
+
+  $("#form_configEnergy").delegate(".listCmdInfo", 'click', function () {
+    var el = $('.configKey[data-l1key=' + $(this).attr('data-input') + ']');
+    jeedom.cmd.getSelectModal({cmd: {type: 'info'}}, function (result) {
+        el.atCaret('insert', result.human);
+    });
 });
 
 </script>
