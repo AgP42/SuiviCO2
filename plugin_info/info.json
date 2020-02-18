@@ -1,20 +1,20 @@
 {
-	"id" : "template",
-	"name" : "Template",
-	"description" : "Plugin template pour la création de plugin",
+	"id" : "suiviCO2",
+	"name" : "Suivi CO2",
+	"description" : "Plugin pour le suivi des émissions CO2",
 	"licence" : "AGPL",
-	"author" : "Jeedom SAS",
+	"author" : "Agp42",
 	"require" : "3.2",
-	"category" : "programming",
+	"category" : "Energy",
 	"hasDependency" : false,
 	"hasOwnDeamon" : false,
 	"maxDependancyInstallTime" : 0,
-	"changelog" : "https://jeedom.github.io/plugin-template/#language#/changelog",
-	"documentation" : "https://jeedom.github.io/plugin-template/#language#/",
+	"changelog" : "https://agp42.github.io/SuiviCO2/#language#/changelog",
+	"documentation" : "https://agp42.github.io/SuiviCO2/#language#",
 	"link" : {
 		"forum":"Lien vers le forum",
 		"video" : "Lien vers une video"
 	},
 	"language" : ["fr_FR","en_US","de_DE","sp_SP","ru_RU","id_ID","it_IT"],
-	"compatibility" : ["miniplus","smart","rpi","docker","diy","mobile"]
+	"compatibility" : ["miniplus","smart","rpi","docker","diy"]
 }

@@ -23,7 +23,7 @@ try {
     if (!isConnect('admin')) {
         throw new Exception(__('401 - Accès non autorisé', __FILE__));
     }
-    
+
     ajax::init();
 
 
@@ -33,4 +33,5 @@ try {
 } catch (Exception $e) {
     ajax::error(displayException($e), $e->getCode());
 }
+
 

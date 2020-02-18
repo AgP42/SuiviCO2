@@ -19,7 +19,7 @@
 /* * ***************************Includes********************************* */
 require_once __DIR__  . '/../../../../core/php/core.inc.php';
 
-class template extends eqLogic {
+class suiviCO2 extends eqLogic {
     /*     * *************************Attributs****************************** */
 
 
@@ -53,35 +53,35 @@ class template extends eqLogic {
     /*     * *********************Méthodes d'instance************************* */
 
     public function preInsert() {
-        
+
     }
 
     public function postInsert() {
-        
+
     }
 
     public function preSave() {
-        
+
     }
 
     public function postSave() {
-        
+
     }
 
     public function preUpdate() {
-        
+
     }
 
     public function postUpdate() {
-        
+
     }
 
     public function preRemove() {
-        
+
     }
 
     public function postRemove() {
-        
+
     }
 
     /*
@@ -106,7 +106,7 @@ class template extends eqLogic {
     /*     * **********************Getteur Setteur*************************** */
 }
 
-class templateCmd extends cmd {
+class suiviCO2Cmd extends cmd {
     /*     * *************************Attributs****************************** */
 
 
@@ -123,7 +123,7 @@ class templateCmd extends cmd {
      */
 
     public function execute($_options = array()) {
-        
+
     }
 
     /*     * **********************Getteur Setteur*************************** */

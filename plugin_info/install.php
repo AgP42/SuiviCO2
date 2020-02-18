@@ -18,17 +18,17 @@
 
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
-function template_install() {
-    
+function suiviCO2_install() {
+
 }
 
-function template_update() {
-    
+function suiviCO2_update() {
+
 }
 
 
-function template_remove() {
-    
+function suiviCO2_remove() {
+
 }
 
 ?>
