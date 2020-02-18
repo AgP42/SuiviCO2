@@ -5,7 +5,7 @@
 	"licence" : "AGPL",
 	"author" : "Agp42",
 	"require" : "3.2",
-	"category" : "Energy",
+	"category" : "energy",
 	"hasDependency" : false,
 	"hasOwnDeamon" : false,
 	"maxDependancyInstallTime" : 0,
