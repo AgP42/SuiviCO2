@@ -39,7 +39,7 @@ if (!isConnect()) {
         </div>
         <div class="rate fixed">
           <div class="form-group">
-              <label class="col-sm-2 control-label">{{Tarif fixe}}</label>
+              <label class="col-sm-2 control-label">{{Tarif fixe (€/kWh)}}</label>
               <div class="col-sm-2">
                   <input class="form-control configKey input-sm" data-l1key="rateHp"/>
               </div>
@@ -48,13 +48,13 @@ if (!isConnect()) {
 
         <div class="rate variable" style="display : none;">
           <div class="form-group">
-              <label class="col-sm-2 control-label">{{Tarif heure pleine}}</label>
+              <label class="col-sm-2 control-label">{{Tarif heure pleine (€/kWh)}}</label>
               <div class="col-sm-2">
                   <input class="form-control configKey input-sm" data-l1key="rateHp"/>
               </div>
           </div>
           <div class="form-group">
-              <label class="col-sm-2 control-label">{{Tarif heure creuse}}</label>
+              <label class="col-sm-2 control-label">{{Tarif heure creuse (€/kWh)}}</label>
               <div class="col-sm-2">
                   <input class="form-control configKey input-sm" data-l1key="rateHc"/>
               </div>
@@ -100,7 +100,14 @@ if (!isConnect()) {
  $('.configKey[data-l1key=rateMode]').on('change', function () {
     $('.rate').hide();
     $('.rate.' + $(this).value()).show();
-});
+  });
+
+  $('.timepicker').datetimepicker({
+    lang: 'fr',
+    datepicker: false,
+    format: 'H:i',
+    step: 15
+  });
 
 
 </script>
