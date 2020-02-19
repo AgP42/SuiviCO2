@@ -111,7 +111,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
             <label class="col-sm-2 control-label">{{Index fixe ou HP}}</label>
             <div class="col-sm-4">
               <div class="input-group">
-                <input type="text" class="eqLogicAttr form-control tooltips roundedLeft" data-l1key="configuration" data-l2key="index_HP" data-concat="1"/>
+                <input type="text" class="eqLogicAttr form-control tooltips roundedLeft" data-l1key="configuration" data-l2key="index_HP"/>
                 <span class="input-group-btn">
                   <a class="btn btn-default listCmdInfo roundedRight"><i class="fa fa-list-alt"></i></a>
                 </span>
@@ -123,7 +123,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
             <label class="col-sm-2 control-label">{{Index HC (facultatif)}}</label>
               <div class="col-sm-4">
                 <div class="input-group">
-                  <input type="text" class="eqLogicAttr form-control tooltips roundedLeft" data-l1key="configuration" data-l2key="index_HC" data-concat="1"/>
+                  <input type="text" class="eqLogicAttr form-control tooltips roundedLeft" data-l1key="configuration" data-l2key="index_HC"/>
                   <span class="input-group-btn">
                     <a class="btn btn-default listCmdInfo roundedRight"><i class="fa fa-list-alt"></i></a>
                   </span>

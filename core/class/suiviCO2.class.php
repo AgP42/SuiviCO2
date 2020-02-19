@@ -66,11 +66,80 @@ class suiviCO2 extends eqLogic {
 
     public function postSave() {
 
+      ///// Creation de la commande index_hp, (obligatoire, verifiée dans preUpdate)
+      $index_hp = $this->getCmd(null, 'index_HP');
+      if (!is_object($index_hp)) {
+        $index_hp = new suiviCO2Cmd();
+    //    $index_hp->setTemplate('dashboard', 'line');
+    //    $index_hp->setTemplate('mobile', 'line');
+        $index_hp->setIsVisible(1);
+        $index_hp->setIsHistorized(1);
+        $index_hp->setName(__('Index HP', __FILE__));
+      }
+      $index_hp->setEqLogic_id($this->getId());
+      $index_hp->setType('info');
+      $index_hp->setSubType('numeric');
+      $index_hp->setLogicalId('index_hp');
+      $index_hp->setUnite('kWh');
+
+      $value = '';
+      preg_match_all("/#([0-9]*)#/", $this->getConfiguration('index_HP'), $matches);
+      foreach ($matches[1] as $cmd_id) {
+        if (is_numeric($cmd_id)) {
+          $cmd = cmd::byId($cmd_id);
+          if (is_object($cmd) && $cmd->getType() == 'info') {
+            $value .= '#' . $cmd_id . '#';
+            break;
+          }
+        }
+      }
+      $index_hp->setValue($value);
+      $index_hp->setGeneric_type( 'GENERIC_INFO');
+      $index_hp->save();
+
+      ///// Creation de la commande index_hc, dans tous les cas, sinon on sait pas gerer le fait qu'on a rempli qqch puis on le vide //a ameliorer...
+//      if ($this->getConfiguration('index_HC') != '') {
+        $index_hc = $this->getCmd(null, 'index_HC');
+        if (!is_object($index_hc)) {
+          $index_hc = new suiviCO2Cmd();
+      //    $index_hc->setTemplate('dashboard', 'line');
+      //    $index_hc->setTemplate('mobile', 'line');
+          $index_hc->setIsVisible(1);
+          $index_hc->setIsHistorized(1);
+          $index_hc->setName(__('Index HC', __FILE__));
+        }
+        $index_hc->setEqLogic_id($this->getId());
+        $index_hc->setType('info');
+        $index_hc->setSubType('numeric');
+        $index_hc->setLogicalId('index_hc');
+        $index_hc->setUnite('kWh');
+
+        $value = '';
+        preg_match_all("/#([0-9]*)#/", $this->getConfiguration('index_HC'), $matches);
+        foreach ($matches[1] as $cmd_id) {
+          if (is_numeric($cmd_id)) {
+            $cmd = cmd::byId($cmd_id);
+            if (is_object($cmd) && $cmd->getType() == 'info') {
+              $value .= '#' . $cmd_id . '#';
+              break;
+            }
+          }
+        }
+        $index_hc->setValue($value);
+        $index_hc->setGeneric_type( 'GENERIC_INFO');
+        $index_hc->save();
+ //     }
     }
 
-    public function preUpdate() {
+  // preUpdate ⇒ Méthode appellée avant la mise à jour de votre objet
+  // ici on vérifie la présence de nos champs de config obligatoire
+  public function preUpdate() {
 
-    }
+      if ($this->getConfiguration('index_HP') == '') {
+          throw new Exception(__('Le champs Index fixe ou HP ne peut être vide',__FILE__));
+      }
+
+  }
 
     public function postUpdate() {
 
