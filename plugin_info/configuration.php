@@ -24,15 +24,8 @@ if (!isConnect()) {
 ?>
 <form class="form-horizontal">
     <fieldset>
-        <legend><i class="fa fa-eur"></i> {{Tarification}}</legend>
-        <div class="form-group">
-            <label class="col-lg-2 control-label">{{Devise}}</label>
-            <div class="col-lg-2">
-                <input class="configKey form-control" data-l1key="currency" value="€"/>
-            </div>
-        </div>
 
-        <legend><i class="fa fa-bolt"></i> {{Electricité}}</legend>
+      <legend><i class="fa fa-bolt"></i> {{Coût électricité}}</legend>
 
       <div class="electricityConfig">
         <div class="form-group">
@@ -45,63 +38,59 @@ if (!isConnect()) {
             </div>
         </div>
         <div class="rate fixed">
-            <div class="form-group">
-                <label class="col-sm-2 control-label">{{Tarif}}</label>
-                <div class="col-sm-4">
-                    <div class="input-group">
-                        <input class="form-control configKey input-sm" data-l1key="rate"/>
-                        <span class="input-group-btn">
-                          <a class="btn btn-default btn-sm listCmdInfo btn-warning"  data-input="rate"><i class="fa fa-list-alt"></i></a>
-                      </span>
-                  </div>
+          <div class="form-group">
+              <label class="col-sm-2 control-label">{{Tarif fixe}}</label>
+              <div class="col-sm-2">
+                  <input class="form-control configKey input-sm" data-l1key="rateHp"/>
+              </div>
+          </div>
+        </div>
+
+        <div class="rate variable" style="display : none;">
+          <div class="form-group">
+              <label class="col-sm-2 control-label">{{Tarif heure pleine}}</label>
+              <div class="col-sm-2">
+                  <input class="form-control configKey input-sm" data-l1key="rateHp"/>
+              </div>
+          </div>
+          <div class="form-group">
+              <label class="col-sm-2 control-label">{{Tarif heure creuse}}</label>
+              <div class="col-sm-2">
+                  <input class="form-control configKey input-sm" data-l1key="rateHc"/>
+              </div>
+          </div>
+          <div class="form-group">
+              <label class="col-sm-2 control-label">{{Début heure creuse}}</label>
+              <div class="col-sm-1">
+                  <input class="form-control configKey input-sm timepicker" data-l1key="startHc"/>
+              </div>
+              <label class="col-sm-2 control-label">{{Fin heure creuse}}</label>
+              <div class="col-sm-1">
+                  <input class="form-control configKey input-sm timepicker" data-l1key="endHc"/>
+              </div>
+          </div>
+          <div class="form-group">
+              <label class="col-sm-2 control-label">{{Début heure creuse 2}}</label>
+              <div class="col-sm-1">
+                  <input class="form-control configKey input-sm timepicker" data-l1key="startHc2"/>
+              </div>
+              <label class="col-sm-2 control-label">{{Fin heure creuse 2}}</label>
+              <div class="col-sm-1">
+                  <input class="form-control configKey input-sm timepicker" data-l1key="endHc2"/>
+              </div>
+          </div>
+          <div class="form-group">
+              <label class="col-sm-2 control-label">{{Début heure creuse 3}}</label>
+              <div class="col-sm-1">
+                  <input class="form-control configKey input-sm timepicker" data-l1key="startHc3"/>
+              </div>
+              <label class="col-sm-2 control-label">{{Fin heure creuse 3}}</label>
+              <div class="col-sm-1">
+                  <input class="form-control configKey input-sm timepicker" data-l1key="endHc3"/>
               </div>
           </div>
       </div>
-      <div class="rate variable" style="display : none;">
-        <div class="form-group">
-            <label class="col-sm-2 control-label">{{Tarif heure pleine}}</label>
-            <div class="col-sm-2">
-                <input class="form-control configKey input-sm" data-l1key="rateHp"/>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-2 control-label">{{Tarif heure creuse}}</label>
-            <div class="col-sm-2">
-                <input class="form-control configKey input-sm" data-l1key="rateHc"/>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-2 control-label">{{Début heure creuse}}</label>
-            <div class="col-sm-1">
-                <input class="form-control configKey input-sm timepicker" data-l1key="startHc"/>
-            </div>
-            <label class="col-sm-2 control-label">{{Fin heure creuse}}</label>
-            <div class="col-sm-1">
-                <input class="form-control configKey input-sm timepicker" data-l1key="endHc"/>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-2 control-label">{{Début heure creuse 2}}</label>
-            <div class="col-sm-1">
-                <input class="form-control configKey input-sm timepicker" data-l1key="startHc2"/>
-            </div>
-            <label class="col-sm-2 control-label">{{Fin heure creuse 2}}</label>
-            <div class="col-sm-1">
-                <input class="form-control configKey input-sm timepicker" data-l1key="endHc2"/>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-2 control-label">{{Début heure creuse 3}}</label>
-            <div class="col-sm-1">
-                <input class="form-control configKey input-sm timepicker" data-l1key="startHc3"/>
-            </div>
-            <label class="col-sm-2 control-label">{{Fin heure creuse 3}}</label>
-            <div class="col-sm-1">
-                <input class="form-control configKey input-sm timepicker" data-l1key="endHc3"/>
-            </div>
-        </div>
     </div>
-  </div>
   </fieldset>
 </form>
 
