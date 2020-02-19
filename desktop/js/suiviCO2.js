@@ -16,6 +16,18 @@
  */
 
 
+$(".eqLogic").off('click','.listCmdInfo').on('click','.listCmdInfo', function () {
+  var el = $(this).closest('.form-group').find('.eqLogicAttr');
+  jeedom.cmd.getSelectModal({cmd: {type: 'info'}}, function (result) {
+    if (el.attr('data-concat') == 1) {
+      el.atCaret('insert', result.human);
+    } else {
+      el.value(result.human);
+    }
+  });
+});
+
+
 $("#table_cmd").sortable({axis: "y", cursor: "move", items: ".cmd", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 /*
  * Fonction pour l'ajout de commande, appellé automatiquement par plugin.template
