@@ -33,6 +33,26 @@ class suiviCO2 extends eqLogic {
       }
      */
 
+      public static function cronDaily() {
+        $datetime = date('Y-m-d H:i:00');
+        log::add('suiviCO2', 'debug', 'je me suis exécutée à : ' . $datetime);
+
+        foreach (self::byType('suiviCO2',true) as $suiviCO2) {
+          $cmd = $suiviCO2->getCmd(null, 'index_hp');
+          if (is_object($cmd)) {
+            $previous = $cmd->execCmd();
+            $cmd->setCollectDate($datetime);
+            $cmd->event($previous);
+
+            $val = $suiviCO2->getConfiguration('index_HP');
+
+            $cmd->event($val);
+
+            log::add('suiviCO2', 'debug', 'dans le foreeach : ' . $datetime . ' test : ' . $val);
+          }
+        }
+
+      }
 
     /*
      * Fonction exécutée automatiquement toutes les heures par Jeedom
@@ -105,6 +125,7 @@ class suiviCO2 extends eqLogic {
       //    $index_hc->setTemplate('dashboard', 'line');
       //    $index_hc->setTemplate('mobile', 'line');
           $index_hc->setIsVisible(1);
+          $index_hc->setConfiguration('historizeMode', 'max');
           $index_hc->setIsHistorized(1);
           $index_hc->setName(__('Index HC', __FILE__));
         }
