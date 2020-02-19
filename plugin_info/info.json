@@ -6,6 +6,7 @@
 	"author" : "Agp42",
 	"require" : "3.2",
 	"category" : "energy",
+  "display" : "panel",
 	"hasDependency" : false,
 	"hasOwnDeamon" : false,
 	"maxDependancyInstallTime" : 0,
