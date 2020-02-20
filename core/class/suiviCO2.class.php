@@ -145,11 +145,6 @@ class suiviCO2 extends eqLogic {
         $cmd->setTemplate('dashboard', 'tile');
         $cmd->setConfiguration('historizeMode', 'max');
         $cmd->setIsHistorized(1);
-        // on pre enregistre les valeurs des index now
-        $indexHP = jeedom::evaluateExpression($this->getConfiguration('index_HP'));
-        $this->setConfiguration('lastValueHP', $indexHP);
-        log::add('suiviCO2', 'debug', 'Initialisation des index - HP : ' . $indexHP);
-
       }
       $cmd->setName(__('Consommation HP', __FILE__));
       $cmd->setEqLogic_id($this->getId());
@@ -175,14 +170,6 @@ class suiviCO2 extends eqLogic {
       $cmd->setUnite('Wh');
       $cmd->setIsVisible(1);
       $cmd->save();
-
-
- /*     if($suiviCO2->getConfiguration('index_HC')!=''){ //si on a un index HC
-        $indexHC = jeedom::evaluateExpression($suiviCO2->getConfiguration('index_HC'));
-        $this->setConfiguration('lastValueHC', $indexHC);
-        log::add('suiviCO2', 'debug', 'Initialisation des index - HC : ' . $indexHC);
-      }//*/
-
 
     }
 
