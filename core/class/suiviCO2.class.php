@@ -34,40 +34,56 @@ class suiviCO2 extends eqLogic {
      */
         public static function cron() {
         $datetime = date('Y-m-d H:i:00');
+        $date = date('Y-m-d');
+   //     $time = date('H:i');
 
-        $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-tr&rows=96&sort=date_heure&refine.date=2020-02-18';
-        log::add('suiviCO2', 'debug', 'CO2 URL ' . $url);
+        //on va chercher toutes les datas du jour. //TODO : attention aux dernieres datas de la veille...
+        $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-tr&rows=100&sort=date_heure&refine.date=' . $date;
+      //  log::add('suiviCO2', 'debug', 'CO2 URL ' . $url);
         $request_http = new com_http($url);
         $content = $request_http->exec(30);
         //$content = file_get_contents($url);
         if ($content === false) {
           return;
         }
+
+        //on decode le retour de l'API pour en faire un tableau
         $json = json_decode($content, true);
-     /*   if (!isset($json['data']['aqi'])) {
-          log::add('suiviCO2', 'error', 'Error in API call ' . $url);
-          return;
-        }*/
-        log::add('suiviCO2', 'debug', 'Date et heure : ' . $json['records']['0']['fields']['date'] . ' - '. $json['records']['0']['fields']['heure'] . ' co2 : ' . $json['records']['0']['fields']['taux_co2']);
-   /*     if ($json['data']['aqi'] <= 50) {
-          $color = 'green';
-        } else if ($json['data']['aqi'] <= 100) {
-          $color = 'yellow';
-        } else if ($json['data']['aqi'] <= 150) {
-          $color = 'orange';
-        } else if ($json['data']['aqi'] <= 200) {
-          $color = 'red';     // 204 0 51
-        } else if ($json['data']['aqi'] <= 300) {
-          $color = 'magenta'; // 102 0 53
-        } else {
-          $color = 'brown';
-        }*/
 
-        //pour chaque equipement declaré par l'utilisateur
-        foreach (self::byType('suiviCO2',true) as $suiviCO2) {
+        //on va chercher dans le tableau les infos qui nous interessent et on les traite
+        $apirecords = $json['records'];
+        foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
+          if (isset($record['fields']['taux_co2'])) {// quand on a un noeud avec le taux_co2
 
-          } // fin foreach equipement
-        } //fin fonction cron
+            $record_date = $record['fields']['date'];
+            $record_time = $record['fields']['heure'];
+            $record_tauxco2 = $record['fields']['taux_co2'];
+
+   //         log::add('suiviCO2', 'debug', 'Position : ' . $position . ' Date et heure : ' . $record_date . ' '. $record_time . ' co2 : ' . $record_tauxco2);
+
+            //pour chaque equipement declaré par l'utilisateur
+            foreach (self::byType('suiviCO2',true) as $suiviCO2) {
+
+        //      if ($co2kwhfromApi > 0) { //ajouter ici traitement date pour verifier unicité en base
+                $cmd = $suiviCO2->getCmd(null, 'co2kwhfromApi');
+                if (is_object($cmd)) {
+              //    $cmd->execCmd();
+                  $cmd->setCollectDate($record_date . ' ' . $record_time . ':00');
+              //    $cmd->->setCollectDate(date('Y-m-d H:i:s'));
+                  $cmd->event($record_tauxco2);
+                  log::add('suiviCO2', 'debug', 'Taux_Co2 : ' . $record_tauxco2 . ' à : ' . $record_date . ' ' . $record_time . ':00');
+
+                }
+          //    }
+            } // fin foreach equipement
+//*/
+            break; //on sort du foreach au 1ere element avec taux_co2 trouvé
+
+          } // fin if on est dans un noeud avec un taux co2
+        } //fin boucle dans toutes les datas recuperées
+
+
+      } //fin fonction cron
 
       public static function cron5() {
         $datetime = date('Y-m-d H:i:00');
@@ -213,7 +229,7 @@ class suiviCO2 extends eqLogic {
         $cmd = new suiviCO2Cmd();
         $cmd->setLogicalId('co2kwhfromApi');
         $cmd->setTemplate('dashboard', 'tile');
-        $cmd->setConfiguration('historizeMode', 'max');
+        $cmd->setConfiguration('historizeMode', 'none'); //max, avg, none ?
         $cmd->setIsHistorized(1);
       }
       $cmd->setName(__('Valeur CO2 par kWh', __FILE__));
