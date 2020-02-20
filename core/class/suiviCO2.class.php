@@ -33,26 +33,76 @@ class suiviCO2 extends eqLogic {
       }
      */
 
-      public static function cronDaily() {
+      public static function cron5() {
         $datetime = date('Y-m-d H:i:00');
-        log::add('suiviCO2', 'debug', 'je me suis exécutée à : ' . $datetime);
 
+        //pour chaque equipement declaré par l'utilisateur
         foreach (self::byType('suiviCO2',true) as $suiviCO2) {
-          $cmd = $suiviCO2->getCmd(null, 'index_hp');
-          if (is_object($cmd)) {
-            $previous = $cmd->execCmd();
-            $cmd->setCollectDate($datetime);
-            $cmd->event($previous);
 
-            $val = $suiviCO2->getConfiguration('index_HP');
+          /* Traitement HP */
+          //on va chercher l'info index_HP via la conf utilisateur
+          $indexHP = jeedom::evaluateExpression($suiviCO2->getConfiguration('index_HP'));
 
-            $cmd->event($val);
+          //on recupere la precedente valeur stockée
+          $lastValue = $suiviCO2->getConfiguration('lastValueHP');
+          //on sauvegarde la valeur actuelle pour le prochain tour
+          $suiviCO2->setConfiguration('lastValueHP', $indexHP);
+          $suiviCO2->save();
 
-            log::add('suiviCO2', 'debug', 'dans le foreeach : ' . $datetime . ' test : ' . $val);
+          log::add('suiviCO2', 'debug', 'lastIndexHP : ' . $lastValue . ' IndexHP : ' . $indexHP);
+
+          //on calcule la consommation entre les 2 derniers index
+          $consumptionHP = $indexHP - $lastValue;
+
+          //si cette consommation est >0, on va la stocker en base
+          if ($consumptionHP > 0) {
+            $cmd = $suiviCO2->getCmd(null, 'consumptionHp');
+            if (is_object($cmd)) {
+              $cmd->setCollectDate($datetime);
+              log::add('suiviCO2', 'debug', 'conso HP (Wh) : ' . $consumptionHP);
+              $cmd->event($consumptionHP);
+            }
           }
-        }
 
-      }
+          /* Traitement HC */
+          if($suiviCO2->getConfiguration('index_HC')!=''){ //si on a un index HC
+
+            //on va chercher l'info index_HP via la conf utilisateur
+            $indexHC = jeedom::evaluateExpression($suiviCO2->getConfiguration('index_HC'));
+
+            //on recupere la precedente valeur stockée
+            $lastValue = $suiviCO2->getConfiguration('lastValueHC');
+            //on sauvegarde la valeur actuelle pour le prochain tour
+            $suiviCO2->setConfiguration('lastValueHC', $indexHC);
+            $suiviCO2->save();
+
+            log::add('suiviCO2', 'debug', 'lastIndexHC : ' . $lastValue . ' IndexHC : ' . $indexHC);
+
+            //on calcule la consommation entre les 2 derniers index
+            $consumptionHC = $indexHC - $lastValue;
+
+            //si cette consommation est >0, on va la stocker en base
+            if ($consumptionHC > 0) {
+              $cmd = $suiviCO2->getCmd(null, 'consumptionHc');
+              if (is_object($cmd)) {
+                $cmd->setCollectDate($datetime);
+                log::add('suiviCO2', 'debug', 'conso HC (Wh) : ' . $consumptionHC);
+                $cmd->event($consumptionHC);
+              }
+            }
+          }
+
+/*          ce morceau de code va chercher tout l'historique de la commande et le loggue
+            $previous = $cmd->getHistory();
+            foreach ($previous as $value) {
+              log::add('suiviCO2', 'debug', ' previous : ' . $value->getValue());
+            }*/
+
+          } // fin foreach equipement
+
+
+
+        } //fin fonction cron
 
     /*
      * Fonction exécutée automatiquement toutes les heures par Jeedom
@@ -86,70 +136,54 @@ class suiviCO2 extends eqLogic {
 
     public function postSave() {
 
-      ///// Creation de la commande index_hp, (obligatoire, verifiée dans preUpdate)
-      $index_hp = $this->getCmd(null, 'index_HP');
-      if (!is_object($index_hp)) {
-        $index_hp = new suiviCO2Cmd();
-    //    $index_hp->setTemplate('dashboard', 'line');
-    //    $index_hp->setTemplate('mobile', 'line');
-        $index_hp->setIsVisible(1);
-        $index_hp->setIsHistorized(1);
-        $index_hp->setName(__('Index HP', __FILE__));
+      // creation des cmd à la sauvegarde de l'équipement
+
+      $cmd = $this->getCmd(null, 'consumptionHp');
+      if (!is_object($cmd)) {
+        $cmd = new suiviCO2Cmd();
+        $cmd->setLogicalId('consumptionHP');
+        $cmd->setTemplate('dashboard', 'tile');
+        $cmd->setConfiguration('historizeMode', 'max');
+        $cmd->setIsHistorized(1);
+        // on pre enregistre les valeurs des index now
+        $indexHP = jeedom::evaluateExpression($this->getConfiguration('index_HP'));
+        $this->setConfiguration('lastValueHP', $indexHP);
+        log::add('suiviCO2', 'debug', 'Initialisation des index - HP : ' . $indexHP);
+
       }
-      $index_hp->setEqLogic_id($this->getId());
-      $index_hp->setType('info');
-      $index_hp->setSubType('numeric');
-      $index_hp->setLogicalId('index_hp');
-      $index_hp->setUnite('kWh');
+      $cmd->setName(__('Consommation HP', __FILE__));
+      $cmd->setEqLogic_id($this->getId());
+      $cmd->setType('info');
+      $cmd->setSubType('numeric');
+      $cmd->setUnite('Wh');
+      $cmd->setIsVisible(1);
+      $cmd->save();
 
-      $value = '';
-      preg_match_all("/#([0-9]*)#/", $this->getConfiguration('index_HP'), $matches);
-      foreach ($matches[1] as $cmd_id) {
-        if (is_numeric($cmd_id)) {
-          $cmd = cmd::byId($cmd_id);
-          if (is_object($cmd) && $cmd->getType() == 'info') {
-            $value .= '#' . $cmd_id . '#';
-            break;
-          }
-        }
+
+      $cmd = $this->getCmd(null, 'consumptionHc');
+      if (!is_object($cmd)) {
+        $cmd = new suiviCO2Cmd();
+        $cmd->setLogicalId('consumptionHC');
+        $cmd->setTemplate('dashboard', 'tile');
+        $cmd->setConfiguration('historizeMode', 'max');
+        $cmd->setIsHistorized(1);
       }
-      $index_hp->setValue($value);
-      $index_hp->setGeneric_type( 'GENERIC_INFO');
-      $index_hp->save();
+      $cmd->setName(__('Consommation HC', __FILE__));
+      $cmd->setEqLogic_id($this->getId());
+      $cmd->setType('info');
+      $cmd->setSubType('numeric');
+      $cmd->setUnite('Wh');
+      $cmd->setIsVisible(1);
+      $cmd->save();
 
-      ///// Creation de la commande index_hc, dans tous les cas, sinon on sait pas gerer le fait qu'on a rempli qqch puis on le vide //a ameliorer...
-//      if ($this->getConfiguration('index_HC') != '') {
-        $index_hc = $this->getCmd(null, 'index_HC');
-        if (!is_object($index_hc)) {
-          $index_hc = new suiviCO2Cmd();
-      //    $index_hc->setTemplate('dashboard', 'line');
-      //    $index_hc->setTemplate('mobile', 'line');
-          $index_hc->setIsVisible(1);
-          $index_hc->setConfiguration('historizeMode', 'max');
-          $index_hc->setIsHistorized(1);
-          $index_hc->setName(__('Index HC', __FILE__));
-        }
-        $index_hc->setEqLogic_id($this->getId());
-        $index_hc->setType('info');
-        $index_hc->setSubType('numeric');
-        $index_hc->setLogicalId('index_hc');
-        $index_hc->setUnite('kWh');
 
-        $value = '';
-        preg_match_all("/#([0-9]*)#/", $this->getConfiguration('index_HC'), $matches);
-        foreach ($matches[1] as $cmd_id) {
-          if (is_numeric($cmd_id)) {
-            $cmd = cmd::byId($cmd_id);
-            if (is_object($cmd) && $cmd->getType() == 'info') {
-              $value .= '#' . $cmd_id . '#';
-              break;
-            }
-          }
-        }
-        $index_hc->setValue($value);
-        $index_hc->setGeneric_type( 'GENERIC_INFO');
-        $index_hc->save();
- //     }
+ /*     if($suiviCO2->getConfiguration('index_HC')!=''){ //si on a un index HC
+        $indexHC = jeedom::evaluateExpression($suiviCO2->getConfiguration('index_HC'));
+        $this->setConfiguration('lastValueHC', $indexHC);
+        log::add('suiviCO2', 'debug', 'Initialisation des index - HC : ' . $indexHC);
+      }//*/
+
+
     }
 
   // preUpdate ⇒ Méthode appellée avant la mise à jour de votre objet
