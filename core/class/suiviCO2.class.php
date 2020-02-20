@@ -32,6 +32,42 @@ class suiviCO2 extends eqLogic {
 
       }
      */
+        public static function cron() {
+        $datetime = date('Y-m-d H:i:00');
+
+        $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-tr&rows=96&sort=date_heure&refine.date=2020-02-18';
+        log::add('suiviCO2', 'debug', 'CO2 URL ' . $url);
+        $request_http = new com_http($url);
+        $content = $request_http->exec(30);
+        //$content = file_get_contents($url);
+        if ($content === false) {
+          return;
+        }
+        $json = json_decode($content, true);
+     /*   if (!isset($json['data']['aqi'])) {
+          log::add('suiviCO2', 'error', 'Error in API call ' . $url);
+          return;
+        }*/
+        log::add('suiviCO2', 'debug', 'Date et heure : ' . $json['records']['0']['fields']['date'] . ' - '. $json['records']['0']['fields']['heure'] . ' co2 : ' . $json['records']['0']['fields']['taux_co2']);
+   /*     if ($json['data']['aqi'] <= 50) {
+          $color = 'green';
+        } else if ($json['data']['aqi'] <= 100) {
+          $color = 'yellow';
+        } else if ($json['data']['aqi'] <= 150) {
+          $color = 'orange';
+        } else if ($json['data']['aqi'] <= 200) {
+          $color = 'red';     // 204 0 51
+        } else if ($json['data']['aqi'] <= 300) {
+          $color = 'magenta'; // 102 0 53
+        } else {
+          $color = 'brown';
+        }*/
+
+        //pour chaque equipement declaré par l'utilisateur
+        foreach (self::byType('suiviCO2',true) as $suiviCO2) {
+
+          } // fin foreach equipement
+        } //fin fonction cron
 
       public static function cron5() {
         $datetime = date('Y-m-d H:i:00');
@@ -98,11 +134,11 @@ class suiviCO2 extends eqLogic {
               log::add('suiviCO2', 'debug', ' previous : ' . $value->getValue());
             }*/
 
-          } // fin foreach equipement
+        } // fin foreach equipement
 
 
 
-        } //fin fonction cron
+      } //fin fonction cron
 
     /*
      * Fonction exécutée automatiquement toutes les heures par Jeedom
@@ -168,6 +204,23 @@ class suiviCO2 extends eqLogic {
       $cmd->setType('info');
       $cmd->setSubType('numeric');
       $cmd->setUnite('Wh');
+      $cmd->setIsVisible(1);
+      $cmd->save();
+
+
+      $cmd = $this->getCmd(null, 'co2kwhfromApi');
+      if (!is_object($cmd)) {
+        $cmd = new suiviCO2Cmd();
+        $cmd->setLogicalId('co2kwhfromApi');
+        $cmd->setTemplate('dashboard', 'tile');
+        $cmd->setConfiguration('historizeMode', 'max');
+        $cmd->setIsHistorized(1);
+      }
+      $cmd->setName(__('Valeur CO2 par kWh', __FILE__));
+      $cmd->setEqLogic_id($this->getId());
+      $cmd->setType('info');
+      $cmd->setSubType('numeric');
+      $cmd->setUnite('gCO2');
       $cmd->setIsVisible(1);
       $cmd->save();
 
