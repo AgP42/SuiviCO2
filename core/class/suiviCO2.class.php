@@ -56,6 +56,37 @@ class suiviCO2 extends eqLogic {
         //on decode le retour de l'API pour en faire un tableau
         $json = json_decode($content, true);
 
+        //pour chaque equipement declaré par l'utilisateur
+        foreach (self::byType('suiviCO2',true) as $suiviCO2) {
+
+          //on va chercher dans le tableau les infos qui nous interessent et on les traite
+          $apirecords = $json['records'];
+          foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
+            if (isset($record['fields']['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
+
+              $record_date = $record['fields']['date'];
+              $record_time = $record['fields']['heure'];
+              $record_tauxco2 = $record['fields']['taux_co2'];
+
+   //         log::add('suiviCO2', 'debug', 'Position : ' . $position . ' Date et heure : ' . $record_date . ' '. $record_time . ' co2 : ' . $record_tauxco2);
+
+              // on enregistre les infos dans la DB history avec la date donnéee dans le json
+              //pas besoin de verifier que la valeur existe pas encore, la DB gere unicité paire datetime/cmd
+              $cmd = $suiviCO2->getCmd(null, 'co2kwhfromApi');
+              if (is_object($cmd)) {
+                $cmd->addHistoryValue($record_tauxco2, $record_date . ' ' . $record_time . ':00');
+
+                log::add('suiviCO2', 'debug', 'Taux_Co2 : ' . $record_tauxco2 . ' à : ' . $record_date . ' ' . $record_time . ':00');
+              }
+
+            } // fin if on est dans un noeud avec un taux co2
+          } //fin boucle dans toutes les datas recuperées
+        } // fin foreach equipement
+      } //fin fonction cron
+
+
+
+      /*
         //on va chercher dans le tableau les infos qui nous interessent et on les traite
         $apirecords = $json['records'];
         foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
@@ -82,7 +113,8 @@ class suiviCO2 extends eqLogic {
             } // fin foreach equipement
           } // fin if on est dans un noeud avec un taux co2
         } //fin boucle dans toutes les datas recuperées
-      } //fin fonction cron
+
+      */
 
       public function calculConso($_type = 'HP', $suiviCO2){
 
