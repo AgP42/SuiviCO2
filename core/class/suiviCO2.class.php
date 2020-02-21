@@ -32,7 +32,7 @@ class suiviCO2 extends eqLogic {
 
       }
      */
-        public static function cron() {
+        public static function cron15() {
         $datetime = date('Y-m-d H:i:00');
         $date = date('Y-m-d');
    //     $time = date('H:i');
@@ -106,15 +106,15 @@ class suiviCO2 extends eqLogic {
           //on calcule la consommation entre les 2 derniers index
           $consumptionHP = $indexHP - $lastValue;
 
-          //si cette consommation est >0, on va la stocker en base
-          if ($consumptionHP > 0) {
+          //si cette consommation est >0, on va la stocker en base - NON, il faut stocker les 0 sinon l'archivage de l'historique fait n'importe quoi...
+  //        if ($consumptionHP > 0) {
             $cmd = $suiviCO2->getCmd(null, 'consumptionHp');
             if (is_object($cmd)) {
               $cmd->setCollectDate($datetime);
               log::add('suiviCO2', 'debug', 'conso HP (Wh) : ' . $consumptionHP);
               $cmd->event($consumptionHP);
             }
-          }
+    //      }
 
           /* Traitement HC */
           if($suiviCO2->getConfiguration('index_HC')!=''){ //si on a un index HC
@@ -134,14 +134,14 @@ class suiviCO2 extends eqLogic {
             $consumptionHC = $indexHC - $lastValue;
 
             //si cette consommation est >0, on va la stocker en base
-            if ($consumptionHC > 0) {
+          //  if ($consumptionHC > 0) {
               $cmd = $suiviCO2->getCmd(null, 'consumptionHc');
               if (is_object($cmd)) {
                 $cmd->setCollectDate($datetime);
                 log::add('suiviCO2', 'debug', 'conso HC (Wh) : ' . $consumptionHC);
                 $cmd->event($consumptionHC);
               }
-            }
+         //   }
           }
 
 /*          ce morceau de code va chercher tout l'historique de la commande et le loggue
@@ -195,7 +195,7 @@ class suiviCO2 extends eqLogic {
         $cmd = new suiviCO2Cmd();
         $cmd->setLogicalId('consumptionHP');
         $cmd->setTemplate('dashboard', 'tile');
-        $cmd->setConfiguration('historizeMode', 'max');
+        $cmd->setConfiguration('historizeMode', 'avg');
         $cmd->setIsHistorized(1);
       }
       $cmd->setName(__('Consommation HP', __FILE__));
@@ -212,7 +212,7 @@ class suiviCO2 extends eqLogic {
         $cmd = new suiviCO2Cmd();
         $cmd->setLogicalId('consumptionHC');
         $cmd->setTemplate('dashboard', 'tile');
-        $cmd->setConfiguration('historizeMode', 'max');
+        $cmd->setConfiguration('historizeMode', 'avg');
         $cmd->setIsHistorized(1);
       }
       $cmd->setName(__('Consommation HC', __FILE__));
@@ -229,7 +229,7 @@ class suiviCO2 extends eqLogic {
         $cmd = new suiviCO2Cmd();
         $cmd->setLogicalId('co2kwhfromApi');
         $cmd->setTemplate('dashboard', 'tile');
-        $cmd->setConfiguration('historizeMode', 'none'); //max, avg, none ?
+        $cmd->setConfiguration('historizeMode', 'avg'); //max, avg, none ?
         $cmd->setIsHistorized(1);
       }
       $cmd->setName(__('Valeur CO2 par kWh', __FILE__));
