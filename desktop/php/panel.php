@@ -18,6 +18,11 @@ $date = array(
   'end' => init('endDate', date('Y-m-d', strtotime('+1 days ' . date('Y-m-d')))),
 );
 
+if (is_object($object)) {
+  $_GET['object_id'] = $object->getId();
+}
+sendVarToJs('object_id', init('object_id'));
+
 ?>
 
 <div class="row row-overflow">
