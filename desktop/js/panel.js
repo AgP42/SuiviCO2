@@ -14,3 +14,17 @@
 * You should have received a copy of the GNU General Public License
 * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
 */
+
+/* Fonctions pour la barre en haut */
+$('.objectName').empty().append('coucou from JS');
+//$('.objectName').empty().append(icon + ' ' + data.result.object.name);
+
+$(".in_datepicker").datepicker();
+
+$('#bt_validChangeDateSuiviCO2').on('click', function () {
+  $('.objectName').empty().append('Date voulues : ' + $('#in_startDate').value() + ' au ' + $('#in_endDate').value());
+
+  //jeedom.history.chart = [];
+  //$('#div_displayEquipement').packery('destroy');
+  //displayThermostat(object_id, $('#in_startDate').value(), $('#in_endDate').value());
+});
