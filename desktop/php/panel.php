@@ -22,7 +22,6 @@ if (is_object($object)) {
   $_GET['object_id'] = $object->getId();
 }
 sendVarToJs('object_id', init('object_id'));
-
 ?>
 
 <div class="row row-overflow">
@@ -67,12 +66,19 @@ sendVarToJs('object_id', init('object_id'));
 
     <!-- premiere moitier haute avec 2 graphs en ligne -->
     <div class="row">
-      <div class="col-lg-6" id="div_chartCO2parkWh"></div>
-      <div class="col-lg-6" id="div_chartConsokWh"></div>
+      <div class="col-lg-6">
+        <legend><i class="fas fa-leaf"></i>  {{gCO2 émis par kWh en France}}</legend>
+        <div id="div_chartCO2parkWh"></div>
+      </div>
+      <div class="col-lg-6">
+        <legend><i class="fas fa-bolt"></i>  {{Ma conso kWh}}</legend>
+        <div id="div_chartConsokWh"></div>
+      </div>
     </div>
 
     <br/>
     <!-- seconde moitier basse avec 1 graphs -->
+    <legend><i class="fas fa-bolt"></i>  {{Mes émissions gCO2}}</legend>
     <div id="div_chartConsoCO2"></div>
 
   </div>

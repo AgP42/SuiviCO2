@@ -66,15 +66,16 @@ function displayGraphsCO2(object_id,_dateStart,_dateEnd) {
       $('#div_chartConsokWh').empty();
       $('#div_chartConsoCO2').empty();
 
+   //   $('#div_chartCO2parkWh').append( '<div class="chartContainer" id="div_chartCO2parkWh2"></div>');
 
       // affiche les graphs
       var series = []
-      for (var i in data.result.eqLogics) {
+      for (var i in data.result.eqLogics) { //pour chaque equipement
 
    //   $('#div_alert').showAlert({message: data.result.eqLogics[i].eqLogic.id, level: 'info'});
 
         // cree un nouveau div pour chaque courbe du graph en bas, dont l'ID contient l'id de l'equipement
-        $('#div_chartCO2parkWh').append( '<div class="chartContainer" id="div_chartCO2parkWh' + data.result.eqLogics[i].eqLogic.id + '"></div>');
+   //     $('#div_chartCO2parkWh').append( '<div class="chartContainer" id="div_chartCO2parkWh' + data.result.eqLogics[i].eqLogic.id + '"></div>');
 
         // appel la construction du graphe en bas
         graphCO2(data.result.eqLogics[i].eqLogic.id);
@@ -93,17 +94,18 @@ function graphCO2(_eqLogic_id) {
       $('#div_alert').showAlert({message: error.message, level: 'danger'});
     },
     success: function (cmds) {
-      jeedom.history.chart['div_chartCO2parkWh' + _eqLogic_id] = null;
-      var foundPower = false;
+      jeedom.history.chart['div_chartCO2parkWh'] = null;
+  //    jeedom.history.chart['div_chartCO2parkWh' + _eqLogic_id] = null;
       for (var i  in cmds) {
         if (cmds[i].logicalId == 'co2kwhfromApi') {
           jeedom.history.drawChart({
             cmd_id: cmds[i].id,
-            el: 'div_chartCO2parkWh' + _eqLogic_id,
+        //    el: 'div_chartCO2parkWh' + _eqLogic_id,
+            el: 'div_chartCO2parkWh',
             dateStart: $('#in_startDate').value(),
             dateEnd: $('#in_endDate').value(),
             option: {
-              graphColor: '#2E9AFE',
+              graphColor: '#' + Math.floor(Math.random()*16777215).toString(16),
               derive : 0,
               graphZindex : 3
             }
