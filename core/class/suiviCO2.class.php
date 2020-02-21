@@ -67,6 +67,15 @@ class suiviCO2 extends eqLogic {
 
       }
 
+    public static function getAndRecordDataCo2Hier() {
+
+      $hier = date('Y-m-d', strtotime('-1 day ' . date('Y-m-d')));
+      log::add('suiviCO2', 'debug', '################ CRON DAILY Suivi CO2 ################');
+      log::add('suiviCO2', 'debug', 'Aujourd hui :  ' . date('Y-m-d') . ', hier  : ' . $hier);
+      self::getAndRecordDataCo2($hier);
+
+    }
+
     public function getAndRecordDataCo2($date) {
 
         //on va chercher toutes les datas du jour. //TODO : attention aux dernieres datas de la veille... A gerer avec un cronDaily qui s'execute a 02:00 sur la date de la veille

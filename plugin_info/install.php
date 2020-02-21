@@ -19,16 +19,38 @@
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
 function suiviCO2_install() {
+  // creation d'un cron tous les jours a 02:00 qui va chercher toutes les données de la veille
+  // sinon on rate systematiquement les dernieres datas d'une journée
+  $cron = cron::byClassAndFunction('suiviCO2', 'getAndRecordDataCo2Hier');
+    if (!is_object($cron)) {
+        $cron = new cron();
+        $cron->setClass('suiviCO2');
+        $cron->setFunction('getAndRecordDataCo2Hier');
+        $cron->setEnable(1);
+        $cron->setSchedule('0 2 * * *');
+        $cron->save();
+    }
 
 }
 
 function suiviCO2_update() {
-
+    $cron = cron::byClassAndFunction('suiviCO2', 'getAndRecordDataCo2Hier');
+    if (!is_object($cron)) {
+        $cron = new cron();
+        $cron->setClass('suiviCO2');
+        $cron->setFunction('getAndRecordDataCo2Hier');
+        $cron->setEnable(1);
+        $cron->setSchedule('0 2 * * *');
+        $cron->save();
+    }
+    $cron->stop();
 }
 
-
 function suiviCO2_remove() {
-
+    $cron = cron::byClassAndFunction('suiviCO2', 'getAndRecordDataCo2Hier');
+    if (is_object($cron)) {
+        $cron->remove();
+    }
 }
 
 ?>
