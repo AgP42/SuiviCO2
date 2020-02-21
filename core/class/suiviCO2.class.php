@@ -84,6 +84,34 @@ class suiviCO2 extends eqLogic {
         } //fin boucle dans toutes les datas recuperées
       } //fin fonction cron
 
+      public function calculConso($_type = 'HP', $suiviCO2){
+
+          //on va chercher l'info index_HP ou HC via la conf utilisateur
+          $index = jeedom::evaluateExpression($suiviCO2->getConfiguration('index_' . $_type));
+
+          //on recupere la precedente valeur stockée, selon HP ou HC
+          $lastValue = $suiviCO2->getConfiguration('lastValue' . $_type);
+          //on sauvegarde la valeur actuelle pour le prochain tour
+          $suiviCO2->setConfiguration('lastValue' . $_type, $index);
+          $suiviCO2->save();
+
+          log::add('suiviCO2', 'debug', 'lastIndex' . $_type . ' : ' . $lastValue . ' Index'  . $_type . ' : ' . $index);
+
+          //on calcule la consommation entre les 2 derniers index
+          $consumption = $index - $lastValue;
+
+          //si cette consommation est >0, on va la stocker en base - NON, il faut stocker les 0 sinon l'archivage de l'historique fait n'importe quoi... dommage de stocker des 0... // TODO a ameliorer...
+  //        if ($consumptionHP > 0) {
+            $cmd = $suiviCO2->getCmd(null, 'consumption' . $_type);
+            if (is_object($cmd)) {
+              $cmd->setCollectDate($datetime);
+              log::add('suiviCO2', 'debug', 'conso ' . $_type . ' (Wh) : ' . $consumption);
+              $cmd->event($consumption);
+            }
+    //      }
+
+      }
+
       public static function cron5() {
         $datetime = date('Y-m-d H:i:00');
 
@@ -91,61 +119,15 @@ class suiviCO2 extends eqLogic {
         foreach (self::byType('suiviCO2',true) as $suiviCO2) {
 
           /* Traitement HP */
-          //on va chercher l'info index_HP via la conf utilisateur
-          $indexHP = jeedom::evaluateExpression($suiviCO2->getConfiguration('index_HP'));
-
-          //on recupere la precedente valeur stockée
-          $lastValue = $suiviCO2->getConfiguration('lastValueHP');
-          //on sauvegarde la valeur actuelle pour le prochain tour
-          $suiviCO2->setConfiguration('lastValueHP', $indexHP);
-          $suiviCO2->save();
-
-          log::add('suiviCO2', 'debug', 'lastIndexHP : ' . $lastValue . ' IndexHP : ' . $indexHP);
-
-          //on calcule la consommation entre les 2 derniers index
-          $consumptionHP = $indexHP - $lastValue;
-
-          //si cette consommation est >0, on va la stocker en base - NON, il faut stocker les 0 sinon l'archivage de l'historique fait n'importe quoi...
-  //        if ($consumptionHP > 0) {
-            $cmd = $suiviCO2->getCmd(null, 'consumptionHp');
-            if (is_object($cmd)) {
-              $cmd->setCollectDate($datetime);
-              log::add('suiviCO2', 'debug', 'conso HP (Wh) : ' . $consumptionHP);
-              $cmd->event($consumptionHP);
-            }
-    //      }
+          $suiviCO2->calculConso('HP', $suiviCO2);
 
           /* Traitement HC */
           if($suiviCO2->getConfiguration('index_HC')!=''){ //si on a un index HC
+            $suiviCO2->calculConso('HC', $suiviCO2);
 
-            //on va chercher l'info index_HP via la conf utilisateur
-            $indexHC = jeedom::evaluateExpression($suiviCO2->getConfiguration('index_HC'));
-
-            //on recupere la precedente valeur stockée
-            $lastValue = $suiviCO2->getConfiguration('lastValueHC');
-            //on sauvegarde la valeur actuelle pour le prochain tour
-            $suiviCO2->setConfiguration('lastValueHC', $indexHC);
-            $suiviCO2->save();
-
-            log::add('suiviCO2', 'debug', 'lastIndexHC : ' . $lastValue . ' IndexHC : ' . $indexHC);
-
-            //on calcule la consommation entre les 2 derniers index
-            $consumptionHC = $indexHC - $lastValue;
-
-            //si cette consommation est >0, on va la stocker en base
-          //  if ($consumptionHC > 0) {
-              $cmd = $suiviCO2->getCmd(null, 'consumptionHc');
-              if (is_object($cmd)) {
-                $cmd->setCollectDate($datetime);
-                log::add('suiviCO2', 'debug', 'conso HC (Wh) : ' . $consumptionHC);
-                $cmd->event($consumptionHC);
-              }
-         //   }
           }
 
         } // fin foreach equipement
-
-
 
       } //fin fonction cron
 
@@ -183,7 +165,7 @@ class suiviCO2 extends eqLogic {
 
       // creation des cmd à la sauvegarde de l'équipement
 
-      $cmd = $this->getCmd(null, 'consumptionHp');
+      $cmd = $this->getCmd(null, 'consumptionHP');
       if (!is_object($cmd)) {
         $cmd = new suiviCO2Cmd();
         $cmd->setLogicalId('consumptionHP');
@@ -200,7 +182,7 @@ class suiviCO2 extends eqLogic {
       $cmd->save();
 
 
-      $cmd = $this->getCmd(null, 'consumptionHc');
+      $cmd = $this->getCmd(null, 'consumptionHC');
       if (!is_object($cmd)) {
         $cmd = new suiviCO2Cmd();
         $cmd->setLogicalId('consumptionHC');
