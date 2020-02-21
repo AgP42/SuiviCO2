@@ -119,10 +119,10 @@ class suiviCO2 extends eqLogic {
         } // fin foreach equipement
       } //fin fonction cron
 
-      public static function cron15() {
+      public static function cronHourly() {
         $datetime = date('Y-m-d H:i:00');
 
-        log::add('suiviCO2', 'debug', '#################### CRON15 ###################');
+        log::add('suiviCO2', 'debug', '#################### CRON Hourly ###################');
 
         //pour chaque equipement declaré par l'utilisateur
         foreach (self::byType('suiviCO2',true) as $suiviCO2) {

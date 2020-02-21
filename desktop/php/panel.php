@@ -78,7 +78,7 @@ sendVarToJs('eqLogic_id', init('eqLogic_id'));
         <div id="div_chartCO2parkWh"></div>
       </div>
       <div class="col-lg-6">
-        <legend><i class="fas fa-bolt"></i>  {{Ma conso kWh}}</legend>
+        <legend><i class="fas fa-bolt"></i>  {{Ma conso Wh}}</legend>
         <div id="div_chartConsokWh"></div>
       </div>
     </div>

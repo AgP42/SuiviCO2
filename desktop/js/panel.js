@@ -66,6 +66,9 @@ function displayGraphsCO2(eqLogic_id,_dateStart,_dateEnd) {
       // appel la construction du graphe CO2 par kWh (en haut à gauche)
       graphCO2(data.result.eqLogic.id);
 
+      // appel la construction du graphe conso Wh (en haut à droite)
+      graphConso(data.result.eqLogic.id);
+
     } // fin success
   }); //fin appel ajax
 } //fin fct displayGraphsCO2
@@ -97,6 +100,53 @@ function graphCO2(_eqLogic_id) {
 
       setTimeout(function(){
         jeedom.history.chart['div_chartCO2parkWh' + _eqLogic_id].chart.xAxis[0].setExtremes(jeedom.history.chart['div_chartCO2parkWh' + _eqLogic_id].chart.navigator.xAxis.min,jeedom.history.chart['div_chartCO2parkWh' + _eqLogic_id].chart.navigator.xAxis.max)
+      }, 1000);
+    }// fin success
+  }); // fin jeedom.eqLogic.getCmd
+} // fin fct graphCO2
+
+// pour construire le graph conso en haut a droite
+function graphConso(_eqLogic_id) {
+  jeedom.eqLogic.getCmd({
+    id: _eqLogic_id,
+    error: function (error) {
+      $('#div_alert').showAlert({message: error.message, level: 'danger'});
+    },
+    success: function (cmds) {
+      jeedom.history.chart['div_chartConsokWh'] = null;
+      for (var i  in cmds) {
+        if (cmds[i].logicalId == 'consumptionHP' || cmds[i].logicalId == 'consumptionHC') {
+          jeedom.history.drawChart({
+            cmd_id: cmds[i].id,
+            el: 'div_chartConsokWh',
+            dateStart: $('#in_startDate').value(),
+            dateEnd: $('#in_endDate').value(),
+            option: {
+              graphColor: '#' + Math.floor(Math.random()*16777215).toString(16),
+              derive : 0,
+              graphType : 'column',
+              graphZindex : 1
+            }
+          });
+        } //fin if courbe
+  /*      if (cmds[i].logicalId == 'consumptionHC') {
+          jeedom.history.drawChart({
+            cmd_id: cmds[i].id,
+            el: 'div_chartConsokWh',
+            dateStart: $('#in_startDate').value(),
+            dateEnd: $('#in_endDate').value(),
+            option: {
+              graphColor: '#' + Math.floor(Math.random()*16777215).toString(16),
+              derive : 0,
+              graphType : 'area',
+              graphZindex : 2
+            }
+          });
+        } //fin if courbe */
+      } // fin for cmds
+
+      setTimeout(function(){
+        jeedom.history.chart['div_chartConsokWh' + _eqLogic_id].chart.xAxis[0].setExtremes(jeedom.history.chart['div_chartConsokWh' + _eqLogic_id].chart.navigator.xAxis.min,jeedom.history.chart['div_chartConsokWh' + _eqLogic_id].chart.navigator.xAxis.max)
       }, 1000);
     }// fin success
   }); // fin jeedom.eqLogic.getCmd
