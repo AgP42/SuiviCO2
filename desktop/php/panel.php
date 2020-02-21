@@ -21,7 +21,8 @@ $date = array(
 if (is_object($object)) {
   $_GET['object_id'] = $object->getId();
 }
-sendVarToJs('object_id', init('object_id'));
+
+sendVarToJs('eqLogic_id', init('28'));
 ?>
 
 <div class="row row-overflow">
@@ -38,9 +39,15 @@ sendVarToJs('object_id', init('object_id'));
           if ($object_li->getIsVisible() == 1) {
             $margin = 15 * $object_li->parentNumber();
             if ($object_li->getId() == $object->getId()) {
-              echo '<li class="cursor li_object active" ><a href="index.php?v=d&m=suiviCO2&p=panel&object_id=' . $object_li->getId() . '" style="position:relative;left:' . $margin . 'px;">' . $object_li->getHumanName(true) . '</a></li>';
+              echo '<li style="position:relative;left:' . $margin . 'px;">' . $object_li->getHumanName(true) . '</li>';
+              foreach ($object_li->getEqLogic(true, false, 'suiviCO2') as $eqLogic) {
+                echo '<li class="cursor li_object active" ><a href="index.php?v=d&m=suiviCO2&p=panel&eqLogic_id=' . $eqLogic->getId() . '" style="position:relative;left:' . $margin*2 . 'px;">' . $eqLogic->getHumanName(true) . '</a></li>';
+              }
             } else {
-              echo '<li class="cursor li_object" ><a href="index.php?v=d&m=suiviCO2&p=panel&object_id=' . $object_li->getId() . '" style="position:relative;left:' . $margin . 'px;">' . $object_li->getHumanName(true) . '</a></li>';
+              echo '<li style="position:relative;left:' . $margin . 'px;">' . $object_li->getHumanName(true) . '</li>';
+              foreach ($object_li->getEqLogic(true, false, 'suiviCO2') as $eqLogic) {
+                echo '<li class="cursor li_object active" ><a href="index.php?v=d&m=suiviCO2&p=panel&eqLogic_id=' . $eqLogic->getId() . '" style="position:relative;left:' . $margin*2 . 'px;">' . $eqLogic->getHumanName(true) . '</a></li>';
+              }
             }
           }
         }
