@@ -66,14 +66,15 @@ function displayGraphsCO2(object_id,_dateStart,_dateEnd) {
       $('#div_chartConsokWh').empty();
       $('#div_chartConsoCO2').empty();
 
-      $('#div_alert').showAlert({message: data.result.object.name, level: 'info'});
 
       // affiche les graphs
- /*     var series = []
+      var series = []
       for (var i in data.result.eqLogics) {
 
+   //   $('#div_alert').showAlert({message: data.result.eqLogics[i].eqLogic.id, level: 'info'});
+
         // cree un nouveau div pour chaque courbe du graph en bas, dont l'ID contient l'id de l'equipement
-        $('#div_charts').append( '<div class="chartContainer" id="div_graph' + data.result.eqLogics[i].eqLogic.id + '"></div>');
+        $('#div_chartCO2parkWh').append( '<div class="chartContainer" id="div_chartCO2parkWh' + data.result.eqLogics[i].eqLogic.id + '"></div>');
 
         // appel la construction du graphe en bas
         graphCO2(data.result.eqLogics[i].eqLogic.id);
@@ -92,75 +93,13 @@ function graphCO2(_eqLogic_id) {
       $('#div_alert').showAlert({message: error.message, level: 'danger'});
     },
     success: function (cmds) {
-      jeedom.history.chart['div_graph' + _eqLogic_id] = null;
+      jeedom.history.chart['div_chartCO2parkWh' + _eqLogic_id] = null;
       var foundPower = false;
       for (var i  in cmds) {
-        if (cmds[i].logicalId == 'power') {
+        if (cmds[i].logicalId == 'co2kwhfromApi') {
           jeedom.history.drawChart({
             cmd_id: cmds[i].id,
-            el: 'div_graph' + _eqLogic_id,
-            dateStart: $('#in_startDate').value(),
-            dateEnd: $('#in_endDate').value(),
-            option: {
-              graphColor: '#BDBDBD',
-              derive : 0,
-              graphStep: 1,
-              graphScale : 1,
-              graphType : 'area',
-              graphZindex :1
-            }
-          });
-          foundPower = true;
-        }
-      }
-      for (var i  in cmds) {
-        if (cmds[i].logicalId == 'order') {
-          jeedom.history.drawChart({
-            cmd_id: cmds[i].id,
-            el: 'div_graph' + _eqLogic_id,
-            dateStart: $('#in_startDate').value(),
-            dateEnd: $('#in_endDate').value(),
-            option: {
-              graphStep: 1,
-              graphColor: '#27ae60',
-              derive : 0,
-              graphZindex : 2
-            }
-          });
-        }
-        if (!foundPower && cmds[i].logicalId == 'actif') {
-          jeedom.history.drawChart({
-            cmd_id: cmds[i].id,
-            el: 'div_graph' + _eqLogic_id,
-            dateStart: $('#in_startDate').value(),
-            dateEnd: $('#in_endDate').value(),
-            option: {
-              graphStep: 1,
-              graphColor: '#2c3e50',
-              graphScale : 1,
-              graphType : 'area',
-              derive : 0,
-              graphZindex : 1
-            }
-          });
-        }
-        if (cmds[i].logicalId == 'temperature') {
-          jeedom.history.drawChart({
-            cmd_id: cmds[i].id,
-            el: 'div_graph' + _eqLogic_id,
-            dateStart: $('#in_startDate').value(),
-            dateEnd: $('#in_endDate').value(),
-            option: {
-              graphColor: '#f39c12',
-              derive : 0,
-              graphZindex : 4
-            }
-          });
-        }
-        if (cmds[i].logicalId == 'temperature_outdoor') {
-          jeedom.history.drawChart({
-            cmd_id: cmds[i].id,
-            el: 'div_graph' + _eqLogic_id,
+            el: 'div_chartCO2parkWh' + _eqLogic_id,
             dateStart: $('#in_startDate').value(),
             dateEnd: $('#in_endDate').value(),
             option: {
@@ -169,11 +108,12 @@ function graphCO2(_eqLogic_id) {
               graphZindex : 3
             }
           });
-        }
-      }
+        } //fin if courbe
+      } // fin for cmds
+
       setTimeout(function(){
-        jeedom.history.chart['div_graph' + _eqLogic_id].chart.xAxis[0].setExtremes(jeedom.history.chart['div_graph' + _eqLogic_id].chart.navigator.xAxis.min,jeedom.history.chart['div_graph' + _eqLogic_id].chart.navigator.xAxis.max)
+        jeedom.history.chart['div_chartCO2parkWh' + _eqLogic_id].chart.xAxis[0].setExtremes(jeedom.history.chart['div_chartCO2parkWh' + _eqLogic_id].chart.navigator.xAxis.min,jeedom.history.chart['div_chartCO2parkWh' + _eqLogic_id].chart.navigator.xAxis.max)
       }, 1000);
-    }
-  });
-}
+    }// fin success
+  }); // fin jeedom.eqLogic.getCmd
+} // fin fct graphCO2
