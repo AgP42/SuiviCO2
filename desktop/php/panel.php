@@ -22,7 +22,7 @@ if (is_object($object)) {
   $_GET['object_id'] = $object->getId();
 }
 
-sendVarToJs('eqLogic_id', init('28'));
+sendVarToJs('eqLogic_id', init('eqLogic_id'));
 ?>
 
 <div class="row row-overflow">

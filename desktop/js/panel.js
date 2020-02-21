@@ -28,20 +28,22 @@ $('#bt_validChangeDateSuiviCO2').on('click', function () {
   $('#div_chartCO2parkWh').packery('destroy');
   $('#div_chartConsokWh').packery('destroy');
   $('#div_chartConsoCO2').packery('destroy');
-  displayGraphsCO2(object_id, $('#in_startDate').value(), $('#in_endDate').value());
+  displayGraphsCO2(eqLogic_id, $('#in_startDate').value(), $('#in_endDate').value());
 });
 
-/* Fonctions pour afficher les graphs */
-displayGraphsCO2(object_id,'',''); // appelle la fonction ci-dessous au lancement de la page. object_id vient du php
+//$('#div_alert').showAlert({message: eqLogic_id, level: 'info'});
 
-function displayGraphsCO2(object_id,_dateStart,_dateEnd) {
+/* Fonctions pour afficher les graphs */
+displayGraphsCO2(eqLogic_id,'',''); // appelle la fonction ci-dessous au lancement de la page. eqLogic_id vient du php
+
+function displayGraphsCO2(eqLogic_id,_dateStart,_dateEnd) {
   // l'appel ajax pour aller chercher les données
   $.ajax({
     type: 'POST',
     url: 'plugins/suiviCO2/core/ajax/suiviCO2.ajax.php',
     data: {
       action: 'getSuiviCO2Data',
-      object_id: object_id,
+      eqLogic_id: eqLogic_id,
       dateStart : _dateStart,
       dateEnd : _dateEnd,
     },
@@ -54,13 +56,17 @@ function displayGraphsCO2(object_id,_dateStart,_dateEnd) {
         $('#div_alert').showAlert({message: data.result, level: 'danger'});
         return;
       }
+
+
+      $('#div_alert').showAlert({message: data.result.eqLogic.id, level: 'info'});
+
       // recupere l'icone et le nom de l'objet pour l'affichage en haut
-      var icon = '';
+  /*    var icon = '';
       if (isset(data.result.object.display) && isset(data.result.object.display.icon)) {
         icon = data.result.object.display.icon;
       }
       $('.objectName').empty().append(icon + ' ' + data.result.object.name);
-
+*/
       // vide les div
       $('#div_chartCO2parkWh').empty();
       $('#div_chartConsokWh').empty();
@@ -69,7 +75,7 @@ function displayGraphsCO2(object_id,_dateStart,_dateEnd) {
    //   $('#div_chartCO2parkWh').append( '<div class="chartContainer" id="div_chartCO2parkWh2"></div>');
 
       // affiche les graphs
-      var series = []
+/*      var series = []
       for (var i in data.result.eqLogics) { //pour chaque equipement
 
    //   $('#div_alert').showAlert({message: data.result.eqLogics[i].eqLogic.id, level: 'info'});
@@ -78,7 +84,7 @@ function displayGraphsCO2(object_id,_dateStart,_dateEnd) {
    //     $('#div_chartCO2parkWh').append( '<div class="chartContainer" id="div_chartCO2parkWh' + data.result.eqLogics[i].eqLogic.id + '"></div>');
 
         // appel la construction du graphe en bas
-        graphCO2(data.result.eqLogics[i].eqLogic.id);
+  //      graphCO2(data.result.eqLogics[i].eqLogic.id);
       } //*/
 
     } // fin success

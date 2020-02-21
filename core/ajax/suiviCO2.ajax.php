@@ -27,10 +27,10 @@ try {
     ajax::init();
 
     if (init('action') == 'getSuiviCO2Data') {
-      if (init('object_id') == '') {
-        $_GET['object_id'] = $_SESSION['user']->getOptions('defaultDashboardObject');
-      }
-      $object = jeeObject::byId(init('object_id'));
+//      if (init('object_id') == '') {
+//        $_GET['object_id'] = $_SESSION['user']->getOptions('defaultDashboardObject');
+//      }
+/*      $object = jeeObject::byId(init('object_id'));
       if (!is_object($object)) {
         $object = jeeObject::rootObject();
       }
@@ -47,11 +47,14 @@ try {
         }
       }
       $return = array('object' => utils::o2a($object));
-
+*/
       $date = array(
         'start' => init('dateStart'),
         'end' => init('dateEnd'),
       );
+      $eqLogic_id = init('eqLogic_id');
+
+      log::add('suiviCO2', 'debug', 'Dans ajax : ' . $eqLogic_id);
 
       if ($date['start'] == '') {
         $date['start'] = date('Y-m-d', strtotime('-1 months ' . date('Y-m-d')));
@@ -60,9 +63,14 @@ try {
         $date['end'] = date('Y-m-d', strtotime('+1 days ' . date('Y-m-d')));
       }
       $return['date'] = $date;
-      foreach ($object->getEqLogic(true, false, 'suiviCO2') as $eqLogic) {
-        $return['eqLogics'][] = array('eqLogic' => utils::o2a($eqLogic));
-      }
+
+   //   log::add('suiviCO2', 'debug', 'Dans ajax : ' . utils::o2a($eqLogic_id);
+
+      //foreach ($object->getEqLogic(true, false, 'suiviCO2') as $eqLogic) {
+      $eqLogic = eqLogic::byId($eqLogic_id);
+  //    $eqLogic = byLogicalId($_logicalId,   $_eqType_name,   $_multiple = false)
+        $return = array('eqLogic' => utils::o2a($eqLogic));
+      //}
       ajax::success($return);
     }
 
