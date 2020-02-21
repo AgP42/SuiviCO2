@@ -16,14 +16,9 @@
 */
 
 /* Fonctions pour la barre en haut */
-//$('.objectName').empty().append('coucou from JS');
-
 $(".in_datepicker").datepicker();
 
-
 $('#bt_validChangeDateSuiviCO2').on('click', function () {
- // $('.objectName').empty().append('Date voulues : ' + $('#in_startDate').value() + ' au ' + $('#in_endDate').value());
-
   jeedom.history.chart = [];
   $('#div_chartCO2parkWh').packery('destroy');
   $('#div_chartConsokWh').packery('destroy');
@@ -37,7 +32,7 @@ $('#bt_validChangeDateSuiviCO2').on('click', function () {
 displayGraphsCO2(eqLogic_id,'',''); // appelle la fonction ci-dessous au lancement de la page. eqLogic_id vient du php
 
 function displayGraphsCO2(eqLogic_id,_dateStart,_dateEnd) {
-  // l'appel ajax pour aller chercher les données
+  // l'appel ajax pour aller chercher les données selon l'équipement selectionné
   $.ajax({
     type: 'POST',
     url: 'plugins/suiviCO2/core/ajax/suiviCO2.ajax.php',
@@ -57,42 +52,25 @@ function displayGraphsCO2(eqLogic_id,_dateStart,_dateEnd) {
         return;
       }
 
+      //$('#div_alert').showAlert({message: data.result.eqLogic.id, level: 'info'});
 
-      $('#div_alert').showAlert({message: data.result.eqLogic.id, level: 'info'});
+      // recupere le nom de l'equipement pour l'affichage en haut
+       $('.objectName').empty().append(data.result.eqLogic.name);
 
-      // recupere l'icone et le nom de l'objet pour l'affichage en haut
-  /*    var icon = '';
-      if (isset(data.result.object.display) && isset(data.result.object.display.icon)) {
-        icon = data.result.object.display.icon;
-      }
-      $('.objectName').empty().append(icon + ' ' + data.result.object.name);
-*/
       // vide les div
       $('#div_chartCO2parkWh').empty();
       $('#div_chartConsokWh').empty();
       $('#div_chartConsoCO2').empty();
 
-   //   $('#div_chartCO2parkWh').append( '<div class="chartContainer" id="div_chartCO2parkWh2"></div>');
-
       // affiche les graphs
-/*      var series = []
-      for (var i in data.result.eqLogics) { //pour chaque equipement
-
-   //   $('#div_alert').showAlert({message: data.result.eqLogics[i].eqLogic.id, level: 'info'});
-
-        // cree un nouveau div pour chaque courbe du graph en bas, dont l'ID contient l'id de l'equipement
-   //     $('#div_chartCO2parkWh').append( '<div class="chartContainer" id="div_chartCO2parkWh' + data.result.eqLogics[i].eqLogic.id + '"></div>');
-
-        // appel la construction du graphe en bas
-  //      graphCO2(data.result.eqLogics[i].eqLogic.id);
-      } //*/
+      // appel la construction du graphe CO2 par kWh (en haut à gauche)
+      graphCO2(data.result.eqLogic.id);
 
     } // fin success
   }); //fin appel ajax
 } //fin fct displayGraphsCO2
 
-
-// pour construire le graph en bas avec toutes les differentes infos dessus
+// pour construire le graph CO2 par kWh en France
 function graphCO2(_eqLogic_id) {
   jeedom.eqLogic.getCmd({
     id: _eqLogic_id,
@@ -101,12 +79,10 @@ function graphCO2(_eqLogic_id) {
     },
     success: function (cmds) {
       jeedom.history.chart['div_chartCO2parkWh'] = null;
-  //    jeedom.history.chart['div_chartCO2parkWh' + _eqLogic_id] = null;
       for (var i  in cmds) {
         if (cmds[i].logicalId == 'co2kwhfromApi') {
           jeedom.history.drawChart({
             cmd_id: cmds[i].id,
-        //    el: 'div_chartCO2parkWh' + _eqLogic_id,
             el: 'div_chartCO2parkWh',
             dateStart: $('#in_startDate').value(),
             dateEnd: $('#in_endDate').value(),

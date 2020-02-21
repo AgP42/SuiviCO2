@@ -27,34 +27,15 @@ try {
     ajax::init();
 
     if (init('action') == 'getSuiviCO2Data') {
-//      if (init('object_id') == '') {
-//        $_GET['object_id'] = $_SESSION['user']->getOptions('defaultDashboardObject');
-//      }
-/*      $object = jeeObject::byId(init('object_id'));
-      if (!is_object($object)) {
-        $object = jeeObject::rootObject();
-      }
-      if (!is_object($object)) {
-        throw new Exception(__('Aucun objet racine trouvé', __FILE__));
-      }
-      if (count($object->getEqLogic(true, false, 'suiviCO2')) == 0) {
-        $allObject = jeeObject::buildTree();
-        foreach ($allObject as $object_sel) {
-          if (count($object_sel->getEqLogic(true, false, 'suiviCO2')) > 0) {
-            $object = $object_sel;
-            break;
-          }
-        }
-      }
-      $return = array('object' => utils::o2a($object));
-*/
+
+      // initialise les variables locales avec les infos de la conf from le JS
       $date = array(
         'start' => init('dateStart'),
         'end' => init('dateEnd'),
       );
       $eqLogic_id = init('eqLogic_id');
 
-      log::add('suiviCO2', 'debug', 'Dans ajax : ' . $eqLogic_id);
+   //   log::add('suiviCO2', 'debug', 'Dans ajax : ' . $eqLogic_id);
 
       if ($date['start'] == '') {
         $date['start'] = date('Y-m-d', strtotime('-1 months ' . date('Y-m-d')));
@@ -62,15 +43,13 @@ try {
       if ($date['end'] == '') {
         $date['end'] = date('Y-m-d', strtotime('+1 days ' . date('Y-m-d')));
       }
-      $return['date'] = $date;
+      $return['date'] = $date; // je vois pas ou c'est utilisé apres, à virer ?
 
    //   log::add('suiviCO2', 'debug', 'Dans ajax : ' . utils::o2a($eqLogic_id);
 
-      //foreach ($object->getEqLogic(true, false, 'suiviCO2') as $eqLogic) {
-      $eqLogic = eqLogic::byId($eqLogic_id);
-  //    $eqLogic = byLogicalId($_logicalId,   $_eqType_name,   $_multiple = false)
-        $return = array('eqLogic' => utils::o2a($eqLogic));
-      //}
+      $eqLogic = eqLogic::byId($eqLogic_id); // on recupere l'eqLogic à partir de son ID
+      $return = array('eqLogic' => utils::o2a($eqLogic)); // on prend toutes les  infos (quoi exactement ?)
+
       ajax::success($return);
     }
 
