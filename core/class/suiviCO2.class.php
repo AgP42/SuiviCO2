@@ -39,11 +39,37 @@ class suiviCO2 extends eqLogic {
               log::add('suiviCO2', 'debug', ' previous : ' . $value->getValue());
             }*/
 
-        public static function cron15() {
-        $datetime = date('Y-m-d H:i:00');
-        $date = date('Y-m-d');
+      public function calculConso($_type = 'HP', $suiviCO2){
 
-        //on va chercher toutes les datas du jour. //TODO : attention aux dernieres datas de la veille... A gerer avec un cronDaily qui s'execute a 02:00
+          //on va chercher l'info index_HP ou HC via la conf utilisateur
+          $index = jeedom::evaluateExpression($suiviCO2->getConfiguration('index_' . $_type));
+
+          //on recupere la precedente valeur stockée, selon HP ou HC
+          $lastValue = $suiviCO2->getConfiguration('lastValue' . $_type);
+          //on sauvegarde la valeur actuelle pour le prochain tour
+          $suiviCO2->setConfiguration('lastValue' . $_type, $index);
+          $suiviCO2->save();
+
+          log::add('suiviCO2', 'debug', 'lastIndex' . $_type . ' : ' . $lastValue . ' Index'  . $_type . ' : ' . $index);
+
+          //on calcule la consommation entre les 2 derniers index
+          $consumption = $index - $lastValue;
+
+          //si cette consommation est >0, on va la stocker en base - NON, il faut stocker les 0 sinon l'archivage de l'historique fait n'importe quoi... dommage de stocker des 0... // TODO a ameliorer...
+  //        if ($consumptionHP > 0) {
+            $cmd = $suiviCO2->getCmd(null, 'consumption' . $_type);
+            if (is_object($cmd)) {
+              $cmd->setCollectDate($datetime);
+              log::add('suiviCO2', 'debug', 'conso ' . $_type . ' (Wh) : ' . $consumption);
+              $cmd->event($consumption);
+            }
+    //      }
+
+      }
+
+    public function getAndRecordDataCo2($date) {
+
+        //on va chercher toutes les datas du jour. //TODO : attention aux dernieres datas de la veille... A gerer avec un cronDaily qui s'execute a 02:00 sur la date de la veille
         $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-tr&rows=100&sort=date_heure&refine.date=' . $date;
       //  log::add('suiviCO2', 'debug', 'CO2 URL ' . $url);
         $request_http = new com_http($url);
@@ -84,66 +110,6 @@ class suiviCO2 extends eqLogic {
         } // fin foreach equipement
       } //fin fonction cron
 
-
-
-      /*
-        //on va chercher dans le tableau les infos qui nous interessent et on les traite
-        $apirecords = $json['records'];
-        foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
-          if (isset($record['fields']['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
-
-            $record_date = $record['fields']['date'];
-            $record_time = $record['fields']['heure'];
-            $record_tauxco2 = $record['fields']['taux_co2'];
-
-   //         log::add('suiviCO2', 'debug', 'Position : ' . $position . ' Date et heure : ' . $record_date . ' '. $record_time . ' co2 : ' . $record_tauxco2);
-
-            //pour chaque equipement declaré par l'utilisateur
-            foreach (self::byType('suiviCO2',true) as $suiviCO2) {
-
-              $cmd = $suiviCO2->getCmd(null, 'co2kwhfromApi');
-              if (is_object($cmd)) {
-                //on ajoute la valeur a la table history avec la date de l'API
-                //pas besoin de verifier que la valeur existe pas encore, la DB gere unicité paire datetime/cmd
-                $cmd->addHistoryValue($record_tauxco2, $record_date . ' ' . $record_time . ':00');
-
-                log::add('suiviCO2', 'debug', 'Taux_Co2 : ' . $record_tauxco2 . ' à : ' . $record_date . ' ' . $record_time . ':00');
-              }
-
-            } // fin foreach equipement
-          } // fin if on est dans un noeud avec un taux co2
-        } //fin boucle dans toutes les datas recuperées
-
-      */
-
-      public function calculConso($_type = 'HP', $suiviCO2){
-
-          //on va chercher l'info index_HP ou HC via la conf utilisateur
-          $index = jeedom::evaluateExpression($suiviCO2->getConfiguration('index_' . $_type));
-
-          //on recupere la precedente valeur stockée, selon HP ou HC
-          $lastValue = $suiviCO2->getConfiguration('lastValue' . $_type);
-          //on sauvegarde la valeur actuelle pour le prochain tour
-          $suiviCO2->setConfiguration('lastValue' . $_type, $index);
-          $suiviCO2->save();
-
-          log::add('suiviCO2', 'debug', 'lastIndex' . $_type . ' : ' . $lastValue . ' Index'  . $_type . ' : ' . $index);
-
-          //on calcule la consommation entre les 2 derniers index
-          $consumption = $index - $lastValue;
-
-          //si cette consommation est >0, on va la stocker en base - NON, il faut stocker les 0 sinon l'archivage de l'historique fait n'importe quoi... dommage de stocker des 0... // TODO a ameliorer...
-  //        if ($consumptionHP > 0) {
-            $cmd = $suiviCO2->getCmd(null, 'consumption' . $_type);
-            if (is_object($cmd)) {
-              $cmd->setCollectDate($datetime);
-              log::add('suiviCO2', 'debug', 'conso ' . $_type . ' (Wh) : ' . $consumption);
-              $cmd->event($consumption);
-            }
-    //      }
-
-      }
-
       public static function cron5() {
         $datetime = date('Y-m-d H:i:00');
 
@@ -160,6 +126,9 @@ class suiviCO2 extends eqLogic {
           }
 
         } // fin foreach equipement
+
+        //appel de l'api pour aujourd'hui et stock des données en base
+        self::getAndRecordDataCo2(date('Y-m-d'));
 
       } //fin fonction cron
 
