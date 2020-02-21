@@ -32,12 +32,18 @@ class suiviCO2 extends eqLogic {
 
       }
      */
+
+/*          ce morceau de code va chercher tout l'historique de la commande et le loggue
+            $previous = $cmd->getHistory();
+            foreach ($previous as $value) {
+              log::add('suiviCO2', 'debug', ' previous : ' . $value->getValue());
+            }*/
+
         public static function cron15() {
         $datetime = date('Y-m-d H:i:00');
         $date = date('Y-m-d');
-   //     $time = date('H:i');
 
-        //on va chercher toutes les datas du jour. //TODO : attention aux dernieres datas de la veille...
+        //on va chercher toutes les datas du jour. //TODO : attention aux dernieres datas de la veille... A gerer avec un cronDaily qui s'execute a 02:00
         $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-tr&rows=100&sort=date_heure&refine.date=' . $date;
       //  log::add('suiviCO2', 'debug', 'CO2 URL ' . $url);
         $request_http = new com_http($url);
@@ -53,7 +59,7 @@ class suiviCO2 extends eqLogic {
         //on va chercher dans le tableau les infos qui nous interessent et on les traite
         $apirecords = $json['records'];
         foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
-          if (isset($record['fields']['taux_co2'])) {// quand on a un noeud avec le taux_co2
+          if (isset($record['fields']['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
 
             $record_date = $record['fields']['date'];
             $record_time = $record['fields']['heure'];
@@ -64,25 +70,18 @@ class suiviCO2 extends eqLogic {
             //pour chaque equipement declaré par l'utilisateur
             foreach (self::byType('suiviCO2',true) as $suiviCO2) {
 
-        //      if ($co2kwhfromApi > 0) { //ajouter ici traitement date pour verifier unicité en base
-                $cmd = $suiviCO2->getCmd(null, 'co2kwhfromApi');
-                if (is_object($cmd)) {
-              //    $cmd->execCmd();
-                  $cmd->setCollectDate($record_date . ' ' . $record_time . ':00');
-              //    $cmd->->setCollectDate(date('Y-m-d H:i:s'));
-                  $cmd->event($record_tauxco2);
-                  log::add('suiviCO2', 'debug', 'Taux_Co2 : ' . $record_tauxco2 . ' à : ' . $record_date . ' ' . $record_time . ':00');
+              $cmd = $suiviCO2->getCmd(null, 'co2kwhfromApi');
+              if (is_object($cmd)) {
+                //on ajoute la valeur a la table history avec la date de l'API
+                //pas besoin de verifier que la valeur existe pas encore, la DB gere unicité paire datetime/cmd
+                $cmd->addHistoryValue($record_tauxco2, $record_date . ' ' . $record_time . ':00');
 
-                }
-          //    }
+                log::add('suiviCO2', 'debug', 'Taux_Co2 : ' . $record_tauxco2 . ' à : ' . $record_date . ' ' . $record_time . ':00');
+              }
+
             } // fin foreach equipement
-//*/
-            break; //on sort du foreach au 1ere element avec taux_co2 trouvé
-
           } // fin if on est dans un noeud avec un taux co2
         } //fin boucle dans toutes les datas recuperées
-
-
       } //fin fonction cron
 
       public static function cron5() {
@@ -143,12 +142,6 @@ class suiviCO2 extends eqLogic {
               }
          //   }
           }
-
-/*          ce morceau de code va chercher tout l'historique de la commande et le loggue
-            $previous = $cmd->getHistory();
-            foreach ($previous as $value) {
-              log::add('suiviCO2', 'debug', ' previous : ' . $value->getValue());
-            }*/
 
         } // fin foreach equipement
 
