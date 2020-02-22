@@ -68,7 +68,7 @@ class suiviCO2 extends eqLogic {
 
       }
 
-      public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 10){
+      public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 10, $_eqLogic_id = NULL){
 
         //on va chercher les _nbRecordsAPI dernieres data. 96 données par jours,
         // on est obligé d'en demander bcp car les champs vide du lendemain voir surlendemain sont crées dans le json
@@ -88,35 +88,42 @@ class suiviCO2 extends eqLogic {
         //pour chaque equipement declaré par l'utilisateur
         foreach (self::byType('suiviCO2',true) as $suiviCO2) {
 
-          //on va chercher dans le tableau les infos qui nous interessent et on les traite
-          $apirecords = $json['records'];
-          $nbRecordsTraites = 0;
-          foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
-            if (isset($record['fields']['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
+          $suiviCO2_id = $suiviCO2->getId();
+          log::add('suiviCO2', 'debug', 'Test des id : suiviCO2_id : ' . $suiviCO2_id . ' et _eqLogic_id : ' . $_eqLogic_id);
 
-              $record_date = $record['fields']['date'];
-              $record_time = $record['fields']['heure'];
-              $record_tauxco2 = $record['fields']['taux_co2'];
-              $nbRecordsTraites++;
-              if ($nbRecordsTraites > $_nbRecordsATraiterDB){
-                break;
-              }
+          if(!isset($_eqLogic_id) || $_eqLogic_id == $suiviCO2_id){
 
-   //         log::add('suiviCO2', 'debug', 'Position : ' . $position . ' Date et heure : ' . $record_date . ' '. $record_time . ' co2 : ' . $record_tauxco2);
+            //on va chercher dans le tableau les infos qui nous interessent et on les traite
+            $apirecords = $json['records'];
+            $nbRecordsTraites = 0;
+            foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
+              if (isset($record['fields']['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
 
-              // on enregistre les infos dans la DB history avec la date donnéee dans le json
-              //pas besoin de verifier que la valeur existe pas encore, la DB gere unicité paire datetime/cmd
-              $cmd = $suiviCO2->getCmd(null, 'co2kwhfromApi');
-              if (is_object($cmd)) {
-                $cmd->addHistoryValue($record_tauxco2, $record_date . ' ' . $record_time . ':00');
+                $record_date = $record['fields']['date'];
+                $record_time = $record['fields']['heure'];
+                $record_tauxco2 = $record['fields']['taux_co2'];
+                $nbRecordsTraites++;
+                if ($nbRecordsTraites > $_nbRecordsATraiterDB){
+                  break;
+                }
 
-                log::add('suiviCO2', 'debug', $nbRecordsTraites . ' - Taux_Co2 : ' . $record_tauxco2 . ' à : ' . $record_date . ' ' . $record_time . ':00');
-              }
+     //         log::add('suiviCO2', 'debug', 'Position : ' . $position . ' Date et heure : ' . $record_date . ' '. $record_time . ' co2 : ' . $record_tauxco2);
+
+                // on enregistre les infos dans la DB history avec la date donnéee dans le json
+                //pas besoin de verifier que la valeur existe pas encore, la DB gere unicité paire datetime/cmd
+                $cmd = $suiviCO2->getCmd(null, 'co2kwhfromApi');
+                if (is_object($cmd)) {
+                  $cmd->addHistoryValue($record_tauxco2, $record_date . ' ' . $record_time . ':00');
+
+                  log::add('suiviCO2', 'debug', $nbRecordsTraites . ' - Taux_Co2 : ' . $record_tauxco2 . ' à : ' . $record_date . ' ' . $record_time . ':00');
+                }
+
 
             } // fin if on est dans un noeud avec un taux co2
           } //fin boucle dans toutes les datas recuperées
+              } //fin boucle verification on veut ecrire les datas pour cet equipement
         } // fin foreach equipement
-      } //fin fonction cron
+      } //fin fonction
 
       public static function cronHourly() {
         $datetime = date('Y-m-d H:i:00');

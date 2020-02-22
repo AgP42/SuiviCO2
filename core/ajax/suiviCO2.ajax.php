@@ -65,7 +65,7 @@ try {
 
       log::add('suiviCO2', 'debug', 'Recu dans ajax : ' . $_nbRecordsAPI . ' - ' . $_nbRecordsATraiterDB);
 
-      $eqLogic->getAndRecordDataCo2($_nbRecordsAPI, $_nbRecordsATraiterDB);
+      $eqLogic->getAndRecordDataCo2($_nbRecordsAPI, $_nbRecordsATraiterDB, init('id'));
 
       ajax::success($return);
     }

@@ -29,7 +29,7 @@ $(".eqLogic").off('click','.listCmdInfo').on('click','.listCmdInfo', function ()
 
 
 $('#bt_historyCO2').on('click', function () {
-    bootbox.confirm('{{Environ 1,5 mois de données, l\'opération peu prendre un peu de temps...}}', function (result) {
+    bootbox.confirm('{{Environ 1,5 mois de données, l\'opération peu prendre du temps...(min 30s)}}', function (result) {
         if (result) {
             $.ajax({
                 type: 'POST',
@@ -37,8 +37,8 @@ $('#bt_historyCO2').on('click', function () {
                 data: {
                     action: 'getAPICO2Data',
                     id: $('.eqLogicAttr[data-l1key=id]').value(),
-                    nbRecordsAPI: 600,
-                    nbRecordsATraiterDB: 600,
+                    nbRecordsAPI: 6000,
+                    nbRecordsATraiterDB: 6000,
                 },
                 dataType: 'json',
                 error: function (request, status, error) {
