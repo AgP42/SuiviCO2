@@ -133,6 +133,22 @@ $eqLogics = eqLogic::byType($plugin->getId());
           </fieldset>
         </form>
 
+        <br>
+
+        <form class="form-horizontal">
+        <fieldset>
+          <legend><i class="fas fa-history"></i> {{Récupérer historique des données}}</legend>
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{CO2 par kWh en France}}</label>
+            <div class="col-sm-4">
+              <a class="btn btn-success btn-sm" id="bt_historyCO2"><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
+            </div>
+          </div>
+
+          </fieldset>
+        </form>
+
       </div>
 
       <div role="tabpanel" class="tab-pane" id="commandtab">

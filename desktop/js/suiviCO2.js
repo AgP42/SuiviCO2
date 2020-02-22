@@ -28,6 +28,35 @@ $(".eqLogic").off('click','.listCmdInfo').on('click','.listCmdInfo', function ()
 });
 
 
+$('#bt_historyCO2').on('click', function () {
+    bootbox.confirm('{{Environ 1,5 mois de données, l\'opération peu prendre un peu de temps...}}', function (result) {
+        if (result) {
+            $.ajax({
+                type: 'POST',
+                url: 'plugins/suiviCO2/core/ajax/suiviCO2.ajax.php',
+                data: {
+                    action: 'getAPICO2Data',
+                    id: $('.eqLogicAttr[data-l1key=id]').value(),
+                    nbRecordsAPI: 600,
+                    nbRecordsATraiterDB: 600,
+                },
+                dataType: 'json',
+                error: function (request, status, error) {
+                    handleAjaxError(request, status, error);
+                },
+                success: function (data) {
+                    if (data.state != 'ok') {
+                        $('#div_alert').showAlert({message: data.result, level: 'danger'});
+                        return;
+                    }
+                    $('#div_alert').showAlert({message: 'Historique chargé avec succès', level: 'success'});
+                }
+            });
+        }
+    });
+});
+
+
 $("#table_cmd").sortable({axis: "y", cursor: "move", items: ".cmd", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 /*
  * Fonction pour l'ajout de commande, appellé automatiquement par plugin.template

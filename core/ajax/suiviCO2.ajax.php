@@ -51,6 +51,23 @@ try {
       $return = array('eqLogic' => utils::o2a($eqLogic)); // on prend toutes les  infos (quoi exactement ?)
 
       ajax::success($return);
+    } // end getSuiviCO2Data
+
+    if (init('action') == 'getAPICO2Data') {
+
+      $eqLogic = eqLogic::byId(init('id'));
+      if (!is_object($eqLogic)) {
+        throw new Exception(__('Equipement introuvable : ', __FILE__) . init('id'));
+      }
+
+      $_nbRecordsAPI = init('nbRecordsAPI');
+      $_nbRecordsATraiterDB = init('nbRecordsATraiterDB');
+
+      log::add('suiviCO2', 'debug', 'Recu dans ajax : ' . $_nbRecordsAPI . ' - ' . $_nbRecordsATraiterDB);
+
+      $eqLogic->getAndRecordDataCo2($_nbRecordsAPI, $_nbRecordsATraiterDB);
+
+      ajax::success($return);
     }
 
     throw new Exception(__('Aucune méthode correspondante à : ', __FILE__) . init('action'));
