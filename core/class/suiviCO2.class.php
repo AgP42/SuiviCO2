@@ -26,12 +26,13 @@ class suiviCO2 extends eqLogic {
 
     /*     * ***********************Methode static*************************** */
 
-    /*
-     * Fonction exécutée automatiquement toutes les minutes par Jeedom
-      public static function cron() {
-
+    //*
+    // * Fonction exécutée automatiquement toutes les minutes par Jeedom
+      public static function cron15() {
+        //appel de l'api et stock des données en base
+        self::getAndRecordDataCo2();
       }
-     */
+     //*/
 
 /*          ce morceau de code va chercher tout l'historique de la commande et le loggue
             $previous = $cmd->getHistory();
@@ -67,24 +68,17 @@ class suiviCO2 extends eqLogic {
 
       }
 
-    public static function getAndRecordDataCo2Hier() {
+      public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 10){
 
-      $hier = date('Y-m-d', strtotime('-1 day ' . date('Y-m-d')));
-      log::add('suiviCO2', 'debug', '################ CRON DAILY Suivi CO2 ################');
-      log::add('suiviCO2', 'debug', 'Aujourd hui :  ' . date('Y-m-d') . ', hier  : ' . $hier);
-      self::getAndRecordDataCo2($hier);
-
-    }
-
-    public function getAndRecordDataCo2($date) {
-
-        //on va chercher toutes les datas du jour. //TODO : attention aux dernieres datas de la veille... A gerer avec un cronDaily qui s'execute a 02:00 sur la date de la veille
-        $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-tr&rows=100&sort=date_heure&refine.date=' . $date;
-      //  log::add('suiviCO2', 'debug', 'CO2 URL ' . $url);
+        //on va chercher les _nbRecordsAPI dernieres data. 96 données par jours,
+        // on est obligé d'en demander bcp car les champs vide du lendemain voir surlendemain sont crées dans le json
+        $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-tr&rows=' . $_nbRecordsAPI . '&sort=date_heure';
+      //  $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-tr&rows=100&sort=date_heure&refine.date=' . $date;
+        log::add('suiviCO2', 'debug', 'Appel CO2 URL ' . $url);
         $request_http = new com_http($url);
         $content = $request_http->exec(30);
-        //$content = file_get_contents($url);
         if ($content === false) {
+          log::add('suiviCO2', 'erreur', 'Erreur lors de l appel CO2 URL : ' . $url);
           return;
         }
 
@@ -96,12 +90,17 @@ class suiviCO2 extends eqLogic {
 
           //on va chercher dans le tableau les infos qui nous interessent et on les traite
           $apirecords = $json['records'];
+          $nbRecordsTraites = 0;
           foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
             if (isset($record['fields']['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
 
               $record_date = $record['fields']['date'];
               $record_time = $record['fields']['heure'];
               $record_tauxco2 = $record['fields']['taux_co2'];
+              $nbRecordsTraites++;
+              if ($nbRecordsTraites > $_nbRecordsATraiterDB){
+                break;
+              }
 
    //         log::add('suiviCO2', 'debug', 'Position : ' . $position . ' Date et heure : ' . $record_date . ' '. $record_time . ' co2 : ' . $record_tauxco2);
 
@@ -111,7 +110,7 @@ class suiviCO2 extends eqLogic {
               if (is_object($cmd)) {
                 $cmd->addHistoryValue($record_tauxco2, $record_date . ' ' . $record_time . ':00');
 
-                log::add('suiviCO2', 'debug', 'Taux_Co2 : ' . $record_tauxco2 . ' à : ' . $record_date . ' ' . $record_time . ':00');
+                log::add('suiviCO2', 'debug', $nbRecordsTraites . ' - Taux_Co2 : ' . $record_tauxco2 . ' à : ' . $record_date . ' ' . $record_time . ':00');
               }
 
             } // fin if on est dans un noeud avec un taux co2
@@ -137,9 +136,6 @@ class suiviCO2 extends eqLogic {
           }
 
         } // fin foreach equipement
-
-        //appel de l'api pour aujourd'hui et stock des données en base
-        self::getAndRecordDataCo2(date('Y-m-d'));
 
       } //fin fonction cron
 
@@ -182,7 +178,7 @@ class suiviCO2 extends eqLogic {
         $cmd = new suiviCO2Cmd();
         $cmd->setLogicalId('consumptionHP');
         $cmd->setTemplate('dashboard', 'tile');
-        $cmd->setConfiguration('historizeMode', 'avg');
+        $cmd->setConfiguration('historizeMode', 'none');
         $cmd->setIsHistorized(1);
       }
       $cmd->setName(__('Consommation HP', __FILE__));
@@ -199,7 +195,7 @@ class suiviCO2 extends eqLogic {
         $cmd = new suiviCO2Cmd();
         $cmd->setLogicalId('consumptionHC');
         $cmd->setTemplate('dashboard', 'tile');
-        $cmd->setConfiguration('historizeMode', 'avg');
+        $cmd->setConfiguration('historizeMode', 'none');
         $cmd->setIsHistorized(1);
       }
       $cmd->setName(__('Consommation HC', __FILE__));
