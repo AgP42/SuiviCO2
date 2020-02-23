@@ -93,6 +93,11 @@ sendVarToJs('eqLogic_id', init('eqLogic_id'));
 
           <!-- TODO a gerer en JS plutot d'en lien, pour pas tout recharger et perdre les dates demandées par l'user...-->
           <?php
+          if (init('groupBy', 'day') == 'hour') {
+            echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=hour&eqLogic_id=' . $eqLogic->getId() . '">{{Heure}}</a> ';
+          } else {
+            echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=hour&eqLogic_id=' . $eqLogic->getId() . '">{{Heure}}</a> ';
+          }
           if (init('groupBy', 'day') == 'day') {
             echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=day&eqLogic_id=' . $eqLogic->getId() . '">{{Jour}}</a> ';
           } else {

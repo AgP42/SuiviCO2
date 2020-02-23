@@ -70,17 +70,19 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
       graphCO2(data.result.eqLogic.id);
 
       // appel la construction du graphe conso Wh (en haut à droite)
-      //graphConso(data.result.eqLogic.id);
+      graphConso(data.result.eqLogic.id);
+
+
       var series = []
 
       // calcul pour le graph en haut a droite "run time by day"
       series.push({
         step: true,
         name: data.result.eqLogic.name,
-        data: data.result.runtimeByDay,
+        data: data.result.consowh,
         type: 'column',
         stack : 1,
-        unite : 'Wh',
+        unite : 'kWh',
         stacking : 'normal',
         dataGrouping: {
             approximation: "sum",
@@ -93,7 +95,7 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
         },
       });
 
-      drawSimpleGraph('div_chartConsokWh', series, 'column');
+      drawSimpleGraph('div_chartConsoCO2', series, 'column'); // c pas le bon div mais c pour tester les 2 en //
 
     } // fin success
   }); //fin appel ajax
@@ -237,7 +239,7 @@ function drawSimpleGraph(_el, _serie) {
       enabled: false
     },
     tooltip: {
-      pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} {{minute(s)}}</b><br/>',
+      pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} {{kWh}}</b><br/>',
       valueDecimals: 2,
     },
     yAxis: {

@@ -203,6 +203,42 @@ class suiviCO2 extends eqLogic {
 
     /*     * *********************Méthodes d'instance************************* */
 
+    /*ce morceau de code va chercher tout l'historique de la commande et le loggue
+            $previous = $cmd->getHistory();
+            foreach ($previous as $value) {
+              log::add('suiviCO2', 'debug', ' previous : ' . $value->getValue());*/
+
+    public function consowh($_startDate = null, $_endDate = null) {
+
+      // on recupere la cmd HP
+      $cmdConsoHP = $this->getCmd(null, 'consumptionHP');
+      if (!is_object($cmdConsoHP)) {
+        return array();
+      }
+
+      $return = array();
+
+      // on boucle dans toutes les valeurs de l'historique de la cmd HP
+      foreach ($cmdConsoHP->getHistory($_startDate, $_endDate) as $history) {
+
+        $valueDateTime = $history->getDatetime();
+
+        // on retourne un tableau avec en index la datetime et en valeurs le couple timestamp, valeur
+        $return[$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($history->getValue() / 1000));
+
+        // on log tout ce petit bordel
+     //   log::add('suiviCO2', 'debug', 'Fct consowh dans class.php, $valueDateTime : ' . $valueDateTime . ' - $return[$valueDateTime] : ' . $return[$valueDateTime][0] . ' - ' . $return[$valueDateTime][1]);
+      }
+
+      return $return;
+    }
+
+    public function consoco2($_startDate = null, $_endDate = null) {
+
+      return $return;
+    }
+
+
     public function preInsert() {
 
     }

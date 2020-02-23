@@ -35,7 +35,7 @@ try {
       );
       $eqLogic_id = init('eqLogic_id');
 
-   //   log::add('suiviCO2', 'debug', 'Dans ajax : ' . $eqLogic_id);
+  //    log::add('suiviCO2', 'debug', 'Dans ajax, eqLogic_id : ' . $eqLogic_id);
 
       if ($date['start'] == '') {
         $date['start'] = date('Y-m-d', strtotime('-1 months ' . date('Y-m-d')));
@@ -48,7 +48,14 @@ try {
    //   log::add('suiviCO2', 'debug', 'Dans ajax : ' . utils::o2a($eqLogic_id);
 
       $eqLogic = eqLogic::byId($eqLogic_id); // on recupere l'eqLogic à partir de son ID
-      $return = array('eqLogic' => utils::o2a($eqLogic)); // on prend toutes les  infos (quoi exactement ?)
+
+      $return = array(
+        'eqLogic' => utils::o2a($eqLogic),
+        'consowh' => array_values($eqLogic->consowh($date['start'], $date['end']))//,
+    //    'consoco2' => array_values($eqLogic->consoco2($date['start'], $date['end']))
+      );
+
+ //     log::add('suiviCO2', 'debug', 'Dans ajax, consowh : ' . $return['consowh'][0]);
 
       ajax::success($return);
     } // end getSuiviCO2Data
