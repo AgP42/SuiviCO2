@@ -71,7 +71,7 @@ class suiviCO2 extends eqLogic {
           $suiviCO2->setConfiguration('lastValue' . $_type, $index);
           $suiviCO2->save();
 
-          log::add('suiviCO2', 'debug', 'lastIndex' . $_type . ' : ' . $lastValue . ' Index'  . $_type . ' : ' . $index);
+     //     log::add('suiviCO2', 'debug', 'lastIndex' . $_type . ' : ' . $lastValue . ' Index'  . $_type . ' : ' . $index);
 
           //on calcule la consommation entre les 2 derniers index
           $consumption = $index - $lastValue;
@@ -81,7 +81,7 @@ class suiviCO2 extends eqLogic {
             $cmd = $suiviCO2->getCmd(null, 'consumption' . $_type);
             if (is_object($cmd)) {
               $cmd->setCollectDate($datetime);
-              log::add('suiviCO2', 'debug', 'conso ' . $_type . ' (Wh) : ' . $consumption);
+              log::add('suiviCO2', 'debug', 'eqLogic_id : ' . $suiviCO2->getId() . ' - Index now ' . $_type . ' : ' . $index . ' - Prev Index '  . $_type . ' : ' . $lastValue . ' = conso ' . $_type . ' (Wh) : ' . $consumption);
               $cmd->event($consumption);
             }
     //      }
@@ -90,16 +90,22 @@ class suiviCO2 extends eqLogic {
 
       public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 4, $_eqLogic_id = NULL){
 
-        //on va chercher les _nbRecordsAPI dernieres data. 96 données par jours,
-        // on est obligé d'en demander bcp car les champs vide du lendemain voir surlendemain sont crées dans le json
+        /* *************** Infos sur l'API opendata.reseaux-energies.fr
+        96 données par jours
+        on est obligé d'en demander bcp car les champs vide du lendemain voir surlendemain sont crées dans le json
+        actualisation toutes les heures à heure pile, à ce moment là l'API ne repond pas, il faut donc decaller sa requete (1min de decallage demandé ici)
+        lors de l'actualisation, on recoit d'un coup les 4 données précédentes, donc a 21:00, on recoit 20:00, 20:15, 20:30 et 20:45
+        */
+
+        //on va chercher les $_nbRecordsAPI dernieres data.
         $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-tr&rows=' . $_nbRecordsAPI . '&sort=date_heure';
-        log::add('suiviCO2', 'debug', 'Appel CO2 URL ' . $url);
+        log::add('suiviCO2', 'debug', 'Appel API CO2, URL : ' . $url);
 
         $request_http = new com_http($url);
         $content = $request_http->exec(30);
 
         if ($content === false) {
-          log::add('suiviCO2', 'erreur', 'Erreur lors de l appel CO2 URL : ' . $url);
+          log::add('suiviCO2', 'erreur', 'Erreur lors de l appel API CO2, URL : ' . $url);
           return;
         }
 
@@ -114,19 +120,19 @@ class suiviCO2 extends eqLogic {
         foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
           if (isset($record['fields']['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
 
-            $record_time = $record['fields']['heure'];
+            $record_time = $record['fields']['heure']; // recu au format H:i
 
-            //on ne veux que les heures piles (échantillonnage sinon la fonction historisation de jeedom fait n importe quoi...)
+            //on ne veux que les heures piles (échantillonnage malheuresement sinon la fonction historisation de jeedom fait n importe quoi...)
             if(date('i', strtotime($record_time)) == "00"){ // on extrait le champ min et on verifie qu'il vaut 00
-              log::add('suiviCO2', 'debug', 'On a trouvé une heure pile, il est : ' . $record_time);
+          //    log::add('suiviCO2', 'debug', 'On a trouvé une heure pile, il est : ' . $record_time);
 
-              $record_date = $record['fields']['date'];
+              $record_date = $record['fields']['date']; // recu au format Y-m-d, ce qui demande Jeedom, donc c'est parfait
               $record_tauxco2 = $record['fields']['taux_co2'];
 
-              // pour pas traiter inutilement des milliers de datas par boucle on coupe quand on a atteint le quota defini en parametre
+              // pour pas traiter inutilement des milliers de datas par boucle on coupe quand on a atteint le quota defini en parametre, 4 par defaut
               $nbRecordsTraites++;
               if ($nbRecordsTraites > $_nbRecordsATraiterDB){
-                log::add('suiviCO2', 'debug', 'Quota de: ' . $_nbRecordsATraiterDB . ' atteint, on break la boucle');
+          //      log::add('suiviCO2', 'debug', 'Quota de: ' . $_nbRecordsATraiterDB . ' atteint, on break la boucle');
                 break;
               }
 
@@ -137,14 +143,14 @@ class suiviCO2 extends eqLogic {
                 $suiviCO2_id = $suiviCO2->getId();
                 if(!isset($_eqLogic_id) || $_eqLogic_id == $suiviCO2_id){
 
-                  log::add('suiviCO2', 'debug', 'Id de l équipement dans lequel on va enregistrer : ' . $suiviCO2_id);
+       //           log::add('suiviCO2', 'debug', 'Id de l équipement dans lequel on va enregistrer : ' . $suiviCO2_id);
 
                   // on enregistre les infos dans la DB history avec la date donnéee dans le json
                   //pas besoin de verifier que la valeur existe pas encore, la DB gere unicité paire datetime/cmd
                   $cmd = $suiviCO2->getCmd(null, 'co2kwhfromApi');
                   if (is_object($cmd)) {
                     $cmd->addHistoryValue($record_tauxco2, $record_date . ' ' . $record_time . ':00');
-                    log::add('suiviCO2', 'debug', $nbRecordsTraites . ' - Taux_Co2 : ' . $record_tauxco2 . ' à : ' . $record_date . ' ' . $record_time . ':00');
+                    log::add('suiviCO2', 'debug', 'eqLogic_id : ' . $suiviCO2_id . ' - Taux_Co2 : ' . $record_tauxco2 . ' à : ' . $record_date . ' ' . $record_time . ':00');
                   }
 
                 } //fin boucle verification on veut ecrire les datas pour cet equipement
@@ -157,7 +163,7 @@ class suiviCO2 extends eqLogic {
       public static function cronHourly() {
         $datetime = date('Y-m-d H:i:00');
 
-        log::add('suiviCO2', 'debug', '#################### CRON Hourly ###################');
+        log::add('suiviCO2', 'debug', '#################### CRON Hourly à ' . $datetime . ' ###################');
 
         //pour chaque equipement declaré par l'utilisateur
         foreach (self::byType('suiviCO2',true) as $suiviCO2) {
@@ -174,7 +180,7 @@ class suiviCO2 extends eqLogic {
         } // fin foreach equipement
 
         //appel de l'api et stock des données en base
-        sleep(60);//attend 1 min, si execution à l'heure pile on recoit pas les datas (due a la mise à jour de l'API ?)
+        sleep(60);//attend 1 min, si execution à l'heure pile on recoit pas les datas (due a la mise à jour de l'API)
         self::getAndRecordDataCo2();
 
       } //fin fonction cron
