@@ -19,6 +19,31 @@
 /* * ***************************Includes********************************* */
 require_once __DIR__  . '/../../../../core/php/core.inc.php';
 
+/***************NOTES***************
+
+        /*
+        date ( string $format [, int $timestamp = time() ] ) : string
+
+        Retourne une date sous forme d'une chaîne, au format donné par le paramètre format, fournie par le paramètre timestamp ou la date et l'heure courantes si aucun timestamp n'est fourni. En d'autres termes, le paramètre timestamp est optionnel et vaut par défaut la valeur de la fonction time().
+
+        strtotime ( string $time [, int $now = time() ] ) : int
+
+        La fonction strtotime() essaye de lire une date au format anglais fournie par le paramètre time, et de la transformer en timestamp Unix (le nombre de secondes depuis le 1er Janvier 1970 à 00:00:00 UTC), relativement au timestamp now, ou à la date courante si ce dernier est omis.
+
+        exemple :
+        $test2 = date('H:i', strtotime($record_time . ' -15 min')); // on prend le $record_time au format H:i, on le converti en timestamp, on lui applique -15min et on le reconverti en format H:i
+        log::add('suiviCO2', 'debug', 'Test dates : ' . $test2);
+
+        */
+
+/*          ce morceau de code va chercher tout l'historique de la commande et le loggue
+            $previous = $cmd->getHistory();
+            foreach ($previous as $value) {
+              log::add('suiviCO2', 'debug', ' previous : ' . $value->getValue());
+            }*/
+
+//*/
+
 class suiviCO2 extends eqLogic {
     /*     * *************************Attributs****************************** */
 
@@ -28,17 +53,12 @@ class suiviCO2 extends eqLogic {
 
     //*
     // * Fonction exécutée automatiquement toutes les minutes par Jeedom
- /*     public static function cron() {
-        //appel de l'api et stock des données en base
-        self::getAndRecordDataCo2();
+/*      public static function cron() {
+
+
       }
      //*/
 
-/*          ce morceau de code va chercher tout l'historique de la commande et le loggue
-            $previous = $cmd->getHistory();
-            foreach ($previous as $value) {
-              log::add('suiviCO2', 'debug', ' previous : ' . $value->getValue());
-            }*/
 
       public function calculConso($_type = 'HP', $suiviCO2){
 
@@ -73,10 +93,11 @@ class suiviCO2 extends eqLogic {
         //on va chercher les _nbRecordsAPI dernieres data. 96 données par jours,
         // on est obligé d'en demander bcp car les champs vide du lendemain voir surlendemain sont crées dans le json
         $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-tr&rows=' . $_nbRecordsAPI . '&sort=date_heure';
-      //  $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-tr&rows=100&sort=date_heure&refine.date=' . $date;
         log::add('suiviCO2', 'debug', 'Appel CO2 URL ' . $url);
+
         $request_http = new com_http($url);
         $content = $request_http->exec(30);
+
         if ($content === false) {
           log::add('suiviCO2', 'erreur', 'Erreur lors de l appel CO2 URL : ' . $url);
           return;
@@ -85,7 +106,7 @@ class suiviCO2 extends eqLogic {
         //on decode le retour de l'API pour en faire un tableau
         $json = json_decode($content, true);
 
-        //on va chercher dans le tableau les infos qui nous interessent et on les traite
+        //on va chercher dans le tableau les infos qui nous interessent (les 'records')
         $apirecords = $json['records'];
 
         $nbRecordsTraites = 0;
@@ -96,10 +117,8 @@ class suiviCO2 extends eqLogic {
             $record_time = $record['fields']['heure'];
 
             //on ne veux que les heures piles (échantillonnage sinon la fonction historisation de jeedom fait n importe quoi...)
-            //TODO - si on confirme que ca resoud le pb historisation, faire une jolie fonction test au lieu de cette horreur...
-            if($record_time == "00:00" || $record_time == "01:00" || $record_time == "02:00" || $record_time == "03:00" || $record_time == "04:00" || $record_time == "05:00" || $record_time == "06:00" || $record_time == "07:00" || $record_time == "08:00" || $record_time == "09:00" || $record_time == "10:00" || $record_time == "11:00" || $record_time == "12:00" || $record_time == "13:00" || $record_time == "14:00" || $record_time == "15:00" || $record_time == "16:00" || $record_time == "17:00" || $record_time == "18:00" || $record_time == "19:00" || $record_time == "20:00" || $record_time == "21:00" || $record_time == "22:00" || $record_time == "23:00"){
+            if(date('i', strtotime($record_time)) == "00"){ // on extrait le champ min et on verifie qu'il vaut 00
               log::add('suiviCO2', 'debug', 'On a trouvé une heure pile, il est : ' . $record_time);
-
 
               $record_date = $record['fields']['date'];
               $record_tauxco2 = $record['fields']['taux_co2'];
@@ -196,19 +215,21 @@ class suiviCO2 extends eqLogic {
 
       $cmd = $this->getCmd(null, 'consumptionHP');
       if (!is_object($cmd)) {
+        //ce qui est ici est declaré à la 1ere creation de l'objet seulement et donc peut etre changé par l'utilisateur par la suite
         $cmd = new suiviCO2Cmd();
         $cmd->setLogicalId('consumptionHP');
     //    $cmd->setTemplate('dashboard', 'tile');
+        $cmd->setIsVisible(0);
+        $cmd->setEqLogic_id($this->getId());
       }
+      //ici apres, jeedom va utiliser ces infos a chaque fois que l'equipement est sauvegardé, si l'utilisateur le change, ces valeurs là écraseront les choix utilisateurs.
       $cmd->setIsHistorized(1);
       $cmd->setConfiguration('historizeMode', 'max');
       $cmd->setConfiguration('historizeRound', 0);
       $cmd->setName(__('Consommation HP', __FILE__));
-      $cmd->setEqLogic_id($this->getId());
       $cmd->setType('info');
       $cmd->setSubType('numeric');
       $cmd->setUnite('Wh');
-      $cmd->setIsVisible(0);
       $cmd->save();
 
 
@@ -217,16 +238,16 @@ class suiviCO2 extends eqLogic {
         $cmd = new suiviCO2Cmd();
         $cmd->setLogicalId('consumptionHC');
   //      $cmd->setTemplate('dashboard', 'tile');
+        $cmd->setIsVisible(0);
+        $cmd->setEqLogic_id($this->getId());
       }
       $cmd->setIsHistorized(1);
       $cmd->setConfiguration('historizeMode', 'max');
       $cmd->setConfiguration('historizeRound', 0);
       $cmd->setName(__('Consommation HC', __FILE__));
-      $cmd->setEqLogic_id($this->getId());
       $cmd->setType('info');
       $cmd->setSubType('numeric');
       $cmd->setUnite('Wh');
-      $cmd->setIsVisible(1);
       $cmd->save();
 
 
@@ -234,6 +255,7 @@ class suiviCO2 extends eqLogic {
       if (!is_object($cmd)) {
         $cmd = new suiviCO2Cmd();
         $cmd->setLogicalId('co2kwhfromApi');
+        $cmd->setIsVisible(0);
     //    $cmd->setTemplate('dashboard', 'tile');
       }
       $cmd->setIsHistorized(1);
@@ -244,7 +266,6 @@ class suiviCO2 extends eqLogic {
       $cmd->setType('info');
       $cmd->setSubType('numeric');
       $cmd->setUnite('gCO2');
-      $cmd->setIsVisible(1);
       $cmd->save();
 
     }
