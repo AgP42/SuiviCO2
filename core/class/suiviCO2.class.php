@@ -322,26 +322,29 @@ class suiviCO2 extends eqLogic {
         }
 
         // pour chacune de ces conso on cherche si on a un timestamp identique avec une valeur CO2API, si oui on multiple, si non on vire la valeur de conso qu'on aura pas reussi a multiplier...
-        foreach ($return['consoCO2'] as $returnConsoCO2) {
+ /*       foreach ($return['consoCO2'] as $returnConsoCO2) {
           foreach ($return['CO2API'] as $co2API) {
 
-            if(isset($returnConsoCO2[$co2API[0]])){
-              $returnConsoCO2[$co2API[0]] = array($co2API[0], $returnConsoCO2[$co2API[0]][1] * $co2API[1]);
-
+            if($returnConsoCO2[0] == $co2API[0]){
+              log::add('suiviCO2', 'debug', 'On a un timestamp avec de la conso et du CO2 : ' . $co2API[0] . ' = ' . date('Y-m-d H:i:00', $co2API[0]/1000));
+              $returnConsoCO2 = array($co2API[0], $returnConsoCO2[1] * $co2API[1]);
+              log::add('suiviCO2', 'debug', 'apres calculs, on veut retourner : ' . $returnConsoCO2[1] . ' à ' . date('Y-m-d H:i:00', $returnConsoCO2[0]/1000));
             }
           }
               # code...
-        }
+        }*/
 
-
+        // pour chacune des valeur de l'API CO2 on cherche la conso associée pour la multiplier
         foreach ($return['CO2API'] as $co2API) {
 
           if(isset($return['consoCO2'][$co2API[0]])){
             $return['consoCO2'][$co2API[0]] = array($co2API[0], $return['consoCO2'][$co2API[0]][1] * $co2API[1]);
 
           }
-              # code...
+
         }
+
+        // TODO : virer les valeurs de conso enregistrées qui n'avaient pas de CO2 api associé
 
         if (isset($return['consoCO2'])) {
           sort($return['consoCO2']);
