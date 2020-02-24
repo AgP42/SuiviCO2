@@ -77,12 +77,12 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
 
       series.push({
         step: true,
-        name: 'gCO2',
+        name: '',
         data: data.result.datas.consoCO2,
         type: 'column',
         color: '#4572A7',
         stack : 1,
-  //      unite : 'gCO2',
+        unite : 'gCO2',
         stacking : 'normal',
         dataGrouping: {
             approximation: "sum",
@@ -91,7 +91,8 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
             units: [[groupBy,[1]]]
         },
         tooltip: {
-            valueDecimals: 2
+            valueDecimals: 2,
+            valueSuffix: ' gCO2'
         },
       });
 
@@ -103,12 +104,12 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
 
       series.push({
         step: true,
-        name: 'HP €',
+        name: 'HP : ',
         data: data.result.datas.cost.HP,
         type: 'column',
         color: '#4572A7',
         stack : 1,
-      //  unite : 'kWh',
+        unite : 'kWh',
         stacking : 'normal',
         dataGrouping: {
             approximation: "sum",
@@ -117,13 +118,14 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
             units: [[groupBy,[1]]]
         },
         tooltip: {
-            valueDecimals: 2
+            valueDecimals: 2,
+            valueSuffix: ' €'
         },
       });
 
       series.push({
         step: true,
-        name: 'HC €',
+        name: 'HC : ',
         data: data.result.datas.cost.HC,
         type: 'column',
         color: '#AA4643',
@@ -137,13 +139,14 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
             units: [[groupBy,[1]]]
         },
         tooltip: {
-            valueDecimals: 2
+            valueDecimals: 2,
+            valueSuffix: ' €'
         },
       });
 
       series.push({
         step: true,
-        name: 'Abo €',
+        name: 'Abo : ',
         data: data.result.datas.cost.Abo,
         type: 'column',
         color: '#000000',
@@ -157,7 +160,8 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
             units: [[groupBy,[1]]]
         },
         tooltip: {
-            valueDecimals: 2
+            valueDecimals: 2,
+            valueSuffix: ' €'
         },
       });
 
@@ -169,9 +173,9 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
 
       series.push({
         step: true,
-        name: 'gCO2',
+        name: '',
         data: data.result.datas.CO2API,
-        type: 'column',
+        type: 'spline',
         color: '#558000',
         stack : 1,
   //      unite : 'gCO2',
@@ -183,7 +187,8 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
             units: [[groupBy,[1]]]
         },
         tooltip: {
-            valueDecimals: 2
+            valueDecimals: 2,
+            valueSuffix: ' gCO2/kWh'
         },
       });
 
@@ -195,7 +200,7 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
 
       series.push({
         step: true,
-        name: 'kWh HP',
+        name: 'HP : ',
         data: data.result.datas.consoHP,
         type: 'column',
         color: '#4572A7',
@@ -209,13 +214,14 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
             units: [[groupBy,[1]]]
         },
         tooltip: {
-            valueDecimals: 2
+            valueDecimals: 2,
+            valueSuffix: ' kWh'
         },
       });
 
       series.push({
         step: true,
-        name: 'kWh HC',
+        name: 'HC : ',
         data: data.result.datas.consoHC,
         type: 'column',
         color: '#AA4643',
@@ -229,7 +235,8 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
             units: [[groupBy,[1]]]
         },
         tooltip: {
-            valueDecimals: 2
+            valueDecimals: 2,
+            valueSuffix: ' kWh'
         },
       });
 
@@ -323,14 +330,35 @@ function drawSimpleGraph(_el, _serie) {
       enabled: true
     },
     tooltip: {
-      pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b><br/>',
+      pointFormat: '<span style="color:{series.color}"></span>{series.name}<b>{point.y}</b><br/>',
       valueDecimals: 2,
     },
+    plotOptions: {
+            column: {
+                stacking: 'normal',
+                dataLabels: {
+                    enabled: false
+                }
+            }
+        },
     yAxis: {
       format: '{value}',
       showEmpty: false,
       showLastLabel: true,
       min: 0,
+      stackLabels: {
+        enabled: true,
+        formatter: function() {
+                return  Highcharts.numberFormat(this.total, 2, ',');
+            },
+        style: {
+          fontWeight: 'bold',
+          color: ( // theme
+            Highcharts.defaultOptions.title.style &&
+            Highcharts.defaultOptions.title.style.color
+            ) || 'gray'
+          }
+        },
       labels: {
         align: 'right',
         x: -5

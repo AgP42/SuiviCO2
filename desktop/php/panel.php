@@ -12,6 +12,27 @@ if (!is_object($object)) {
 if (!is_object($object)) {
   throw new Exception('{{Aucun objet racine trouvé}}');
 }
+if (is_object($object)) {
+  $_GET['object_id'] = $object->getId();
+}
+
+// on cherche le 1er equipement pour quand on arrive sur le panel
+
+$allObject = jeeObject::buildTree();
+foreach ($allObject as $object_li) {
+  if ($object_li->getIsVisible() == 1) {
+    foreach ($object_li->getEqLogic(true, false, 'suiviCO2') as $eqLogic) {
+      if ($eqLogic->getIsVisible() == 1) {
+        $_GET['eqLogic_id'] = $eqLogic->getId();
+      }
+    }
+  }
+}
+
+
+sendVarToJs('eqLogic_id', init('eqLogic_id'));
+
+
 
 $date = array(
   'start' => init('startDate', date('Y-m-d', strtotime('-1 month ' . date('Y-m-d')))),
@@ -41,11 +62,6 @@ if (init('groupBy', 'day') == 'year') { //TODO
   );
 } //*/
 
-if (is_object($object)) {
-  $_GET['object_id'] = $object->getId();
-}
-
-sendVarToJs('eqLogic_id', init('eqLogic_id'));
 ?>
 
 <div class="row row-overflow" id="div_suiviCO2">
