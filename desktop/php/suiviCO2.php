@@ -51,6 +51,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
     <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" data-action="returnToThumbnailDisplay"><i class="fa fa-arrow-circle-left"></i></a></li>
     <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Equipement}}</a></li>
     <li role="presentation"><a href="#commandtab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i> {{Commandes}}</a></li>
+    <li role="presentation"><a href="#historytab" aria-controls="history" role="tab" data-toggle="tab"><i class="fa fa-history"></i> {{Historique}}</a></li>
   </ul>
   <div class="tab-content" style="height:calc(100% - 50px);overflow:auto;overflow-x: hidden;">
     <div role="tabpanel" class="tab-pane active" id="eqlogictab">
@@ -136,18 +137,33 @@ $eqLogics = eqLogic::byType($plugin->getId());
         <br>
 
         <form class="form-horizontal">
-        <fieldset>
-          <legend><i class="fas fa-history"></i> {{Récupérer historique des données}}</legend>
+          <fieldset>
+            <legend><i class="fas fa-euro-sign"></i> {{Coût électricité}}</legend>
 
-          <div class="form-group">
-            <label class="col-sm-2 control-label">{{CO2 par kWh en France}}</label>
-            <div class="col-sm-4">
-              <a class="btn btn-success btn-sm" id="bt_historyCO2"><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
+            <div class="form-group">
+              <label class="col-sm-2 control-label">{{Abonnement (€ TTC / mois)}}</label>
+              <div class="col-sm-2">
+                <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="costAbo" />
+              </div>
             </div>
-          </div>
 
-          </fieldset>
-        </form>
+            <div class="form-group">
+              <label class="col-sm-2 control-label">{{Tarif HP (€ TTC / kWh)}}</label>
+              <div class="col-sm-2">
+                <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="costHP" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-2 control-label">{{Tarif HPC (€ TTC / mois)}}</label>
+              <div class="col-sm-2">
+                <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="costHC" />
+              </div>
+            </div>
+
+            </fieldset>
+          </form>
+
 
       </div>
 
@@ -163,6 +179,25 @@ $eqLogics = eqLogic::byType($plugin->getId());
             </tbody>
         </table>
       </div>
+
+      <div role="tabpanel" class="tab-pane" id="historytab">
+        <br>
+        <form class="form-horizontal">
+        <fieldset>
+          <legend><i class="fas fa-history"></i> {{Récupérer historique des données}}</legend>
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{CO2 par kWh en France}}</label>
+            <div class="col-sm-4">
+              <a class="btn btn-success btn-sm" id="bt_historyCO2"><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
+            </div>
+          </div>
+
+          </fieldset>
+        </form>
+
+      </div>
+
 
     </div>
 

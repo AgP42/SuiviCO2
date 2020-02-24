@@ -127,9 +127,17 @@ sendVarToJs('eqLogic_id', init('eqLogic_id'));
       </legend>
     </div>
 
-    <!-- moitier haute avec 1 graphs -->
-    <legend><i class="fas fa-bolt"></i>  {{Mes émissions gCO2}}</legend>
-    <div id="div_chartConsoCO2"></div>
+    <!-- moitier haute avec 2 graphs en ligne -->
+    <div class="row">
+      <div class="col-lg-6">
+        <legend><i class="fas fa-bolt"></i>  {{Mes émissions gCO2}}</legend>
+        <div id="div_chartConsoCO2"></div>
+      </div>
+      <div class="col-lg-6">
+        <legend><i class="fas fa-euro-sign"></i>  {{Mes coûts €}}</legend>
+        <div id="div_chartCost"></div>
+      </div>
+    </div>
 
     <!-- moitier basse avec 2 graphs en ligne -->
     <div class="row">

@@ -23,6 +23,7 @@ $('#bt_validChangeDateSuiviCO2').on('click', function () {
   $('#div_chartCO2parkWh').packery('destroy');
   $('#div_chartConsokWh').packery('destroy');
   $('#div_chartConsoCO2').packery('destroy');
+  $('#div_chartCost').packery('destroy');
   displayGraphsCO2(eqLogic_id, $('#in_startDate').value(), $('#in_endDate').value());
 
 //  $('#div_alert').showAlert({message: $('#in_startDate').value(), level: 'info'});
@@ -64,11 +65,83 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
       $('#div_chartConsoCO2').empty();
       $('#div_chartCO2parkWh').empty();
       $('#div_chartConsokWh').empty();
+      $('#div_chartCost').empty();
 
       // affiche les graphs
-      // appel la construction du graphe CO2 par kWh en France (en bas à gauche)
-   //   graphCO2(data.result.eqLogic.id);
+
       // pour le graph conso CO2
+      var series = []
+
+      series.push({
+        step: true,
+        name: 'gCO2',
+        data: data.result.datas.consoCO2,
+        type: 'column',
+        color: '#4572A7',
+        stack : 1,
+  //      unite : 'gCO2',
+        stacking : 'normal',
+        dataGrouping: {
+            approximation: "sum",
+            enabled: true,
+            forced: true,
+            units: [[groupBy,[1]]]
+        },
+        tooltip: {
+            valueDecimals: 2
+        },
+      });
+
+       drawSimpleGraph('div_chartConsoCO2', series, 'column');
+
+
+      // pour le graph cout
+      var series = []
+
+      series.push({
+        step: true,
+        name: 'kWh HP',
+        data: data.result.datas.cost,
+        type: 'column',
+        color: '#4572A7',
+        stack : 1,
+      //  unite : 'kWh',
+        stacking : 'normal',
+        dataGrouping: {
+            approximation: "sum",
+            enabled: true,
+            forced: true,
+            units: [[groupBy,[1]]]
+        },
+        tooltip: {
+            valueDecimals: 2
+        },
+      });
+
+  /*    series.push({
+        step: true,
+        name: 'kWh HC',
+        data: data.result.datas.consoHC,
+        type: 'column',
+        color: '#AA4643',
+        stack : 1,
+    //    unite : 'kWh',
+        stacking : 'normal',
+        dataGrouping: {
+            approximation: "sum",
+            enabled: true,
+            forced: true,
+            units: [[groupBy,[1]]]
+        },
+        tooltip: {
+            valueDecimals: 2
+        },
+      });*/
+
+      drawSimpleGraph('div_chartCost', series, 'column');
+
+
+      // pour le graph CO2 API
       var series = []
 
       series.push({
@@ -92,6 +165,7 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
       });
 
       drawSimpleGraph('div_chartCO2parkWh', series, 'column'); // données brut API
+
 
       // pour le graph conso kWh HP et HC
       var series = []
@@ -138,37 +212,13 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
 
       drawSimpleGraph('div_chartConsokWh', series, 'column');
 
-      // pour le graph conso CO2
-      var series = []
-
-      series.push({
-        step: true,
-        name: 'gCO2',
-        data: data.result.datas.consoCO2,
-        type: 'column',
-        color: '#4572A7',
-        stack : 1,
-  //      unite : 'gCO2',
-        stacking : 'normal',
-        dataGrouping: {
-            approximation: "sum",
-            enabled: true,
-            forced: true,
-            units: [[groupBy,[1]]]
-        },
-        tooltip: {
-            valueDecimals: 2
-        },
-      });
-
-      drawSimpleGraph('div_chartConsoCO2', series, 'column');
 
     } // fin success
   }); //fin appel ajax
 } //fin fct displayGraphsCO2
 
 // pour construire le graph CO2 par kWh en France
-function graphCO2(_eqLogic_id) {
+/*function graphCO2(_eqLogic_id) {
   jeedom.eqLogic.getCmd({
     id: _eqLogic_id,
     error: function (error) {
@@ -201,14 +251,14 @@ function graphCO2(_eqLogic_id) {
       }, 1000);
     }// fin success
   }); // fin jeedom.eqLogic.getCmd
-} // fin fct graphCO2
+} // fin fct graphCO2 */
 
 function drawSimpleGraph(_el, _serie) {
   new Highcharts.StockChart({
     chart: {
       zoomType: 'x',
       renderTo: _el,
-      height: 400,
+      height: 340,
       spacingTop: 0,
       spacingLeft: 0,
       spacingRight: 0,

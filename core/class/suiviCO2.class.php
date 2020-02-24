@@ -220,6 +220,11 @@ class suiviCO2 extends eqLogic {
         'cost' => array(),
       );
 
+      /*****************/
+      log::add('suiviCO2', 'debug', 'Config cout HP lue : ' . config::byKey('rateHp', 'suiviCO2') . ' - travaillée : ' . str_replace(',', '.', config::byKey('rateHp', 'suiviCO2')));
+  //    str_replace(',', '.', config::byKey('rateHp', 'suiviCO2'))
+      /*****************/
+
       /********************* Calculs pour conso HP ********************/
       // on recupere la cmd HP
       $cmdConsoHP = $this->getCmd(null, 'consumptionHP');
@@ -246,6 +251,7 @@ class suiviCO2 extends eqLogic {
       }
 
        /********************* Calculs pour conso HC ********************/
+       // TODO ne faire que si HC est defini
        // on recupere la cmd HC
        $cmdConsoHC = $this->getCmd(null, 'consumptionHC');
        if (!is_object($cmdConsoHC)) {
