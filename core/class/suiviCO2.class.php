@@ -251,6 +251,8 @@ class suiviCO2 extends eqLogic {
          $return['consoHP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000));
          $return['cost']['HP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000 * $costHP));
          $return['cost']['Abo'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($costAbo / 30.5 / 24)); //pour toutes les dates on balance le cout de l'abo a l'heure // TODO : ameliorer ce calcul tout pourri ! Il faudrait boucler dans toutes les heures entre startdate et enddate et ajouter une valeur selon le nombre de jours dans le mois...
+         $return['total']['consokWh'] += floatval($value / 1000);
+         $return['total']['cost'] += floatval($value / 1000 * $costHP); // TODO ajouter le cout de l'abo sans faire de doublon pour les heures qui ont du HP et du HC
         }
 
       }
@@ -285,6 +287,8 @@ class suiviCO2 extends eqLogic {
             $return['consoHC'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000));
             $return['cost']['HC'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000 * $costHC));
             $return['cost']['Abo'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($costAbo / 30.5 / 24));
+            $return['total']['consokWh'] += floatval($value / 1000);
+            $return['total']['cost'] += floatval($value / 1000 * $costHC);
           }
        }
 
@@ -371,7 +375,9 @@ class suiviCO2 extends eqLogic {
         foreach ($return['CO2API'] as $co2API) {
 
           if(isset($return['consoCO2'][$co2API[0]])){
-            $return['consoCO2'][$co2API[0]] = array($co2API[0], $return['consoCO2'][$co2API[0]][1] * $co2API[1]);
+            $value = $return['consoCO2'][$co2API[0]][1] * $co2API[1];
+            $return['consoCO2'][$co2API[0]] = array($co2API[0], $value);
+            $return['total']['co2'] += floatval($value / 1000);
 
           }
 
@@ -385,7 +391,11 @@ class suiviCO2 extends eqLogic {
         }
         /*******************/
 
-      return $return;
+        $return['total']['cost'] = round($return['total']['cost'], 2);
+        $return['total']['co2'] = round($return['total']['co2'], 2);
+        $return['total']['consokWh'] = round($return['total']['consokWh'], 2);
+
+        return $return;
     }
 
     public function consoco2($_startDate = null, $_endDate = null) {

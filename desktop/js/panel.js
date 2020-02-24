@@ -61,6 +61,9 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
       // recupere le nom de l'equipement pour l'affichage dans la barre en haut
       $('.objectName').empty().append(data.result.eqLogic.name);
 
+      $('#div_suiviCO2').setValues(data.result.datas, '.suiviCO2Attr'); // ??
+  //    $('#div_suiviCO2').setValues(data.result, '.suiviCO2Attr'); // ??
+
       // vide les div
       $('#div_chartConsoCO2').empty();
       $('#div_chartCO2parkWh').empty();

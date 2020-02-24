@@ -48,7 +48,7 @@ if (is_object($object)) {
 sendVarToJs('eqLogic_id', init('eqLogic_id'));
 ?>
 
-<div class="row row-overflow">
+<div class="row row-overflow" id="div_suiviCO2">
 
   <!-- Liste objet à gauche -->
   <div class="col-lg-2" id="sd_objectList" style="z-index:999">
@@ -119,9 +119,9 @@ sendVarToJs('eqLogic_id', init('eqLogic_id'));
 
           <!-- TODO -->
           <span class="pull-right">
-            <span class='label label-success' style="font-size: 0.9em;"><span class="energyAttr" data-l1key="total" data-l2key="co2"></span> CO2</span>
-            <span class='label label-primary' style="font-size: 0.9em;"><span class="energyAttr" data-l1key="total" data-l2key="consumption"></span> kWh</span>
-            <span class='label label-default' style="font-size: 0.9em;"><span class="energyAttr" data-l1key="total" data-l2key="cost"> </span> €</span>
+            <span class='label label-success' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="co2"></span> kg CO2</span>
+            <span class='label label-primary' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="consokWh"></span> kWh</span>
+            <span class='label label-default' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="cost"> </span> €</span>
           </span>
 
       </legend>
