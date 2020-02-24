@@ -51,7 +51,7 @@ try {
 
       $return = array(
         'eqLogic' => utils::o2a($eqLogic),
-        'consowh' => array_values($eqLogic->consowh($date['start'], $date['end']))//,
+        'datas' => $eqLogic->getGraphsDatasSuiviCO2($date['start'], $date['end'])//,
     //    'consoco2' => array_values($eqLogic->consoco2($date['start'], $date['end']))
       );
 

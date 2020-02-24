@@ -208,15 +208,23 @@ class suiviCO2 extends eqLogic {
             foreach ($previous as $value) {
               log::add('suiviCO2', 'debug', ' previous : ' . $value->getValue());*/
 
-    public function consowh($_startDate = null, $_endDate = null) {
+    public function getGraphsDatasSuiviCO2($_startDate = null, $_endDate = null) {
 
+
+      $return = array(
+        'consoHP' => array(),
+        'consoHC' => array(),
+        'consoCO2' => array(),
+        'total' => array('power' => 0, 'consumption' => 0, 'cost' => 0),
+        'cost' => array(),
+    );
+
+      /* Calculs pour conso HP*/
       // on recupere la cmd HP
       $cmdConsoHP = $this->getCmd(null, 'consumptionHP');
       if (!is_object($cmdConsoHP)) {
         return array();
       }
-
-      $return = array();
 
       // on boucle dans toutes les valeurs de l'historique de la cmd HP
       foreach ($cmdConsoHP->getHistory($_startDate, $_endDate) as $history) {
@@ -224,11 +232,40 @@ class suiviCO2 extends eqLogic {
         $valueDateTime = $history->getDatetime();
 
         // on retourne un tableau avec en index la datetime et en valeurs le couple timestamp, valeur
-        $return[$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($history->getValue() / 1000));
+        $return['consoHP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($history->getValue() / 1000));
 
         // on log tout ce petit bordel
      //   log::add('suiviCO2', 'debug', 'Fct consowh dans class.php, $valueDateTime : ' . $valueDateTime . ' - $return[$valueDateTime] : ' . $return[$valueDateTime][0] . ' - ' . $return[$valueDateTime][1]);
       }
+
+      if (isset($return['consoHP'])) {
+        sort($return['consoHP']);
+        $return['consoHP'] = array_values($return['consoHP']);
+      }
+
+       /* Calculs pour conso HC*/
+       // on recupere la cmd HC
+       $cmdConsoHC = $this->getCmd(null, 'consumptionHC');
+       if (!is_object($cmdConsoHC)) {
+         return array();
+       }
+
+       // on boucle dans toutes les valeurs de l'historique de la cmd HC
+       foreach ($cmdConsoHC->getHistory($_startDate, $_endDate) as $history) {
+
+         $valueDateTime = $history->getDatetime();
+
+         // on retourne un tableau avec en index la datetime et en valeurs le couple timestamp, valeur
+         $return['consoHC'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($history->getValue() / 1000));
+
+         // on log tout ce petit bordel
+      //   log::add('suiviCO2', 'debug', 'Fct consowh dans class.php, $valueDateTime : ' . $valueDateTime . ' - $return[$valueDateTime] : ' . $return[$valueDateTime][0] . ' - ' . $return[$valueDateTime][1]);
+       }
+
+       if (isset($return['consoHC'])) {
+         sort($return['consoHC']);
+         $return['consoHC'] = array_values($return['consoHC']);
+       }
 
       return $return;
     }

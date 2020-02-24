@@ -79,7 +79,26 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
       series.push({
         step: true,
         name: data.result.eqLogic.name,
-        data: data.result.consowh,
+        data: data.result.datas.consoHP,
+        type: 'column',
+        stack : 1,
+        unite : 'kWh',
+        stacking : 'normal',
+        dataGrouping: {
+            approximation: "sum",
+            enabled: true,
+            forced: true,
+            units: [[groupBy,[1]]]
+        },
+        tooltip: {
+            valueDecimals: 2
+        },
+      });
+
+      series.push({
+        step: true,
+        name: data.result.eqLogic.name,
+        data: data.result.datas.consoHC,
         type: 'column',
         stack : 1,
         unite : 'kWh',
