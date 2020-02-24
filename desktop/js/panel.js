@@ -57,7 +57,7 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
 
       //$('#div_alert').showAlert({message: data.result.eqLogic.id, level: 'info'});
 
-      // recupere le nom de l'equipement pour l'affichage en haut
+      // recupere le nom de l'equipement pour l'affichage dans la barre en haut
        $('.objectName').empty().append(data.result.eqLogic.name);
 
       // vide les div
@@ -69,18 +69,15 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
       // appel la construction du graphe CO2 par kWh (en haut à gauche)
       graphCO2(data.result.eqLogic.id);
 
-      // appel la construction du graphe conso Wh (en haut à droite)
-      graphConso(data.result.eqLogic.id);
-
-
+      // pour le graph conso kWh HP et HC
       var series = []
 
-      // calcul pour le graph en haut a droite "run time by day"
       series.push({
         step: true,
-        name: data.result.eqLogic.name,
+        name: 'HP',
         data: data.result.datas.consoHP,
         type: 'column',
+        color: '#4572A7',
         stack : 1,
         unite : 'kWh',
         stacking : 'normal',
@@ -97,9 +94,10 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
 
       series.push({
         step: true,
-        name: data.result.eqLogic.name,
+        name: 'HC',
         data: data.result.datas.consoHC,
         type: 'column',
+        color: '#AA4643',
         stack : 1,
         unite : 'kWh',
         stacking : 'normal',
@@ -114,7 +112,7 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
         },
       });
 
-      drawSimpleGraph('div_chartConsoCO2', series, 'column'); // c pas le bon div mais c pour tester les 2 en //
+      drawSimpleGraph('div_chartConsokWh', series, 'column');
 
     } // fin success
   }); //fin appel ajax
@@ -156,59 +154,12 @@ function graphCO2(_eqLogic_id) {
   }); // fin jeedom.eqLogic.getCmd
 } // fin fct graphCO2
 
-// pour construire le graph conso en haut a droite
-function graphConso(_eqLogic_id) {
-  jeedom.eqLogic.getCmd({
-    id: _eqLogic_id,
-    error: function (error) {
-      $('#div_alert').showAlert({message: error.message, level: 'danger'});
-    },
-    success: function (cmds) {
-      jeedom.history.chart['div_chartConsokWh'] = null;
-      for (var i  in cmds) {
-        if (cmds[i].logicalId == 'consumptionHP' || cmds[i].logicalId == 'consumptionHC') {
-          jeedom.history.drawChart({
-            cmd_id: cmds[i].id,
-            el: 'div_chartConsokWh',
-            dateStart: $('#in_startDate').value(),
-            dateEnd: $('#in_endDate').value(),
-            option: {
-              graphColor: '#' + Math.floor(Math.random()*16777215).toString(16),
-              derive : 0,
-              graphType : 'column',
-              graphZindex : 1
-            }
-          });
-        } //fin if courbe
-  /*      if (cmds[i].logicalId == 'consumptionHC') {
-          jeedom.history.drawChart({
-            cmd_id: cmds[i].id,
-            el: 'div_chartConsokWh',
-            dateStart: $('#in_startDate').value(),
-            dateEnd: $('#in_endDate').value(),
-            option: {
-              graphColor: '#' + Math.floor(Math.random()*16777215).toString(16),
-              derive : 0,
-              graphType : 'area',
-              graphZindex : 2
-            }
-          });
-        } //fin if courbe */
-      } // fin for cmds
-
-      setTimeout(function(){
-        jeedom.history.chart['div_chartConsokWh' + _eqLogic_id].chart.xAxis[0].setExtremes(jeedom.history.chart['div_chartConsokWh' + _eqLogic_id].chart.navigator.xAxis.min,jeedom.history.chart['div_chartConsokWh' + _eqLogic_id].chart.navigator.xAxis.max)
-      }, 1000);
-    }// fin success
-  }); // fin jeedom.eqLogic.getCmd
-} // fin fct graphConso
-
 function drawSimpleGraph(_el, _serie) {
   new Highcharts.StockChart({
     chart: {
       zoomType: 'x',
       renderTo: _el,
-      height: 180,
+      height: 400,
       spacingTop: 0,
       spacingLeft: 0,
       spacingRight: 0,
@@ -223,14 +174,6 @@ function drawSimpleGraph(_el, _serie) {
     },
     rangeSelector: {
       buttons: [{
-        type: 'minute',
-        count: 30,
-        text: '30m'
-      }, {
-        type: 'hour',
-        count: 1,
-        text: 'H'
-      }, {
         type: 'day',
         count: 1,
         text: 'J'
@@ -251,11 +194,11 @@ function drawSimpleGraph(_el, _serie) {
         count: 1,
         text: 'Tous'
       }],
-      selected: 6,
+      selected: 4,
       inputEnabled: false
     },
     legend: {
-      enabled: false
+      enabled: true
     },
     tooltip: {
       pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} {{kWh}}</b><br/>',
@@ -270,6 +213,16 @@ function drawSimpleGraph(_el, _serie) {
         align: 'right',
         x: -5
       }
+    },
+    xAxis: {
+        type: 'datetime',
+        dateTimeLabelFormats: {
+            hour: '%d-%m-%Y<br/>%H:%M',
+            day: '%a %d-%m-%Y',
+            week: '%d-%m-%Y',
+            month: '%m-%Y',
+            year: '%Y'
+        }
     },
     scrollbar: {
       barBackgroundColor: 'gray',

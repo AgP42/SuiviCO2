@@ -230,9 +230,12 @@ class suiviCO2 extends eqLogic {
       foreach ($cmdConsoHP->getHistory($_startDate, $_endDate) as $history) {
 
         $valueDateTime = $history->getDatetime();
+        $value = $history->getValue();
 
         // on retourne un tableau avec en index la datetime et en valeurs le couple timestamp, valeur
-        $return['consoHP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($history->getValue() / 1000));
+        if($value != 0){
+         $return['consoHP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000));
+        }
 
         // on log tout ce petit bordel
      //   log::add('suiviCO2', 'debug', 'Fct consowh dans class.php, $valueDateTime : ' . $valueDateTime . ' - $return[$valueDateTime] : ' . $return[$valueDateTime][0] . ' - ' . $return[$valueDateTime][1]);
@@ -254,9 +257,12 @@ class suiviCO2 extends eqLogic {
        foreach ($cmdConsoHC->getHistory($_startDate, $_endDate) as $history) {
 
          $valueDateTime = $history->getDatetime();
+         $value = $history->getValue();
 
          // on retourne un tableau avec en index la datetime et en valeurs le couple timestamp, valeur
-         $return['consoHC'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($history->getValue() / 1000));
+        if($value != 0){
+          $return['consoHC'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000));
+        }
 
          // on log tout ce petit bordel
       //   log::add('suiviCO2', 'debug', 'Fct consowh dans class.php, $valueDateTime : ' . $valueDateTime . ' - $return[$valueDateTime] : ' . $return[$valueDateTime][0] . ' - ' . $return[$valueDateTime][1]);
