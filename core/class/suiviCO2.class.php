@@ -231,7 +231,6 @@ class suiviCO2 extends eqLogic {
 
    //   log::add('suiviCO2', 'debug', 'Config Abo lue : ' . $costAbo . ' - HP : ' . $costHP . ' - HC : ' . $costHC);
 
-      /*****************/
 
       /********************* Calculs pour conso HP et cost HP ********************/
       // on recupere la cmd HP
@@ -246,7 +245,7 @@ class suiviCO2 extends eqLogic {
         $valueDateTime = $history->getDatetime();
         $value = $history->getValue();
 
-        // on retourne un tableau avec en index la datetime et en valeurs le couple timestamp, valeur
+        // on retourne plusieurs tableaux avec en index la datetime et en valeurs le couple timestamp, valeur
         if($value != 0){
          $return['consoHP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000));
          $return['cost']['HP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000 * $costHP));
