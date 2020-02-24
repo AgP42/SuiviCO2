@@ -216,16 +216,24 @@ class suiviCO2 extends eqLogic {
         'consoHC' => array(), // conso kWh HP
         'CO2API' => array(), // emissions CO2 par kWh en France
         'consoCO2' => array(), // conso CO2 de la maison : (HP+HC)*CO2API
-        'total' => array('power' => 0, 'consumption' => 0, 'cost' => 0),
-        'cost' => array(),
+        'total' => array('co2' => 0, 'consokWh' => 0, 'cost' => 0),
+        'cost' => array(
+            'HP' => array(),
+            'HC' => array(),
+            'Abo' => array(),
+        ),
       );
 
-      /*****************/
-      log::add('suiviCO2', 'debug', 'Config cout HP lue : ' . config::byKey('rateHp', 'suiviCO2') . ' - travaillée : ' . str_replace(',', '.', config::byKey('rateHp', 'suiviCO2')));
-  //    str_replace(',', '.', config::byKey('rateHp', 'suiviCO2'))
+      /******** Aller chercher et formater les infos de cout EDF *********/
+      $costAbo = str_replace(',', '.', $this->getConfiguration('costAbo')); // si on a une , au lieu d'un . on va la remplacer
+      $costHP = str_replace(',', '.', $this->getConfiguration('costHP'));
+      $costHC = str_replace(',', '.', $this->getConfiguration('costHC'));
+
+   //   log::add('suiviCO2', 'debug', 'Config Abo lue : ' . $costAbo . ' - HP : ' . $costHP . ' - HC : ' . $costHC);
+
       /*****************/
 
-      /********************* Calculs pour conso HP ********************/
+      /********************* Calculs pour conso HP et cost HP ********************/
       // on recupere la cmd HP
       $cmdConsoHP = $this->getCmd(null, 'consumptionHP');
       if (!is_object($cmdConsoHP)) {
@@ -241,6 +249,8 @@ class suiviCO2 extends eqLogic {
         // on retourne un tableau avec en index la datetime et en valeurs le couple timestamp, valeur
         if($value != 0){
          $return['consoHP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000));
+         $return['cost']['HP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000 * $costHP));
+         $return['cost']['Abo'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($costAbo / 30.5 / 24)); //pour toutes les dates on balance le cout de l'abo a l'heure // TODO : ameliorer ce calcul tout pourri ! Il faudrait boucler dans toutes les heures entre startdate et enddate et ajouter une valeur selon le nombre de jours dans le mois...
         }
 
       }
@@ -248,6 +258,11 @@ class suiviCO2 extends eqLogic {
       if (isset($return['consoHP'])) {
         sort($return['consoHP']);
         $return['consoHP'] = array_values($return['consoHP']);
+      }
+
+      if (isset($return['cost']['HP'])) {
+        sort($return['cost']['HP']);
+        $return['cost']['HP'] = array_values($return['cost']['HP']);
       }
 
        /********************* Calculs pour conso HC ********************/
@@ -268,12 +283,24 @@ class suiviCO2 extends eqLogic {
           // TODO checker cette histoire de UTC, ca decalle pas tout le bordel ?
           if($value != 0){
             $return['consoHC'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000));
+            $return['cost']['HC'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000 * $costHC));
+            $return['cost']['Abo'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($costAbo / 30.5 / 24));
           }
        }
 
        if (isset($return['consoHC'])) {
          sort($return['consoHC']);
          $return['consoHC'] = array_values($return['consoHC']);
+       }
+
+       if (isset($return['cost']['HC'])) {
+         sort($return['cost']['HC']);
+         $return['cost']['HC'] = array_values($return['cost']['HC']);
+       }
+
+       if (isset($return['cost']['Abo'])) {
+         sort($return['cost']['Abo']);
+         $return['cost']['Abo'] = array_values($return['cost']['Abo']);
        }
 
         /********************* Calculs pour les valeurs CO2 from API ********************/

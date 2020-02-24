@@ -100,8 +100,8 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
 
       series.push({
         step: true,
-        name: 'kWh HP',
-        data: data.result.datas.cost,
+        name: 'HP €',
+        data: data.result.datas.cost.HP,
         type: 'column',
         color: '#4572A7',
         stack : 1,
@@ -118,10 +118,10 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
         },
       });
 
-  /*    series.push({
+      series.push({
         step: true,
-        name: 'kWh HC',
-        data: data.result.datas.consoHC,
+        name: 'HC €',
+        data: data.result.datas.cost.HC,
         type: 'column',
         color: '#AA4643',
         stack : 1,
@@ -136,7 +136,27 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
         tooltip: {
             valueDecimals: 2
         },
-      });*/
+      });
+
+      series.push({
+        step: true,
+        name: 'Abo €',
+        data: data.result.datas.cost.Abo,
+        type: 'column',
+        color: '#000000',
+        stack : 1,
+    //    unite : 'kWh',
+        stacking : 'normal',
+        dataGrouping: {
+            approximation: "sum",
+            enabled: true,
+            forced: true,
+            units: [[groupBy,[1]]]
+        },
+        tooltip: {
+            valueDecimals: 2
+        },
+      });
 
       drawSimpleGraph('div_chartCost', series, 'column');
 
