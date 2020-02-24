@@ -20,19 +20,21 @@ $date = array(
 
 sendVarToJs('groupBy', init('groupBy', 'day'));
 
-/*if (init('groupBy', 'month') == 'day') {
+//TODO quand on passe par "month", changer les dates pour chopper tout le mois sinon ca fait des approximations
+
+/*if (init('groupBy', 'day') == 'day') {
   $date = array(
     'start' => init('startDate', date('Y-m-d', strtotime('-31 days ' . date('Y-m-d')))),
     'end' => init('endDate', date('Y-m-d')),
   );
 }
-if (init('groupBy', 'month') == 'month') {
+if (init('groupBy', 'day') == 'month') {
   $date = array(
     'start' => init('startDate', date('Y-m-d', strtotime('-1 year ' . date('Y-m-d')))),
     'end' => init('endDate', date('Y-m-d', strtotime('+1 days' . date('Y-m-d')))),
   );
 }
-if (init('groupBy', 'month') == 'year') { //TODO
+if (init('groupBy', 'day') == 'year') { //TODO
   $date = array(
     'start' => init('startDate', date('Y-m-d', strtotime('-1 year ' . date('Y-m-d')))),
     'end' => init('endDate', date('Y-m-d', strtotime('+1 days' . date('Y-m-d')))),

@@ -58,28 +58,52 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
       //$('#div_alert').showAlert({message: data.result.eqLogic.id, level: 'info'});
 
       // recupere le nom de l'equipement pour l'affichage dans la barre en haut
-       $('.objectName').empty().append(data.result.eqLogic.name);
+      $('.objectName').empty().append(data.result.eqLogic.name);
 
       // vide les div
+      $('#div_chartConsoCO2').empty();
       $('#div_chartCO2parkWh').empty();
       $('#div_chartConsokWh').empty();
-      $('#div_chartConsoCO2').empty();
 
       // affiche les graphs
-      // appel la construction du graphe CO2 par kWh (en haut à gauche)
-      graphCO2(data.result.eqLogic.id);
+      // appel la construction du graphe CO2 par kWh en France (en bas à gauche)
+   //   graphCO2(data.result.eqLogic.id);
+      // pour le graph conso CO2
+      var series = []
+
+      series.push({
+        step: true,
+        name: 'gCO2',
+        data: data.result.datas.CO2API,
+        type: 'column',
+        color: '#558000',
+        stack : 1,
+  //      unite : 'gCO2',
+        stacking : 'normal',
+        dataGrouping: {
+            approximation: "average",
+            enabled: true,
+            forced: true,
+            units: [[groupBy,[1]]]
+        },
+        tooltip: {
+            valueDecimals: 2
+        },
+      });
+
+      drawSimpleGraph('div_chartCO2parkWh', series, 'column'); // données brut API
 
       // pour le graph conso kWh HP et HC
       var series = []
 
       series.push({
         step: true,
-        name: 'HP',
+        name: 'kWh HP',
         data: data.result.datas.consoHP,
         type: 'column',
         color: '#4572A7',
         stack : 1,
-        unite : 'kWh',
+      //  unite : 'kWh',
         stacking : 'normal',
         dataGrouping: {
             approximation: "sum",
@@ -94,12 +118,12 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
 
       series.push({
         step: true,
-        name: 'HC',
+        name: 'kWh HC',
         data: data.result.datas.consoHC,
         type: 'column',
         color: '#AA4643',
         stack : 1,
-        unite : 'kWh',
+    //    unite : 'kWh',
         stacking : 'normal',
         dataGrouping: {
             approximation: "sum",
@@ -113,6 +137,31 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
       });
 
       drawSimpleGraph('div_chartConsokWh', series, 'column');
+
+      // pour le graph conso CO2
+      var series = []
+
+      series.push({
+        step: true,
+        name: 'gCO2',
+        data: data.result.datas.consoCO2,
+        type: 'column',
+        color: '#4572A7',
+        stack : 1,
+  //      unite : 'gCO2',
+        stacking : 'normal',
+        dataGrouping: {
+            approximation: "sum",
+            enabled: true,
+            forced: true,
+            units: [[groupBy,[1]]]
+        },
+        tooltip: {
+            valueDecimals: 2
+        },
+      });
+
+      drawSimpleGraph('div_chartConsoCO2', series, 'column');
 
     } // fin success
   }); //fin appel ajax
@@ -201,7 +250,7 @@ function drawSimpleGraph(_el, _serie) {
       enabled: true
     },
     tooltip: {
-      pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} {{kWh}}</b><br/>',
+      pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b><br/>',
       valueDecimals: 2,
     },
     yAxis: {

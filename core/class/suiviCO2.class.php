@@ -212,14 +212,15 @@ class suiviCO2 extends eqLogic {
 
 
       $return = array(
-        'consoHP' => array(),
-        'consoHC' => array(),
-        'consoCO2' => array(),
+        'consoHP' => array(), // conso kWh HP
+        'consoHC' => array(), // conso kWh HP
+        'CO2API' => array(), // emissions CO2 par kWh en France
+        'consoCO2' => array(), // conso CO2 de la maison : (HP+HC)*CO2API
         'total' => array('power' => 0, 'consumption' => 0, 'cost' => 0),
         'cost' => array(),
-    );
+      );
 
-      /* Calculs pour conso HP*/
+      /********************* Calculs pour conso HP ********************/
       // on recupere la cmd HP
       $cmdConsoHP = $this->getCmd(null, 'consumptionHP');
       if (!is_object($cmdConsoHP)) {
@@ -237,8 +238,6 @@ class suiviCO2 extends eqLogic {
          $return['consoHP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000));
         }
 
-        // on log tout ce petit bordel
-     //   log::add('suiviCO2', 'debug', 'Fct consowh dans class.php, $valueDateTime : ' . $valueDateTime . ' - $return[$valueDateTime] : ' . $return[$valueDateTime][0] . ' - ' . $return[$valueDateTime][1]);
       }
 
       if (isset($return['consoHP'])) {
@@ -246,7 +245,7 @@ class suiviCO2 extends eqLogic {
         $return['consoHP'] = array_values($return['consoHP']);
       }
 
-       /* Calculs pour conso HC*/
+       /********************* Calculs pour conso HC ********************/
        // on recupere la cmd HC
        $cmdConsoHC = $this->getCmd(null, 'consumptionHC');
        if (!is_object($cmdConsoHC)) {
@@ -256,22 +255,99 @@ class suiviCO2 extends eqLogic {
        // on boucle dans toutes les valeurs de l'historique de la cmd HC
        foreach ($cmdConsoHC->getHistory($_startDate, $_endDate) as $history) {
 
-         $valueDateTime = $history->getDatetime();
-         $value = $history->getValue();
+          $valueDateTime = $history->getDatetime();
+          $value = $history->getValue();
 
-         // on retourne un tableau avec en index la datetime et en valeurs le couple timestamp, valeur
-        if($value != 0){
-          $return['consoHC'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000));
-        }
-
-         // on log tout ce petit bordel
-      //   log::add('suiviCO2', 'debug', 'Fct consowh dans class.php, $valueDateTime : ' . $valueDateTime . ' - $return[$valueDateTime] : ' . $return[$valueDateTime][0] . ' - ' . $return[$valueDateTime][1]);
+          // on retourne un tableau avec en index la datetime et en valeurs le couple timestamp, valeur
+          // TODO checker cette histoire de UTC, ca decalle pas tout le bordel ?
+          if($value != 0){
+            $return['consoHC'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000));
+          }
        }
 
        if (isset($return['consoHC'])) {
          sort($return['consoHC']);
          $return['consoHC'] = array_values($return['consoHC']);
        }
+
+        /********************* Calculs pour les valeurs CO2 from API ********************/
+        // on recupere la cmd
+        $cmdCO2API = $this->getCmd(null, 'co2kwhfromApi');
+        if (!is_object($cmdCO2API)) {
+          return array();
+        }
+
+        // on boucle dans toutes les valeurs de l'historique de la cmd
+        foreach ($cmdCO2API->getHistory($_startDate, $_endDate) as $history) {
+
+          $valueDateTime = $history->getDatetime();
+          $value = $history->getValue();
+
+          // on retourne un tableau avec en index la datetime et en valeurs le couple timestamp, valeur
+         if($value != 0){
+           $return['CO2API'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value));
+         }
+
+          // on log tout ce petit bordel
+       //   log::add('suiviCO2', 'debug', 'Fct consowh dans class.php, $valueDateTime : ' . $valueDateTime . ' - $return[$valueDateTime] : ' . $return[$valueDateTime][0] . ' - ' . $return[$valueDateTime][1]);
+        }
+
+        if (isset($return['CO2API'])) {
+          sort($return['CO2API']);
+          $return['CO2API'] = array_values($return['CO2API']);
+        }
+
+        /********************* Calculs pour la conso CO2 selon conso HP et HC ********************/
+
+  /*    $return['CO2API']
+        $return['consoHP']
+        $return['consoHC']
+*/
+        // on va commencer par additionner nos datas HP et HC
+
+        // on stocke toutes les datas HP dans un nouveau tableau formaté pour le return
+        foreach ($return['consoHP'] as $consoHP) {
+          $return['consoCO2'][$consoHP[0]] = $consoHP;
+        }
+
+        // on ajoute toutes les datas HC
+        foreach ($return['consoHC'] as $consoHC) {
+
+          if(!isset($return['consoCO2'][$consoHC[0]])){
+            $return['consoCO2'][$consoHC[0]] = $consoHC;
+          } else { // on a deja une valeur, donc il y a a cette date des valeurs HC et HP, on additionne HC avec la valeur deja existante (HP donc)
+            $return['consoCO2'][$consoHC[0]] = array($consoHC[0], $return['consoCO2'][$consoHC[0]][1] + $consoHC[1]);
+      //      log::add('suiviCO2', 'debug', 'On a un timestamp avec des data HP et HC : ' . $consoHC[0] . ' = ' . date('Y-m-d H:i:00', $consoHC[0]/1000));
+          }
+        }
+
+        // pour chacune de ces conso on cherche si on a un timestamp identique avec une valeur CO2API, si oui on multiple, si non on vire la valeur de conso qu'on aura pas reussi a multiplier...
+        foreach ($return['consoCO2'] as $returnConsoCO2) {
+          foreach ($return['CO2API'] as $co2API) {
+
+            if(isset($returnConsoCO2[$co2API[0]])){
+              $returnConsoCO2[$co2API[0]] = array($co2API[0], $returnConsoCO2[$co2API[0]][1] * $co2API[1]);
+
+            }
+          }
+              # code...
+        }
+
+
+        foreach ($return['CO2API'] as $co2API) {
+
+          if(isset($return['consoCO2'][$co2API[0]])){
+            $return['consoCO2'][$co2API[0]] = array($co2API[0], $return['consoCO2'][$co2API[0]][1] * $co2API[1]);
+
+          }
+              # code...
+        }
+
+        if (isset($return['consoCO2'])) {
+          sort($return['consoCO2']);
+          $return['consoCO2'] = array_values($return['consoCO2']);
+        }
+        /*******************/
 
       return $return;
     }
