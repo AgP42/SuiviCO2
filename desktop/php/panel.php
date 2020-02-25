@@ -24,7 +24,7 @@ if (init('eqLogic_id') == '') { // on cherche le 1er equipement a afficher quand
   foreach ($allObject as $object_li) {
     if ($object_li->getIsVisible() == 1) {
       foreach ($object_li->getEqLogic(true, false, 'suiviCO2') as $eqLogic) {
-        if ($eqLogic->getIsVisible() == 1) {
+        if ($eqLogic->getIsEnable() == 1) {
           $eqLogic_id = $eqLogic->getId();
           break 2; // sort des 2 boucles foreach des qu'on a trouvé notre 1er equipement
         }
