@@ -32,12 +32,13 @@ if (init('eqLogic_id') == '') { // on cherche le 1er equipement a afficher quand
     }
   }
 
-  sendVarToJs('eqLogic_id', $eqLogic_id); // demande au JS d'afficher le panel pour cet equipement
-
 } else { //si on a &eqLogic_id dans l'URL
 
-  sendVarToJs('eqLogic_id', init('eqLogic_id')); // c'est cette ligne qui permet de lire le &eqLogic_id de l'URL et donc de changer d'equipement a afficher
+  $eqLogic_id = init('eqLogic_id');
+
 }
+
+sendVarToJs('eqLogic_id', $eqLogic_id); // sert à quoi exactement ?
 
 // initialise les dates du datepicker quand on arrive sur la page : debut 1 mois avant now et fin demain
 $date = array(
@@ -136,24 +137,24 @@ if (init('groupBy', 'day') == 'year') { // quand on selectionne "year", on prend
               <!-- TODO a gerer en JS plutot d'en lien, pour pas tout recharger et perdre les dates demandées par l'user...-->
               <?php
               if (init('groupBy', 'day') == 'hour') {
-                echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=hour&eqLogic_id=' . $eqLogic->getId() . '">{{Heure}}</a> ';
+                echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=hour&eqLogic_id=' . $eqLogic_id . '">{{Heure}}</a> ';
               } else {
-                echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=hour&eqLogic_id=' . $eqLogic->getId() . '">{{Heure}}</a> ';
+                echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=hour&eqLogic_id=' . $eqLogic_id . '">{{Heure}}</a> ';
               }
               if (init('groupBy', 'day') == 'day') {
-                echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=day&eqLogic_id=' . $eqLogic->getId() . '">{{Jour}}</a> ';
+                echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=day&eqLogic_id=' . $eqLogic_id . '">{{Jour}}</a> ';
               } else {
-                echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=day&eqLogic_id=' . $eqLogic->getId() . '">{{Jour}}</a> ';
+                echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=day&eqLogic_id=' . $eqLogic_id . '">{{Jour}}</a> ';
               }
               if (init('groupBy', 'day') == 'month') {
-                echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=month&eqLogic_id=' . $eqLogic->getId() . '">{{Mois}}</a> ';
+                echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=month&eqLogic_id=' . $eqLogic_id . '">{{Mois}}</a> ';
               } else {
-                echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=month&eqLogic_id=' . $eqLogic->getId() . '">{{Mois}}</a> ';
+                echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=month&eqLogic_id=' . $eqLogic_id . '">{{Mois}}</a> ';
               }
               if (init('groupBy', 'day') == 'year') {
-                echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=year&eqLogic_id=' . $eqLogic->getId() . '">{{Année}}</a> ';
+                echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=year&eqLogic_id=' . $eqLogic_id . '">{{Année}}</a> ';
               } else {
-                echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=year&eqLogic_id=' . $eqLogic->getId() . '">{{Année}}</a> ';
+                echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=year&eqLogic_id=' . $eqLogic_id . '">{{Année}}</a> ';
               }
               ?>
             </div>
