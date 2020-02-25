@@ -61,102 +61,6 @@ class suiviCO2 extends eqLogic {
       }
      //*/
 
-//////////////////////////////// A VIRER APRES LE TEST ///////////////////////////////////////////////////////
-      public function TestHistorisation($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 4, $_eqLogic_id = NULL){
-
-        //on va chercher les $_nbRecordsAPI dernieres data.
-        $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-tr&rows=' . $_nbRecordsAPI . '&sort=date_heure';
-        log::add('suiviCO2', 'debug', 'Test HISTORISATION Appel API CO2, URL : ' . $url);
-
-        $request_http = new com_http($url);
-        $content = $request_http->exec(30);
-
-        if ($content === false) {
-          log::add('suiviCO2', 'erreur', 'Erreur lors de l appel API CO2, URL : ' . $url);
-          return;
-        }
-
-        //on decode le retour de l'API pour en faire un tableau
-        $json = json_decode($content, true);
-
-        //on va chercher dans le tableau les infos qui nous interessent (les 'records')
-        $apirecords = $json['records'];
-
-        $nbRecordsTraites = 0;
-
-        foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
-          if (isset($record['fields']['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
-
-            $record_date = $record['fields']['date']; // recu au format Y-m-d, ce qui demande Jeedom, donc c'est parfait
-            $record_time = $record['fields']['heure']; // recu au format H:i
-            $record_tauxco2 = $record['fields']['taux_co2'];
-
-            /************ Mise à jour de la derniere valeur dispo ************/
-
-            // on cherche la valeur de l'heure courante -15min (parce que c'est la derniere dispo via l'API...)
-            $datetimecherchee = date('Y-m-d H:i', strtotime('-15 min ' . date('Y-m-d H:00')));
-            $datetimerecord = $record_date . ' ' . $record_time;
-      //      log::add('suiviCO2', 'debug', 'datetimecherchee : ' . $datetimecherchee . 'datetimerecord : ' . $datetimerecord);
-
-            if($datetimecherchee == $datetimerecord){
-
-      //        log::add('suiviCO2', 'debug', 'Trouvee, on la garde : ' . $record_tauxco2);
-
-
-              //pour chaque equipement declaré par l'utilisateur, on met a jour la cmd
-              foreach (self::byType('suiviCO2',true) as $suiviCO2) {
-
-              // on regarde si on a limité à un equipement ou s'il faut tous les traiter (selon que cette fct est appelée par le cron ou par la commande d'historisation)
-              $suiviCO2_id = $suiviCO2->getId();
-              if(!isset($_eqLogic_id) || $_eqLogic_id == $suiviCO2_id){
-
-                  $cmd = $suiviCO2->getCmd(null, 'TestHistorisation');
-                  if (is_object($cmd)) {
-                    $cmd->setCollectDate($datetime);
-                    $cmd->event($record_tauxco2);
-                    log::add('suiviCO2', 'debug', 'co2kwhfromApi_lastvalue : ' . $record_tauxco2);
-                  }
-                }
-              }
-            }//*/
-
-            /************ Enregistrement des datas heures fixe en base de donnee ************/
-            //on ne veux enregistrer que les heures piles (échantillonnage malheuresement sinon la fonction historisation de jeedom fait n importe quoi...)
-    //        if(date('i', strtotime($record_time)) == "00"){ // on extrait le champ min et on verifie qu'il vaut 00
-          //    log::add('suiviCO2', 'debug', 'On a trouvé une heure pile, il est : ' . $record_time);
-
-              // pour pas traiter inutilement des milliers de datas par boucle on coupe quand on a atteint le quota defini en parametre, 4 par defaut
-              $nbRecordsTraites++;
-              if ($nbRecordsTraites > $_nbRecordsATraiterDB){
-          //      log::add('suiviCO2', 'debug', 'Quota de: ' . $_nbRecordsATraiterDB . ' atteint, on break la boucle');
-                break;
-              }
-
-              //pour chaque equipement declaré par l'utilisateur
-              foreach (self::byType('suiviCO2',true) as $suiviCO2) {
-
-                // on regarde si on a limité à un equipement ou s'il faut tous les traiter (selon que cette fct est appelée par le cron ou par la commande d'historisation)
-                $suiviCO2_id = $suiviCO2->getId();
-                if(!isset($_eqLogic_id) || $_eqLogic_id == $suiviCO2_id){
-
-       //           log::add('suiviCO2', 'debug', 'Id de l équipement dans lequel on va enregistrer : ' . $suiviCO2_id);
-
-                  // on enregistre les infos dans la DB history avec la date donnéee dans le json
-                  //pas besoin de verifier que la valeur existe pas encore, la DB gere unicité paire datetime/cmd
-                  $cmd = $suiviCO2->getCmd(null, 'TestHistorisation');
-                  if (is_object($cmd)) {
-                    $cmd->addHistoryValue($record_tauxco2, $record_date . ' ' . $record_time . ':00');
-                    log::add('suiviCO2', 'debug', 'eqLogic_id : ' . $suiviCO2_id . ' - Taux_Co2 : ' . $record_tauxco2 . ' à : ' . $record_date . ' ' . $record_time . ':00');
-                  }
-
-                } //fin boucle verification on veut ecrire les datas pour cet equipement
-              } // fin foreach equipement
-    //        } // fin on a trouvé une heure entiere
-          } // fin if on est dans un noeud avec un taux co2
-        } //fin boucle dans toutes les datas recuperées
-      } //fin fonction
-/////////////////////////////////////////////////////////////////////////////////////////
-
 
       public function calculConso($_type = 'HP', $suiviCO2){
 
@@ -186,7 +90,7 @@ class suiviCO2 extends eqLogic {
 
       }
 
-      public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 4, $_eqLogic_id = NULL){
+      public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 10, $_eqLogic_id = NULL){
 
         /* *************** Infos sur l'API opendata.reseaux-energies.fr
         96 données par jours
@@ -235,21 +139,22 @@ class suiviCO2 extends eqLogic {
 
               //pour chaque equipement declaré par l'utilisateur, on met a jour la cmd
               foreach (self::byType('suiviCO2',true) as $suiviCO2) {
-                $cmd = $suiviCO2->getCmd(null, 'co2kwhfromApi_lastvalue');
+                $cmd = $suiviCO2->getCmd(null, 'co2kwhfromApi');
                 if (is_object($cmd)) {
                   $cmd->setCollectDate($datetime);
                   $cmd->event($record_tauxco2);
-                  log::add('suiviCO2', 'debug', 'co2kwhfromApi_lastvalue : ' . $record_tauxco2);
+                  log::add('suiviCO2', 'debug', 'co2kwhfromApi : ' . $record_tauxco2);
                 }
               }
             }//*/
 
             /************ Enregistrement des datas heures fixe en base de donnee ************/
+
             //on ne veux enregistrer que les heures piles (échantillonnage malheuresement sinon la fonction historisation de jeedom fait n importe quoi...)
-            if(date('i', strtotime($record_time)) == "00"){ // on extrait le champ min et on verifie qu'il vaut 00
+     //       if(date('i', strtotime($record_time)) == "00"){ // on extrait le champ min et on verifie qu'il vaut 00
           //    log::add('suiviCO2', 'debug', 'On a trouvé une heure pile, il est : ' . $record_time);
 
-              // pour pas traiter inutilement des milliers de datas par boucle on coupe quand on a atteint le quota defini en parametre, 4 par defaut
+              // pour pas traiter inutilement, on coupe apres x valeur API avec un taux_co2 traitées
               $nbRecordsTraites++;
               if ($nbRecordsTraites > $_nbRecordsATraiterDB){
           //      log::add('suiviCO2', 'debug', 'Quota de: ' . $_nbRecordsATraiterDB . ' atteint, on break la boucle');
@@ -266,7 +171,7 @@ class suiviCO2 extends eqLogic {
        //           log::add('suiviCO2', 'debug', 'Id de l équipement dans lequel on va enregistrer : ' . $suiviCO2_id);
 
                   // on enregistre les infos dans la DB history avec la date donnéee dans le json
-                  //pas besoin de verifier que la valeur existe pas encore, la DB gere unicité paire datetime/cmd
+                  // pas besoin de verifier que la valeur existe pas encore, la DB gere unicité paire datetime/cmd
                   $cmd = $suiviCO2->getCmd(null, 'co2kwhfromApi');
                   if (is_object($cmd)) {
                     $cmd->addHistoryValue($record_tauxco2, $record_date . ' ' . $record_time . ':00');
@@ -275,12 +180,12 @@ class suiviCO2 extends eqLogic {
 
                 } //fin boucle verification on veut ecrire les datas pour cet equipement
               } // fin foreach equipement
-            } // fin on a trouvé une heure entiere
+         //   } // fin on a trouvé une heure entiere
           } // fin if on est dans un noeud avec un taux co2
         } //fin boucle dans toutes les datas recuperées
       } //fin fonction
 
-      public static function cronHourly() {
+      public static function cron15() {
         $datetime = date('Y-m-d H:i:00');
 
         log::add('suiviCO2', 'debug', '#################### CRON Hourly à ' . $datetime . ' ###################');
@@ -576,19 +481,18 @@ class suiviCO2 extends eqLogic {
       $cmd->setUnite('Wh');
       $cmd->save();
 
-//TODO regrouper les 2 cmd suivantes ! Implique de changer tout le code de la fct pour enregistrer les valeur API...
-      // cmd qui va historiser les valeurs de l'API aux heures fixes
+      // cmd qui va historiser les valeurs de l'API
       $cmd = $this->getCmd(null, 'co2kwhfromApi');
       if (!is_object($cmd)) {
         $cmd = new suiviCO2Cmd();
         $cmd->setLogicalId('co2kwhfromApi');
     //    $cmd->setTemplate('dashboard', 'tile');
+        $cmd->setIsVisible(1);
       }
-      $cmd->setIsVisible(0); // sert a rien de la rendre visible, on balance direct dans l'historique, donc restera toujours a 0 pour le dashboard
       $cmd->setIsHistorized(1);
-      $cmd->setConfiguration('historizeMode', 'max'); //max, avg, none ?
-      $cmd->setConfiguration('historizeRound', 0);
-      $cmd->setName(__('CO2/kWh heure pleine', __FILE__));
+      $cmd->setConfiguration('historizeMode', 'avg'); //max, min, avg, none. a 16:00 il min, max ou avg sur toutes les valeurs de 16:xx. None : il supprime juste les doublons aux dates successives
+      $cmd->setConfiguration('historizeRound', 2);
+      $cmd->setName(__('gCO2/kWh produit - Fr', __FILE__));
       $cmd->setEqLogic_id($this->getId());
       $cmd->setType('info');
       $cmd->setSubType('numeric');
@@ -596,7 +500,7 @@ class suiviCO2 extends eqLogic {
       $cmd->save();
 
       // cmd qui va permettre d'afficher et de rendre dispo la derniere valeur de CO2/kWh. A chaque heure fixe on prendra la derniere valeur dispo, donc xx:45 (l'API ne s'actualise que toutes les heures)
-      $cmd = $this->getCmd(null, 'co2kwhfromApi_lastvalue');
+  /*    $cmd = $this->getCmd(null, 'co2kwhfromApi_lastvalue');
       if (!is_object($cmd)) {
         $cmd = new suiviCO2Cmd();
         $cmd->setLogicalId('co2kwhfromApi_lastvalue');
@@ -609,28 +513,7 @@ class suiviCO2 extends eqLogic {
       $cmd->setType('info');
       $cmd->setSubType('numeric');
       $cmd->setUnite('gCO2');
-      $cmd->save();
-
-      ///////**a virer apres le test historization**/////////////
-
-
-          $cmd = $this->getCmd(null, 'TestHistorisation');
-          if (!is_object($cmd)) {
-            $cmd = new suiviCO2Cmd();
-            $cmd->setLogicalId('TestHistorisation');
-      //      $cmd->setTemplate('dashboard', 'tile');
-            $cmd->setIsVisible(1);
-            $cmd->setEqLogic_id($this->getId());
-          }
-          $cmd->setIsHistorized(1);
-     //     $cmd->setConfiguration('historizeMode', 'max');
-     //     $cmd->setConfiguration('historizeRound', 0);
-          $cmd->setName(__('Test historisation', __FILE__));
-          $cmd->setType('info');
-          $cmd->setSubType('numeric');
-          $cmd->setUnite('gCO2');
-          $cmd->save();
-      /////////////////////////////////////////////////////////////
+      $cmd->save();//*/
 
     }
 

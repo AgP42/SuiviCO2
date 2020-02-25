@@ -71,8 +71,7 @@ try {
 
       log::add('suiviCO2', 'debug', 'Recu dans ajax : ' . $_nbRecordsAPI . ' - ' . $_nbRecordsATraiterDB);
 
-//      $eqLogic->getAndRecordDataCo2($_nbRecordsAPI, $_nbRecordsATraiterDB, init('id')); /////////////TEST HISTORISATION
-      $eqLogic->TestHistorisation($_nbRecordsAPI, $_nbRecordsATraiterDB, init('id'));
+      $eqLogic->getAndRecordDataCo2($_nbRecordsAPI, $_nbRecordsATraiterDB, init('id')); /////////////TEST HISTORISATION
 
       ajax::success($return);
     }

@@ -37,8 +37,8 @@ $('#bt_historyCO2').on('click', function () {
                 data: {
                     action: 'getAPICO2Data',
                     id: $('.eqLogicAttr[data-l1key=id]').value(),
-                    nbRecordsAPI: 600,
-                    nbRecordsATraiterDB: 600, // TEST HISTORISATION limité a 600
+                    nbRecordsAPI: 6000,
+                    nbRecordsATraiterDB: 6000, // TEST HISTORISATION limité a 600
                 },
                 dataType: 'json',
                 error: function (request, status, error) {
