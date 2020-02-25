@@ -2,6 +2,7 @@
 if (!isConnect()) {
   throw new Exception('{{401 - Accès non autorisé}}');
 }
+
 if (init('object_id') == '') {
   $_GET['object_id'] = $_SESSION['user']->getOptions('defaultDashboardObject');
 }
@@ -16,30 +17,37 @@ if (is_object($object)) {
   $_GET['object_id'] = $object->getId();
 }
 
-// on cherche le 1er equipement pour quand on arrive sur le panel
 
-$allObject = jeeObject::buildTree();
-foreach ($allObject as $object_li) {
-  if ($object_li->getIsVisible() == 1) {
-    foreach ($object_li->getEqLogic(true, false, 'suiviCO2') as $eqLogic) {
-      if ($eqLogic->getIsVisible() == 1) {
-        $_GET['eqLogic_id'] = $eqLogic->getId();
+if (init('eqLogic_id') == '') { // on cherche le 1er equipement a afficher quand on arrive sur le panel, quand &eqLogic_id n'est pas dans l'URL
+
+  $allObject = jeeObject::buildTree();
+  foreach ($allObject as $object_li) {
+    if ($object_li->getIsVisible() == 1) {
+      foreach ($object_li->getEqLogic(true, false, 'suiviCO2') as $eqLogic) {
+        if ($eqLogic->getIsVisible() == 1) {
+          $eqLogic_id = $eqLogic->getId();
+          break 2; // sort des 2 boucles foreach des qu'on a trouvé notre 1er equipement
+        }
       }
     }
   }
+
+  sendVarToJs('eqLogic_id', $eqLogic_id); // demande au JS d'afficher le panel pour cet equipement
+
+} else { //si on a &eqLogic_id dans l'URL
+
+  sendVarToJs('eqLogic_id', init('eqLogic_id')); // c'est cette ligne qui permet de lire le &eqLogic_id de l'URL et donc de changer d'equipement a afficher
 }
 
-
-sendVarToJs('eqLogic_id', init('eqLogic_id'));
-
-
-
+// initialise les dates du datepicker quand on arrive sur la page : debut 1 mois avant now et fin demain
 $date = array(
   'start' => init('startDate', date('Y-m-d', strtotime('-1 month ' . date('Y-m-d')))),
   'end' => init('endDate', date('Y-m-d', strtotime('+1 days ' . date('Y-m-d')))),
 );//*/
 
+// initialise le regrouper par à "jour" par defaut
 sendVarToJs('groupBy', init('groupBy', 'day'));
+
 
 //TODO quand on passe par "month", changer les dates pour chopper tout le mois sinon ca fait des approximations
 
