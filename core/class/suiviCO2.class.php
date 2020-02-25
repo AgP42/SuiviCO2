@@ -53,8 +53,10 @@ class suiviCO2 extends eqLogic {
 
     //*
     // * Fonction exécutée automatiquement toutes les minutes par Jeedom
-/*      public static function cron() {
+ /*     public static function cron() {
 
+            $test = date('Y-m-d H:i', strtotime('-15 min ' . date('Y-m-d H:00')));
+            log::add('suiviCO2', 'debug', '15 min avant lheure courante pleine ? : ' . $test);
 
       }
      //*/
@@ -120,14 +122,36 @@ class suiviCO2 extends eqLogic {
         foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
           if (isset($record['fields']['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
 
+            $record_date = $record['fields']['date']; // recu au format Y-m-d, ce qui demande Jeedom, donc c'est parfait
             $record_time = $record['fields']['heure']; // recu au format H:i
+            $record_tauxco2 = $record['fields']['taux_co2'];
 
-            //on ne veux que les heures piles (échantillonnage malheuresement sinon la fonction historisation de jeedom fait n importe quoi...)
+            /************ Mise à jour de la derniere valeur dispo ************/
+
+            // on cherche la valeur de l'heure courante -15min (parce que c'est la derniere dispo via l'API...)
+            $datetimecherchee = date('Y-m-d H:i', strtotime('-15 min ' . date('Y-m-d H:00')));
+            $datetimerecord = $record_date . ' ' . $record_time;
+      //      log::add('suiviCO2', 'debug', 'datetimecherchee : ' . $datetimecherchee . 'datetimerecord : ' . $datetimerecord);
+
+            if($datetimecherchee == $datetimerecord){
+
+      //        log::add('suiviCO2', 'debug', 'Trouvee, on la garde : ' . $record_tauxco2);
+
+              //pour chaque equipement declaré par l'utilisateur, on met a jour la cmd
+              foreach (self::byType('suiviCO2',true) as $suiviCO2) {
+                $cmd = $suiviCO2->getCmd(null, 'co2kwhfromApi_lastvalue');
+                if (is_object($cmd)) {
+                  $cmd->setCollectDate($datetime);
+                  $cmd->event($record_tauxco2);
+                  log::add('suiviCO2', 'debug', 'co2kwhfromApi_lastvalue : ' . $record_tauxco2);
+                }
+              }
+            }//*/
+
+            /************ Enregistrement des datas heures fixe en base de donnee ************/
+            //on ne veux enregistrer que les heures piles (échantillonnage malheuresement sinon la fonction historisation de jeedom fait n importe quoi...)
             if(date('i', strtotime($record_time)) == "00"){ // on extrait le champ min et on verifie qu'il vaut 00
           //    log::add('suiviCO2', 'debug', 'On a trouvé une heure pile, il est : ' . $record_time);
-
-              $record_date = $record['fields']['date']; // recu au format Y-m-d, ce qui demande Jeedom, donc c'est parfait
-              $record_tauxco2 = $record['fields']['taux_co2'];
 
               // pour pas traiter inutilement des milliers de datas par boucle on coupe quand on a atteint le quota defini en parametre, 4 par defaut
               $nbRecordsTraites++;
@@ -139,7 +163,7 @@ class suiviCO2 extends eqLogic {
               //pour chaque equipement declaré par l'utilisateur
               foreach (self::byType('suiviCO2',true) as $suiviCO2) {
 
-                // on regarde si on a limité à un equipement ou s'il faut tous les traiter
+                // on regarde si on a limité à un equipement ou s'il faut tous les traiter (selon que cette fct est appelée par le cron ou par la commande d'historisation)
                 $suiviCO2_id = $suiviCO2->getId();
                 if(!isset($_eqLogic_id) || $_eqLogic_id == $suiviCO2_id){
 
@@ -456,18 +480,34 @@ class suiviCO2 extends eqLogic {
       $cmd->setUnite('Wh');
       $cmd->save();
 
-
+      // cmd qui va historiser les valeurs de l'API aux heures fixes
       $cmd = $this->getCmd(null, 'co2kwhfromApi');
       if (!is_object($cmd)) {
         $cmd = new suiviCO2Cmd();
         $cmd->setLogicalId('co2kwhfromApi');
-        $cmd->setIsVisible(0);
     //    $cmd->setTemplate('dashboard', 'tile');
       }
+      $cmd->setIsVisible(0); // sert a rien de la rendre visible, on balance direct dans l'historique, donc restera toujours a 0 pour le dashboard
       $cmd->setIsHistorized(1);
       $cmd->setConfiguration('historizeMode', 'max'); //max, avg, none ?
       $cmd->setConfiguration('historizeRound', 0);
       $cmd->setName(__('Valeur CO2 par kWh', __FILE__));
+      $cmd->setEqLogic_id($this->getId());
+      $cmd->setType('info');
+      $cmd->setSubType('numeric');
+      $cmd->setUnite('gCO2');
+      $cmd->save();
+
+      // cmd qui va permettre d'afficher et de rendre dispo la derniere valeur de CO2/kWh. A chaque heure fixe on prendra la derniere valeur dispo, donc xx:45 (l'API ne s'actualise que toutes les heures)
+      $cmd = $this->getCmd(null, 'co2kwhfromApi_lastvalue');
+      if (!is_object($cmd)) {
+        $cmd = new suiviCO2Cmd();
+        $cmd->setLogicalId('co2kwhfromApi_lastvalue');
+    //    $cmd->setTemplate('dashboard', 'tile');
+        $cmd->setIsHistorized(0); // on historize celle
+      }
+      $cmd->setIsVisible(1);
+      $cmd->setName(__('gCO2 par kWh produit en France', __FILE__));
       $cmd->setEqLogic_id($this->getId());
       $cmd->setType('info');
       $cmd->setSubType('numeric');
