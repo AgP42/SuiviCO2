@@ -90,7 +90,7 @@ class suiviCO2 extends eqLogic {
 
       }
 
-      public function getHistoriqueConso($_eqLogic_id){
+      public function getHistoriqueConso($_startDate, $_endDate, $_eqLogic_id){
 
         // on cherche l'eqLogic de cet id
         $eqLogic = eqLogic::byId($_eqLogic_id);
@@ -101,10 +101,37 @@ class suiviCO2 extends eqLogic {
         $_type = 'HP';
 
         //on va chercher l'id de la CMD contenant index_HP ou HC via la conf utilisateur, format #10#
-        $index = $eqLogic->getConfiguration('index_' . $_type);
+        $index_cmd_id = $eqLogic->getConfiguration('index_' . $_type);
+
+   //     $cmdIndex_id = str_replace("#", "", $indexCMDlu); // on vire les #, on a maintenant l'ID d'une commande d'un autre objet
+
+        $cmdIndexHP = cmd::byId(str_replace('#', '', $index_cmd_id));
+
+        // on recupere la cmd HP
+   //     $cmdConsoHP = $eqLogic->getCmd(null, 'consumptionHP');
+        if (!is_object($cmdIndexHP)) {
+          return array();
+        }
+
+        // on boucle dans toutes les valeurs de l'historique de la cmd index HP
+        foreach ($cmdIndexHP->getHistory($_startDate, $_endDate) as $history) {
+
+          $valueDateTime = $history->getDatetime();
+          $value = $history->getValue();
+
+          // on retourne plusieurs tableaux avec en index la datetime et en valeurs le couple timestamp, valeur
+          if($value != 0){
+           $return['consoHP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000));
+           $return['cost']['HP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000 * $costHP));
+           $return['cost']['Abo'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($costAbo / 30.5 / 24)); //pour toutes les dates on balance le cout de l'abo a l'heure // TODO : ameliorer ce calcul tout pourri ! Il faudrait boucler dans toutes les heures entre startdate et enddate et ajouter une valeur selon le nombre de jours dans le mois...
+           $return['total']['consokWh'] += floatval($value / 1000);
+           $return['total']['cost'] += floatval($value / 1000 * $costHP); // TODO ajouter le cout de l'abo sans faire de doublon pour les heures qui ont du HP et du HC
+          }
+
+        } //*/
 
 
-        log::add('suiviCO2', 'debug', 'Bien arrivé jusqua la class, index : ' . $index);
+        log::add('suiviCO2', 'debug', 'Bien arrivé jusqua la class, cmdIndex_id : ' . $cmdIndex_id);
 
 
       }
