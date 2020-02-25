@@ -48,25 +48,30 @@ $date = array(
 // initialise le regrouper par à "jour" par defaut
 sendVarToJs('groupBy', init('groupBy', 'day'));
 
+// changement des dates demandées quand on passe en mois ou année pour chopper des range particulier
 
-//TODO quand on passe par "month", changer les dates pour chopper tout le mois sinon ca fait des approximations
-
-/*if (init('groupBy', 'day') == 'day') {
+if (init('groupBy', 'day') == 'hour') { // quand on selectionne "heure", on va changer le date picker pour selectionner de la veille à demain
   $date = array(
-    'start' => init('startDate', date('Y-m-d', strtotime('-31 days ' . date('Y-m-d')))),
-    'end' => init('endDate', date('Y-m-d')),
+    'start' => init('startDate', date('Y-m-d', strtotime('-1 day ' . date('Y-m-d')))),
+    'end' => init('endDate', date('Y-m-d', strtotime('+1 day ' . date('Y-m-d')))),
   );
 }
-if (init('groupBy', 'day') == 'month') {
+if (init('groupBy', 'day') == 'day') { // quand on selectionne "jour", on prend de -1 mois à demain
   $date = array(
-    'start' => init('startDate', date('Y-m-d', strtotime('-1 year ' . date('Y-m-d')))),
-    'end' => init('endDate', date('Y-m-d', strtotime('+1 days' . date('Y-m-d')))),
+    'start' => init('startDate', date('Y-m-d', strtotime('-1 month ' . date('Y-m-d')))),
+    'end' => init('endDate', date('Y-m-d', strtotime('+1 days ' . date('Y-m-d')))),
   );
 }
-if (init('groupBy', 'day') == 'year') { //TODO
+if (init('groupBy', 'day') == 'month') { // quand on selectionne "month", on prend depuis le debut de l'année courante à la fin du mois courant
   $date = array(
-    'start' => init('startDate', date('Y-m-d', strtotime('-1 year ' . date('Y-m-d')))),
-    'end' => init('endDate', date('Y-m-d', strtotime('+1 days' . date('Y-m-d')))),
+    'start' => init('startDate', date('Y-01-01', strtotime('-1 year ' . date('Y-m-d')))),
+    'end' => init('endDate', date('Y-m-t', strtotime(date('Y-m-d')))), // le t dans la fct date() permet de donner le dernier jour du mois
+  );
+}
+if (init('groupBy', 'day') == 'year') { // quand on selectionne "year", on prend les 10 dernieres années
+  $date = array(
+    'start' => init('startDate', date('Y-01-01', strtotime('-10 year ' . date('Y-m-d')))),
+    'end' => init('endDate', date('Y-12-31', strtotime('+1 days' . date('Y-m-d')))),
   );
 } //*/
 
@@ -111,41 +116,48 @@ if (init('groupBy', 'day') == 'year') { //TODO
       <legend style="height: 35px;">
         <span class="objectName"></span>
 
-           {{Période du}} <input class="form-control input-sm in_datepicker" id='in_startDate' style="display : inline-block; width: 150px;" value='<?php echo $date['start'] ?>'/> {{au}}
-          <input class="form-control input-sm in_datepicker" id='in_endDate' style="display : inline-block; width: 150px;" value='<?php echo $date['end'] ?>'/>
-          <a class="btn btn-success btn-sm tooltips" id='bt_validChangeDateSuiviCO2' title="{{Attention une trop grande plage de date peut mettre très longtemps a être calculée ou même ne pas s'afficher}}">{{Ok}}</a>
+          <span class='label label-success' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="co2"></span> kg CO2</span>
+          <span class='label label-primary' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="consokWh"></span> kWh</span>
+          <span class='label label-default' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="cost"> </span> €</span>
 
-          {{grouper par : }}
-
-          <!-- TODO a gerer en JS plutot d'en lien, pour pas tout recharger et perdre les dates demandées par l'user...-->
-          <?php
-          if (init('groupBy', 'day') == 'hour') {
-            echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=hour&eqLogic_id=' . $eqLogic->getId() . '">{{Heure}}</a> ';
-          } else {
-            echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=hour&eqLogic_id=' . $eqLogic->getId() . '">{{Heure}}</a> ';
-          }
-          if (init('groupBy', 'day') == 'day') {
-            echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=day&eqLogic_id=' . $eqLogic->getId() . '">{{Jour}}</a> ';
-          } else {
-            echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=day&eqLogic_id=' . $eqLogic->getId() . '">{{Jour}}</a> ';
-          }
-          if (init('groupBy', 'day') == 'month') {
-            echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=month&eqLogic_id=' . $eqLogic->getId() . '">{{Mois}}</a> ';
-          } else {
-            echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=month&eqLogic_id=' . $eqLogic->getId() . '">{{Mois}}</a> ';
-          }
-          if (init('groupBy', 'day') == 'year') {
-            echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=year&eqLogic_id=' . $eqLogic->getId() . '">{{Année}}</a> ';
-          } else {
-            echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=year&eqLogic_id=' . $eqLogic->getId() . '">{{Année}}</a> ';
-          }
-          ?>
-
-          <!-- TODO -->
           <span class="pull-right">
-            <span class='label label-success' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="co2"></span> kg CO2</span>
-            <span class='label label-primary' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="consokWh"></span> kWh</span>
-            <span class='label label-default' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="cost"> </span> €</span>
+
+            <div>
+              {{Période du}} <input class="form-control input-sm in_datepicker" id='in_startDate' style="display : inline-block; width: 150px;" value='<?php echo $date['start'] ?>'/> {{au}}
+              <input class="form-control input-sm in_datepicker" id='in_endDate' style="display : inline-block; width: 150px;" value='<?php echo $date['end'] ?>'/>
+              <a class="btn btn-success btn-sm tooltips" id='bt_validChangeDateSuiviCO2' title="{{Attention une trop grande plage de date peut mettre très longtemps a être calculée ou même ne pas s'afficher}}">{{Ok}}</a>
+            </div>
+
+            <div>
+              {{Grouper par : }}
+
+              <!--i class="fas fa-calendar-alt"></i-->
+
+              <!-- TODO a gerer en JS plutot d'en lien, pour pas tout recharger et perdre les dates demandées par l'user...-->
+              <?php
+              if (init('groupBy', 'day') == 'hour') {
+                echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=hour&eqLogic_id=' . $eqLogic->getId() . '">{{Heure}}</a> ';
+              } else {
+                echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=hour&eqLogic_id=' . $eqLogic->getId() . '">{{Heure}}</a> ';
+              }
+              if (init('groupBy', 'day') == 'day') {
+                echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=day&eqLogic_id=' . $eqLogic->getId() . '">{{Jour}}</a> ';
+              } else {
+                echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=day&eqLogic_id=' . $eqLogic->getId() . '">{{Jour}}</a> ';
+              }
+              if (init('groupBy', 'day') == 'month') {
+                echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=month&eqLogic_id=' . $eqLogic->getId() . '">{{Mois}}</a> ';
+              } else {
+                echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=month&eqLogic_id=' . $eqLogic->getId() . '">{{Mois}}</a> ';
+              }
+              if (init('groupBy', 'day') == 'year') {
+                echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=year&eqLogic_id=' . $eqLogic->getId() . '">{{Année}}</a> ';
+              } else {
+                echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=year&eqLogic_id=' . $eqLogic->getId() . '">{{Année}}</a> ';
+              }
+              ?>
+            </div>
+
           </span>
 
       </legend>
