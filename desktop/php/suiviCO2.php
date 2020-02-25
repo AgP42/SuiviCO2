@@ -187,9 +187,16 @@ $eqLogics = eqLogic::byType($plugin->getId());
           <legend><i class="fas fa-history"></i> {{Récupérer historique des données}}</legend>
 
           <div class="form-group">
-            <label class="col-sm-2 control-label">{{CO2 par kWh en France}}</label>
+            <label class="col-sm-3 control-label">{{Données temps réel CO2 par kWh en France}}</label>
             <div class="col-sm-4">
               <a class="btn btn-success btn-sm" id="bt_historyCO2"><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label">{{Ma conso kWh (uniquement si les commandes contenant les index étaient déjà historisées dans jeedom)}}</label>
+            <div class="col-sm-4">
+              <a class="btn btn-success btn-sm" id="bt_historykWh"><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
             </div>
           </div>
 

@@ -71,7 +71,24 @@ try {
 
       log::add('suiviCO2', 'debug', 'Recu dans ajax : ' . $_nbRecordsAPI . ' - ' . $_nbRecordsATraiterDB);
 
-      $eqLogic->getAndRecordDataCo2($_nbRecordsAPI, $_nbRecordsATraiterDB, init('id')); /////////////TEST HISTORISATION
+      $eqLogic->getAndRecordDataCo2($_nbRecordsAPI, $_nbRecordsATraiterDB, init('id'));
+
+      ajax::success($return);
+    }
+
+    if (init('action') == 'getHistoriqueConso') {
+
+      $eqLogic = eqLogic::byId(init('id'));
+      if (!is_object($eqLogic)) {
+        throw new Exception(__('Equipement introuvable : ', __FILE__) . init('id'));
+      }
+
+ //     $_nbRecordsAPI = init('nbRecordsAPI');
+ //     $_nbRecordsATraiterDB = init('nbRecordsATraiterDB');
+
+  //    log::add('suiviCO2', 'debug', 'Recu dans ajax - getHistoriqueConso');
+
+      $eqLogic->getHistoriqueConso(init('id'));
 
       ajax::success($return);
     }
@@ -81,5 +98,7 @@ try {
 } catch (Exception $e) {
     ajax::error(displayException($e), $e->getCode());
 }
+
+
 
 

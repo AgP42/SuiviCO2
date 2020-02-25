@@ -90,6 +90,25 @@ class suiviCO2 extends eqLogic {
 
       }
 
+      public function getHistoriqueConso($_eqLogic_id){
+
+        // on cherche l'eqLogic de cet id
+        $eqLogic = eqLogic::byId($_eqLogic_id);
+
+        //on va chercher la valeur actuelle index_HP ou HC via la conf utilisateur
+     //   $index = jeedom::evaluateExpression($eqLogic->getConfiguration('index_' . $_type));
+
+        $_type = 'HP';
+
+        //on va chercher l'id de la CMD contenant index_HP ou HC via la conf utilisateur, format #10#
+        $index = $eqLogic->getConfiguration('index_' . $_type);
+
+
+        log::add('suiviCO2', 'debug', 'Bien arrivé jusqua la class, index : ' . $index);
+
+
+      }
+
       public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 10, $_eqLogic_id = NULL){
 
         /* *************** Infos sur l'API opendata.reseaux-energies.fr

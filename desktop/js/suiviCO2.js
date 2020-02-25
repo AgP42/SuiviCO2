@@ -38,7 +38,35 @@ $('#bt_historyCO2').on('click', function () {
                     action: 'getAPICO2Data',
                     id: $('.eqLogicAttr[data-l1key=id]').value(),
                     nbRecordsAPI: 6000,
-                    nbRecordsATraiterDB: 6000, // TEST HISTORISATION limité a 600
+                    nbRecordsATraiterDB: 6000,
+                },
+                dataType: 'json',
+                error: function (request, status, error) {
+                    handleAjaxError(request, status, error);
+                },
+                success: function (data) {
+                    if (data.state != 'ok') {
+                        $('#div_alert').showAlert({message: data.result, level: 'danger'});
+                        return;
+                    }
+                    $('#div_alert').showAlert({message: 'Historique chargé avec succès', level: 'success'});
+                }
+            });
+        }
+    });
+});
+
+$('#bt_historykWh').on('click', function () {
+    bootbox.confirm('{{L\'opération peu prendre plusieurs minutes}}', function (result) {
+        if (result) {
+            $.ajax({
+                type: 'POST',
+                url: 'plugins/suiviCO2/core/ajax/suiviCO2.ajax.php',
+                data: {
+                    action: 'getHistoriqueConso',
+                    id: $('.eqLogicAttr[data-l1key=id]').value(),
+                //    nbRecordsAPI: 6000,
+                //    nbRecordsATraiterDB: 6000, //TODO ajouter des datepicker et mettre start et end ici
                 },
                 dataType: 'json',
                 error: function (request, status, error) {

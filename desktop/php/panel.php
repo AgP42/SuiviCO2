@@ -20,6 +20,7 @@ if (is_object($object)) {
 
 if (init('eqLogic_id') == '') { // on cherche le 1er equipement a afficher quand on arrive sur le panel, quand &eqLogic_id n'est pas dans l'URL
 
+  //TODO - ca marche, mais ya pas plus simple ??
   $allObject = jeeObject::buildTree();
   foreach ($allObject as $object_li) {
     if ($object_li->getIsVisible() == 1) {
