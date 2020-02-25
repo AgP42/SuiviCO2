@@ -91,15 +91,11 @@ if (init('groupBy', 'day') == 'year') { // quand on selectionne "year", on prend
         foreach ($allObject as $object_li) {
           if ($object_li->getIsVisible() == 1) {
             $margin = 15 * $object_li->parentNumber();
-            if ($object_li->getId() == $object->getId()) {
-              echo '<li style="position:relative;left:' . $margin . 'px;">' . $object_li->getHumanName(true) . '</li>';
-              foreach ($object_li->getEqLogic(true, false, 'suiviCO2') as $eqLogic) {
+            foreach ($object_li->getEqLogic(true, false, 'suiviCO2') as $eqLogic) {
+              if ($eqLogic->getId() == $eqLogic_id) {
                 echo '<li class="cursor li_object active" ><a href="index.php?v=d&m=suiviCO2&p=panel&eqLogic_id=' . $eqLogic->getId() . '" style="position:relative;left:' . $margin*2 . 'px;">' . $eqLogic->getHumanName(true) . '</a></li>';
-              }
-            } else {
-              echo '<li style="position:relative;left:' . $margin . 'px;">' . $object_li->getHumanName(true) . '</li>';
-              foreach ($object_li->getEqLogic(true, false, 'suiviCO2') as $eqLogic) {
-                echo '<li class="cursor li_object active" ><a href="index.php?v=d&m=suiviCO2&p=panel&eqLogic_id=' . $eqLogic->getId() . '" style="position:relative;left:' . $margin*2 . 'px;">' . $eqLogic->getHumanName(true) . '</a></li>';
+              } else {
+                echo '<li class="cursor li_object" ><a href="index.php?v=d&m=suiviCO2&p=panel&eqLogic_id=' . $eqLogic->getId() . '" style="position:relative;left:' . $margin*2 . 'px;">' . $eqLogic->getHumanName(true) . '</a></li>';
               }
             }
           }
