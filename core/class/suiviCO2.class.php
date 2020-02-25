@@ -185,7 +185,7 @@ class suiviCO2 extends eqLogic {
         } //fin boucle dans toutes les datas recuperées
       } //fin fonction
 
-      public static function cron15() {
+      public static function cronHourly() {
         $datetime = date('Y-m-d H:i:00');
 
         log::add('suiviCO2', 'debug', '#################### CRON Hourly à ' . $datetime . ' ###################');

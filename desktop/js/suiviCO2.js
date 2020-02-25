@@ -29,7 +29,7 @@ $(".eqLogic").off('click','.listCmdInfo').on('click','.listCmdInfo', function ()
 
 
 $('#bt_historyCO2').on('click', function () {
-    bootbox.confirm('{{Environ 1,5 mois de données, l\'opération peu prendre du temps...(min 30s)}}', function (result) {
+    bootbox.confirm('{{Environ 1,5 mois de données, l\'opération peu prendre plusieurs minutes}}', function (result) {
         if (result) {
             $.ajax({
                 type: 'POST',
