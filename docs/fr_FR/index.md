@@ -65,8 +65,9 @@ Lors de la création de l'équipement, il est possible que la 1ere valeur de con
 
 Utilisation du panneau desktop
 ======================
+![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/PanneauDesktop.png)
 
-
+Vous pouvez sélectionner en haut à droite la période a visualiser ainsi que le regroupement des infos à faire sur les graphs. 
 
 API
 ======
