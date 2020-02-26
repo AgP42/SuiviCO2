@@ -5,6 +5,13 @@ if (!isConnect('admin')) {
 $plugin = plugin::byId('suiviCO2');
 sendVarToJS('eqType', $plugin->getId());
 $eqLogics = eqLogic::byType($plugin->getId());
+
+// initialise les dates du datepicker quand on arrive sur la page : debut 1 mois avant now et fin demain
+$date = array(
+  'start' => init('startDate', date('Y-m-d', strtotime('-1 month ' . date('Y-m-d')))),
+  'end' => init('endDate', date('Y-m-d', strtotime('+1 days ' . date('Y-m-d')))),
+);//*/
+
 ?>
 
 <div class="row row-overflow">
@@ -196,7 +203,13 @@ $eqLogics = eqLogic::byType($plugin->getId());
           <div class="form-group">
             <label class="col-sm-3 control-label">{{Ma conso kWh (uniquement si les commandes contenant les index étaient déjà historisées dans jeedom)}}</label>
             <div class="col-sm-4">
-              <a class="btn btn-success btn-sm" id="bt_historykWh"><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
+            <span>
+              <div>
+                {{Période du}} <input class="form-control input-sm in_datepicker" id='in_startDate' style="display : inline-block; width: 150px;" value='<?php echo $date['start'] ?>'/> {{au}}
+                <input class="form-control input-sm in_datepicker" id='in_endDate' style="display : inline-block; width: 150px;" value='<?php echo $date['end'] ?>'/>
+                <a class="btn btn-success btn-sm tooltips" id='bt_historykWh' title="{{Attention une trop grande plage de date peut mettre très longtemps a être calculée}}"><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
+              </div>
+            </span>
             </div>
           </div>
 

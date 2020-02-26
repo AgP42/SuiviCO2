@@ -15,6 +15,7 @@
  * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
  */
 
+$(".in_datepicker").datepicker();
 
 $(".eqLogic").off('click','.listCmdInfo').on('click','.listCmdInfo', function () {
   var el = $(this).closest('.form-group').find('.eqLogicAttr');
@@ -29,7 +30,7 @@ $(".eqLogic").off('click','.listCmdInfo').on('click','.listCmdInfo', function ()
 
 
 $('#bt_historyCO2').on('click', function () {
-    bootbox.confirm('{{Environ 1,5 mois de données, l\'opération peu prendre plusieurs minutes}}', function (result) {
+    bootbox.confirm('{{Environ 1,5 mois de données, l\'opération peut prendre plusieurs minutes}}', function (result) {
         if (result) {
             $.ajax({
                 type: 'POST',
@@ -58,7 +59,8 @@ $('#bt_historyCO2').on('click', function () {
 
 
 $('#bt_historykWh').on('click', function () {
-    bootbox.confirm('{{L\'opération peu prendre plusieurs minutes}}', function (result) {
+
+    bootbox.confirm('{{L\'opération peut prendre plusieurs minutes}}', function (result) {
         if (result) {
             $.ajax({
                 type: 'POST',
@@ -66,10 +68,8 @@ $('#bt_historykWh').on('click', function () {
                 data: {
                     action: 'getHistoriqueConso',
                     id: $('.eqLogicAttr[data-l1key=id]').value(),
-                    dateStart : '',
-                    dateEnd : '',
-                //    nbRecordsAPI: 6000,
-                //    nbRecordsATraiterDB: 6000, //TODO ajouter des datepicker et mettre start et end ici
+                    dateStart : $('#in_startDate').value(),
+                    dateEnd : $('#in_endDate').value(),
                 },
                 dataType: 'json',
                 error: function (request, status, error) {
