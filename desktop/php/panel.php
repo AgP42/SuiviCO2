@@ -64,6 +64,12 @@ if (init('groupBy', 'day') == 'day') { // quand on selectionne "jour", on prend 
     'end' => init('endDate', date('Y-m-d', strtotime('+1 days ' . date('Y-m-d')))),
   );
 }
+if (init('groupBy', 'day') == 'week') { // quand on selectionne "semaine", on prend les 2 derniers mois entiers à la fin du mois courant
+  $date = array(
+    'start' => init('startDate', date('Y-m-01', strtotime('-2 month ' . date('Y-m-d')))),
+    'end' => init('endDate', date('Y-m-t', strtotime(date('Y-m-d')))), // le t dans la fct date() permet de donner le dernier jour du mois
+  );
+}
 if (init('groupBy', 'day') == 'month') { // quand on selectionne "month", on prend depuis le debut de l'année courante à la fin du mois courant
   $date = array(
     'start' => init('startDate', date('Y-01-01', strtotime('-1 year ' . date('Y-m-d')))),
@@ -142,6 +148,11 @@ if (init('groupBy', 'day') == 'year') { // quand on selectionne "year", on prend
                 echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=day&eqLogic_id=' . $eqLogic_id . '">{{Jour}}</a> ';
               } else {
                 echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=day&eqLogic_id=' . $eqLogic_id . '">{{Jour}}</a> ';
+              }
+              if (init('groupBy', 'day') == 'week') {
+                echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=week&eqLogic_id=' . $eqLogic_id . '">{{Semaine}}</a> ';
+              } else {
+                echo '<a class="btn btn-default btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=week&eqLogic_id=' . $eqLogic_id . '">{{Semaine}}</a> ';
               }
               if (init('groupBy', 'day') == 'month') {
                 echo '<a class="btn btn-primary btn-sm" href="index.php?v=d&m=suiviCO2&p=panel&groupBy=month&eqLogic_id=' . $eqLogic_id . '">{{Mois}}</a> ';
