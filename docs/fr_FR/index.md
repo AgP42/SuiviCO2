@@ -2,9 +2,8 @@ Présentation
 ============
 
 Ce plugin suiviCO2 pour Jeedom a 2 fonctions principales : 
-- Visualiser ses émissions de CO2 liées a sa consommation électrique
-- Disposer de la valeur actuelle de gCO2 par kWh produit, émis en France en temps réel. De facon a pouvoir conditionner ses équipements facultatifs (retarder un peu le chauffe-eau en HC par exemple)
-
+- Disposer de la valeur actuelle de gCO2 par kWh produit, émis en France, en temps réel. De facon à pouvoir conditionner ses équipements facultatifs (retarder un peu le chauffe-eau en HC par exemple)
+- Visualiser ses émissions de CO2 liées à sa consommation électrique (ainsi que la consommation, coût associé et les émissions globales de la production en France) :
 
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/PanneauDesktop.png)
 
@@ -23,24 +22,26 @@ Une fois le plugin activé, il est visible dans le menu "plugin"/"energie".
 
 Vous pouvez alors définir plusieurs "sources d'émission CO2". Chacune est indépendante. 
 
-
 Onglet Equipement
 -----------------
 
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/OngletEquipement.png)
 
-Il faut assigner l'équipement à un objet parent et cocher la case "Activer" pour qu'elle soit visible dans le panneau desktop. 
+Pour que cet équipement soit visible dans le panneau desktop, il faut l'assigner à un objet parent et cocher la case "Activer". 
+La case "Visible" permet de définir la visibilité du widget sur le dashboard Jeedom :
+![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/widget.png)
+Cliquer sur la commande permet de visualiser son historique :
+![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/historique.png)
 
-Vous devez ensuite définir la commande Jeedom renvoyant l'index (fixe ou HP), et éventuellement l'index HC si vous en avez un. 
+
+Dans l'onglet "Equipement", vous devez ensuite définir la commande Jeedom renvoyant l'index (fixe ou HP) à utiliser, et éventuellement l'index HC si vous en avez un. 
 
 Et définir vos coûts d'électricité, en €. 
-
 
 Onglet Commandes
 -----------------
 
-Les commandes sont automatiquement créées à la sauvegarde de l'équipement. Il n'y a rien a configurer ici. 
-
+Les commandes sont automatiquement créées à la sauvegarde de l'équipement. Il n'y a rien a configurer ici. Vous pouvez éventuellement aller dans les paramétres de chaque commande pour définir leur visibilité sur le dashboard. 
 
 Onglet Historique
 --------------
@@ -51,9 +52,24 @@ Le plugin chargera les données de l'API ainsi que le calcul de nos consommation
 
 - Données temps réel CO2 par kWh en France : cette commande va chercher les données de l'API "temps réel", c'est à dire les données prévisionnelles, par 15 min, qui sont mises à jour toutes les heures. Cette commande permet de recuperer la totalité des données présentes sur le serveur, c'est à dire environ 1,5 mois de données. Le temps de chargement prend environ 1 min avec un RPI3 et une connection internet correcte. 
 
+- Ma conso kWh : uniquement si les commandes contenant les index étaient déjà historisées dans jeedom. Cette commande permet avec les données d'index historisées de calculer et d'enregistrer vos conso HP et HC pour les visualiser dans le panneau desktop. Il est possible de choisir la période voulue, attention, les données peuvent etre extremement longues à charger, il vaut mieux charger plusieurs fois des petites quantitées de données (1 mois par exemple). 
+Pour infos voici quelques durées avec un RPI3 : 
+     - 1 mois, HP et HC : 1 min
+     - 1 mois, HP seulement : 20s
+     - 2 mois, HP seulement : 1 min 10s
+     - plus de 6 mois, HP seulement : timeout aprés 10 min, aucune donnée enregistrées en base
+       
+Il est possible de relancer l'historique sur des dates déjà enregistrées. 
+
+Lors de la création de l'équipement, il est possible que la 1ere valeur de consommation HP/HC soient manquante, vous pouvez alors relancer l'historisation des données pour la journée pour la récuperer. 
+
 Utilisation du panneau desktop
 ======================
 
-Personaliser un champ pour une commande en particulier
-------------------------------------------------------
+
+
+API
+======
+
+Ce plugin utilise les données nationales fournies par RTE : <a href="https://opendata.reseaux-energies.fr/explore/dataset/eco2mix-national-tr/information/?disjunctive.nature" target="_blank">https://opendata.reseaux-energies.fr/</a>
 
