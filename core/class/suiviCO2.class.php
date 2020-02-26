@@ -69,7 +69,8 @@ class suiviCO2 extends eqLogic {
 
           //on recupere la precedente valeur stockée, selon HP ou HC
           $lastValue = $suiviCO2->getConfiguration('lastValue' . $_type);
-          //on sauvegarde la valeur actuelle pour le prochain tour
+
+           //on sauvegarde la valeur actuelle pour le prochain tour
           $suiviCO2->setConfiguration('lastValue' . $_type, $index);
           $suiviCO2->save();
 
@@ -79,14 +80,15 @@ class suiviCO2 extends eqLogic {
           $consumption = $index - $lastValue;
 
           //si cette consommation est >0, on va la stocker en base - NON, il faut stocker les 0 sinon l'archivage de l'historique fait n'importe quoi... dommage de stocker des 0... // TODO a ameliorer...
-  //        if ($consumptionHP > 0) {
+
+          if ($consumption < 1000) { //1000 kWh c'est environ 170€, si on consomme ca par heure c'est qu'on a un gros probleme... Ce test permet de ne pas sauvegarder l'index entier lors de la 1ere boucle apres la creation de l'objet.
             $cmd = $suiviCO2->getCmd(null, 'consumption' . $_type);
             if (is_object($cmd)) {
               $cmd->setCollectDate($datetime);
               log::add('suiviCO2', 'debug', 'eqLogic_id : ' . $suiviCO2->getId() . ' - Index now ' . $_type . ' : ' . $index . ' - Prev Index '  . $_type . ' : ' . $lastValue . ' = conso ' . $_type . ' (Wh) : ' . $consumption);
               $cmd->event($consumption);
             }
-    //      }
+          }
 
       }
 
