@@ -42,6 +42,9 @@ require_once __DIR__  . '/../../../../core/php/core.inc.php';
               log::add('suiviCO2', 'debug', ' previous : ' . $value->getValue());
             }*/
 
+
+
+
 //*/
 
 class suiviCO2 extends eqLogic {
@@ -53,10 +56,14 @@ class suiviCO2 extends eqLogic {
 
     //*
     // * Fonction exécutée automatiquement toutes les minutes par Jeedom
- /*     public static function cron() {
+  /*    public static function cron() {
 
-            $test = date('Y-m-d H:i', strtotime('-15 min ' . date('Y-m-d H:00')));
-            log::add('suiviCO2', 'debug', '15 min avant lheure courante pleine ? : ' . $test);
+
+        $abo = 18;
+        $valueDateTime = '2020-02-20 12:50:00';
+
+        $nbJourCeMois = date('t', strtotime($valueDateTime));
+        log::add('suiviCO2', 'debug', 'Nb jours ci mois ci : ' . $nbJourCeMois . ' - Cout abo par heure : ' . $abo/$nbJourCeMois/24);
 
       }
      //*/
@@ -79,7 +86,8 @@ class suiviCO2 extends eqLogic {
           //on calcule la consommation entre les 2 derniers index
           $consumption = $index - $lastValue;
 
-          //si cette consommation est >0, on va la stocker en base - NON, il faut stocker les 0 sinon l'archivage de l'historique fait n'importe quoi... dommage de stocker des 0... // TODO a ameliorer...
+          //si cette consommation est >0, on va la stocker en base - NON, il faut stocker les 0 sinon l'archivage de l'historique fait n'importe quoi... dommage de stocker des 0...
+          // TODO a ameliorer...
 
           if ($consumption < 1000) { //1000 kWh c'est environ 170€, si on consomme ca par heure c'est qu'on a un gros probleme... Ce test permet de ne pas sauvegarder l'index entier lors de la 1ere boucle apres la creation de l'objet.
             $cmd = $suiviCO2->getCmd(null, 'consumption' . $_type);
@@ -224,7 +232,8 @@ class suiviCO2 extends eqLogic {
               //pour chaque equipement declaré par l'utilisateur
               foreach (self::byType('suiviCO2',true) as $suiviCO2) {
 
-                // on regarde si on a limité à un equipement ou s'il faut tous les traiter (selon que cette fct est appelée par le cron ou par la commande d'historisation) // TODO ameliorer ca avec $this qui represente l'id de l'eq logic qui l'a appelé !
+                // on regarde si on a limité à un equipement ou s'il faut tous les traiter (selon que cette fct est appelée par le cron ou par la commande d'historisation)
+                // TODO ameliorer ca avec $this qui represente l'id de l'eq logic qui l'a appelé !
                 $suiviCO2_id = $suiviCO2->getId();
                 if(!isset($_eqLogic_id) || $_eqLogic_id == $suiviCO2_id){
 
@@ -332,11 +341,14 @@ class suiviCO2 extends eqLogic {
 
         // on retourne plusieurs tableaux avec en index la datetime et en valeurs le couple timestamp, valeur
         if($value != 0){
-         $return['consoHP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000));
-         $return['cost']['HP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000 * $costHP));
-         $return['cost']['Abo'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($costAbo / 30.5 / 24)); //pour toutes les dates on balance le cout de l'abo a l'heure // TODO : ameliorer ce calcul tout pourri ! Il faudrait boucler dans toutes les heures entre startdate et enddate et ajouter une valeur selon le nombre de jours dans le mois...
-         $return['total']['consokWh'] += floatval($value / 1000);
-         $return['total']['cost'] += floatval($value / 1000 * $costHP); // TODO ajouter le cout de l'abo sans faire de doublon pour les heures qui ont du HP et du HC
+          $return['consoHP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000));
+          $return['cost']['HP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000 * $costHP));
+          $nbJourCeMois = date('t', strtotime($valueDateTime));
+          $costAboHeure = $costAbo / $nbJourCeMois / 24;
+   //       log::add('suiviCO2', 'debug', 'Nb jours ci mois ci : ' . $nbJourCeMois . ' - Cout abo par heure : ' . $costAboHeure);
+          $return['cost']['Abo'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($costAboHeure)); //pour toutes les dates on balance le cout de l'abo a l'heure.
+          $return['total']['consokWh'] += floatval($value / 1000);
+          $return['total']['cost'] += floatval($value / 1000 * $costHP + $costAboHeure); // on ajoute le cout de l'abo toutes les HP, on l'ajoutera ci-dessous toutes les HC puis on le soustraira aux heures ayants du HP et HC pour virer les doublons
         }
 
       }
@@ -366,13 +378,15 @@ class suiviCO2 extends eqLogic {
           $value = $history->getValue();
 
           // on retourne un tableau avec en index la datetime et en valeurs le couple timestamp, valeur
-          // TODO checker cette histoire de UTC, ca decalle pas tout le bordel ?
           if($value != 0){
             $return['consoHC'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000));
             $return['cost']['HC'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000 * $costHC));
-            $return['cost']['Abo'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($costAbo / 30.5 / 24));
+            $nbJourCeMois = date('t', strtotime($valueDateTime));
+            $costAboHeure = $costAbo / $nbJourCeMois / 24;
+     //       log::add('suiviCO2', 'debug', 'Nb jours ci mois ci : ' . $nbJourCeMois . ' - Cout abo par heure : ' . $costAboHeure);
+            $return['cost']['Abo'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($costAboHeure));
             $return['total']['consokWh'] += floatval($value / 1000);
-            $return['total']['cost'] += floatval($value / 1000 * $costHC);
+            $return['total']['cost'] += floatval($value / 1000 * $costHC + $costAboHeure);
           }
        }
 
@@ -438,22 +452,11 @@ class suiviCO2 extends eqLogic {
             $return['consoCO2'][$consoHC[0]] = $consoHC;
           } else { // on a deja une valeur, donc il y a a cette date des valeurs HC et HP, on additionne HC avec la valeur deja existante (HP donc)
             $return['consoCO2'][$consoHC[0]] = array($consoHC[0], $return['consoCO2'][$consoHC[0]][1] + $consoHC[1]);
+    //        log::add('suiviCO2', 'debug', 'Ds la boucle HP ET HC - costAboHeure : ' . $costAboHeure);
+            $return['total']['cost'] -= floatval($costAboHeure); // et on retire 1 fois l'abo cout heure qui a deja ete compté pour les HP ET les HC
       //      log::add('suiviCO2', 'debug', 'On a un timestamp avec des data HP et HC : ' . $consoHC[0] . ' = ' . date('Y-m-d H:i:00', $consoHC[0]/1000));
           }
         }
-
-        // pour chacune de ces conso on cherche si on a un timestamp identique avec une valeur CO2API, si oui on multiple, si non on vire la valeur de conso qu'on aura pas reussi a multiplier...
- /*       foreach ($return['consoCO2'] as $returnConsoCO2) {
-          foreach ($return['CO2API'] as $co2API) {
-
-            if($returnConsoCO2[0] == $co2API[0]){
-              log::add('suiviCO2', 'debug', 'On a un timestamp avec de la conso et du CO2 : ' . $co2API[0] . ' = ' . date('Y-m-d H:i:00', $co2API[0]/1000));
-              $returnConsoCO2 = array($co2API[0], $returnConsoCO2[1] * $co2API[1]);
-              log::add('suiviCO2', 'debug', 'apres calculs, on veut retourner : ' . $returnConsoCO2[1] . ' à ' . date('Y-m-d H:i:00', $returnConsoCO2[0]/1000));
-            }
-          }
-              # code...
-        }*/
 
         // pour chacune des valeur de l'API CO2 on cherche la conso associée pour la multiplier
         foreach ($return['CO2API'] as $co2API) {
@@ -558,22 +561,6 @@ class suiviCO2 extends eqLogic {
       $cmd->setSubType('numeric');
       $cmd->setUnite('gCO2');
       $cmd->save();
-
-      // cmd qui va permettre d'afficher et de rendre dispo la derniere valeur de CO2/kWh. A chaque heure fixe on prendra la derniere valeur dispo, donc xx:45 (l'API ne s'actualise que toutes les heures)
-  /*    $cmd = $this->getCmd(null, 'co2kwhfromApi_lastvalue');
-      if (!is_object($cmd)) {
-        $cmd = new suiviCO2Cmd();
-        $cmd->setLogicalId('co2kwhfromApi_lastvalue');
-    //    $cmd->setTemplate('dashboard', 'tile');
-        $cmd->setIsHistorized(0); // on historize pas celle la
-        $cmd->setName(__('gCO2 par kWh produit en France', __FILE__));
-      }
-      $cmd->setIsVisible(1);
-      $cmd->setEqLogic_id($this->getId());
-      $cmd->setType('info');
-      $cmd->setSubType('numeric');
-      $cmd->setUnite('gCO2');
-      $cmd->save();//*/
 
     }
 
