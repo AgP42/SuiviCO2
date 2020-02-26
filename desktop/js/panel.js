@@ -166,7 +166,7 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
         },
       });
 
-      drawSimpleGraph('div_chartCost', series, ' kWh');
+      drawSimpleGraph('div_chartCost', series, ' €');
 
 
       // pour le graph CO2 API
