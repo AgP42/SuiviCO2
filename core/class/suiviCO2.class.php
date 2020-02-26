@@ -92,53 +92,59 @@ class suiviCO2 extends eqLogic {
 
       public function getAndRecordHistoriqueConso($_startDate, $_endDate){
 
-        $_type = 'HP';
+        $_typeConso = array('HP', 'HC');
 
-        // on recupere la cmd contenant l'index HP
-        $index_cmd_id = $this->getConfiguration('index_' . $_type); //on va chercher l'id de la CMD contenant index_HP ou HC via la conf utilisateur, format #10#
-        $cmdIndexHP = cmd::byId(str_replace('#', '', $index_cmd_id)); // on vire les # et on prend cette commande (d'un autre objet !)
-        if (!is_object($cmdIndexHP)) {
-          return array();
-        }
+        foreach ($_typeConso as $_type) {
 
-        $cmd = $this->getCmd(null, 'consumptionHP'); // on prend la commande dans laquelle on va ecrire notre resultat de calcul conso
-        if (is_object($cmd)) {
+          // on recupere la cmd contenant l'index
+          $index_cmd_id = $this->getConfiguration('index_' . $_type); //on va chercher l'id de la CMD contenant index_HP ou HC via la conf utilisateur, format #10#
 
-          $historyHP = $cmdIndexHP->getHistory($_startDate, $_endDate); // on choppe l'historique de notre index aux dates données par l'user
+          $cmdIndex = cmd::byId(str_replace('#', '', $index_cmd_id)); // on vire les # et on prend cette commande (d'un autre objet !)
+          if (!is_object($cmdIndex)) {
+            log::add('suiviCO2', 'warning', 'Pas de commande dans le champs ' . $_type . ' ou ' . $index_cmd_id . ' n est pas une commande valide - Fin de l import');
+            return array();
+          }
 
-          // on boucle dans toutes les valeurs de l'historique de la cmd index HP
-          foreach ($historyHP as $history) {
+          $cmd = $this->getCmd(null, 'consumption' . $_type); // on prend la commande dans laquelle on va ecrire notre resultat de calcul conso
+          if (is_object($cmd)) {
 
-            $valueDateTime = $history->getDatetime();
-            $value = $history->getValue();
+            $historyIndex = $cmdIndex->getHistory($_startDate, $_endDate); // on choppe l'historique de notre index aux dates données par l'user
 
-            //on ne veux enregistrer que les heures piles
-            if(date('i', strtotime($valueDateTime)) == "00"){ // on extrait le champ min et on verifie qu'il vaut 00
+            // on boucle dans toutes les valeurs de l'historique de la cmd index
+            foreach ($historyIndex as $history) {
 
-      //        log::add('suiviCO2', 'debug', 'Voici notre historique heures piles :' . $valueDateTime . ' : ' . $value);
+              $valueDateTime = $history->getDatetime();
+              $value = $history->getValue();
 
-              foreach ($historyHP as $history_prev) { // on cherche dans le meme historique si on a une donnée 1h avant
+              //on ne veux enregistrer que les heures piles
+              if(date('i', strtotime($valueDateTime)) == "00"){ // on extrait le champ min et on verifie qu'il vaut 00
 
-                $valueDateTime_prev = $history_prev->getDatetime();
-                $value_prev = $history_prev->getValue();
+        //        log::add('suiviCO2', 'debug', 'Voici notre historique heures piles :' . $valueDateTime . ' : ' . $value);
 
-                $datetimecherchee = date('Y-m-d H:i:00', strtotime('-1 hour ' . $valueDateTime));
+                foreach ($historyIndex as $history_prev) { // on cherche dans le meme historique si on a une donnée 1h avant
 
-                if ($valueDateTime_prev == $datetimecherchee){
+                  $valueDateTime_prev = $history_prev->getDatetime();
+                  $value_prev = $history_prev->getValue();
 
-                  $conso = round($value - $value_prev, 0);
-                  $cmd->addHistoryValue($conso, $valueDateTime);
-                  log::add('suiviCO2', 'debug', 'Conso historique enregistrée en DB :' . $valueDateTime . ' : ' . $conso);
+                  $datetimecherchee = date('Y-m-d H:i:00', strtotime('-1 hour ' . $valueDateTime));
 
-                }
+                  if ($valueDateTime_prev == $datetimecherchee){
 
-              } // fin foreach history_prev
+                    $conso = round($value - $value_prev, 0);
+                    $cmd->addHistoryValue($conso, $valueDateTime);
+                    log::add('suiviCO2', 'debug', 'Conso historique enregistrée en DB :' . $valueDateTime . ' : ' . $conso);
 
-            } // fin if heure pile
+                  }
 
-          } // fin foreach history
+                } // fin foreach history_prev
 
-        } // fin if cmd
+              } // fin if heure pile
+
+            } // fin foreach history
+
+          } // fin if cmd
+
+        } // fin foreach HP puis HC
 
       } // fin fct
 
@@ -159,7 +165,7 @@ class suiviCO2 extends eqLogic {
         $content = $request_http->exec(30);
 
         if ($content === false) {
-          log::add('suiviCO2', 'erreur', 'Erreur lors de l appel API CO2, URL : ' . $url);
+          log::add('suiviCO2', 'error', 'Erreur lors de l appel API CO2, URL : ' . $url);
           return;
         }
 

@@ -76,23 +76,6 @@ try {
       ajax::success($return);
     }
 
- /*   if (init('action') == 'getHistoriqueConso') {
-
-      $eqLogic = eqLogic::byId(init('id'));
-      if (!is_object($eqLogic)) {
-        throw new Exception(__('Equipement introuvable : ', __FILE__) . init('id'));
-      }
-
- //     $_nbRecordsAPI = init('nbRecordsAPI');
- //     $_nbRecordsATraiterDB = init('nbRecordsATraiterDB');
-
-  //    log::add('suiviCO2', 'debug', 'Recu dans ajax - getHistoriqueConso');
-
-      $eqLogic->getAndRecordHistoriqueConso($date['start'], $date['end'], init('id'));
-
-      ajax::success($return);
-    }//*/
-
     if (init('action') == 'getHistoriqueConso') {
 
       // initialise les variables locales avec les infos de la conf from le JS
@@ -117,13 +100,6 @@ try {
 
 
       $eqLogic->getAndRecordHistoriqueConso($date['start'], $date['end']);
-
-  /*    $return = array(
-        'eqLogic' => utils::o2a($eqLogic),
-        'datas' => $eqLogic->getGraphsDatasSuiviCO2($date['start'], $date['end'])
-      ); */
-
- //     log::add('suiviCO2', 'debug', 'Dans ajax, consowh : ' . $return['consowh'][0]);
 
       ajax::success($return);
     } // end getSuiviCO2Data
