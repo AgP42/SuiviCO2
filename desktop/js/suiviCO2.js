@@ -56,6 +56,7 @@ $('#bt_historyCO2').on('click', function () {
     });
 });
 
+
 $('#bt_historykWh').on('click', function () {
     bootbox.confirm('{{L\'opération peu prendre plusieurs minutes}}', function (result) {
         if (result) {
@@ -65,6 +66,8 @@ $('#bt_historykWh').on('click', function () {
                 data: {
                     action: 'getHistoriqueConso',
                     id: $('.eqLogicAttr[data-l1key=id]').value(),
+                    dateStart : '',
+                    dateEnd : '',
                 //    nbRecordsAPI: 6000,
                 //    nbRecordsATraiterDB: 6000, //TODO ajouter des datepicker et mettre start et end ici
                 },

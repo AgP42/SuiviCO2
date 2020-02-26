@@ -90,51 +90,57 @@ class suiviCO2 extends eqLogic {
 
       }
 
-      public function getHistoriqueConso($_startDate, $_endDate, $_eqLogic_id){
-
-        // on cherche l'eqLogic de cet id
-        $eqLogic = eqLogic::byId($_eqLogic_id);
-
-        //on va chercher la valeur actuelle index_HP ou HC via la conf utilisateur
-     //   $index = jeedom::evaluateExpression($eqLogic->getConfiguration('index_' . $_type));
+      public function getAndRecordHistoriqueConso($_startDate, $_endDate){
 
         $_type = 'HP';
 
-        //on va chercher l'id de la CMD contenant index_HP ou HC via la conf utilisateur, format #10#
-        $index_cmd_id = $eqLogic->getConfiguration('index_' . $_type);
-
-   //     $cmdIndex_id = str_replace("#", "", $indexCMDlu); // on vire les #, on a maintenant l'ID d'une commande d'un autre objet
-
-        $cmdIndexHP = cmd::byId(str_replace('#', '', $index_cmd_id));
-
-        // on recupere la cmd HP
-   //     $cmdConsoHP = $eqLogic->getCmd(null, 'consumptionHP');
+        // on recupere la cmd contenant l'index HP
+        $index_cmd_id = $this->getConfiguration('index_' . $_type); //on va chercher l'id de la CMD contenant index_HP ou HC via la conf utilisateur, format #10#
+        $cmdIndexHP = cmd::byId(str_replace('#', '', $index_cmd_id)); // on vire les # et on prend cette commande (d'un autre objet !)
         if (!is_object($cmdIndexHP)) {
           return array();
         }
 
-        // on boucle dans toutes les valeurs de l'historique de la cmd index HP
-        foreach ($cmdIndexHP->getHistory($_startDate, $_endDate) as $history) {
+        $cmd = $this->getCmd(null, 'consumptionHP'); // on prend la commande dans laquelle on va ecrire notre resultat de calcul conso
+        if (is_object($cmd)) {
 
-          $valueDateTime = $history->getDatetime();
-          $value = $history->getValue();
+          $historyHP = $cmdIndexHP->getHistory($_startDate, $_endDate); // on choppe l'historique de notre index aux dates données par l'user
 
-          // on retourne plusieurs tableaux avec en index la datetime et en valeurs le couple timestamp, valeur
-          if($value != 0){
-           $return['consoHP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000));
-           $return['cost']['HP'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value / 1000 * $costHP));
-           $return['cost']['Abo'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($costAbo / 30.5 / 24)); //pour toutes les dates on balance le cout de l'abo a l'heure // TODO : ameliorer ce calcul tout pourri ! Il faudrait boucler dans toutes les heures entre startdate et enddate et ajouter une valeur selon le nombre de jours dans le mois...
-           $return['total']['consokWh'] += floatval($value / 1000);
-           $return['total']['cost'] += floatval($value / 1000 * $costHP); // TODO ajouter le cout de l'abo sans faire de doublon pour les heures qui ont du HP et du HC
-          }
+          // on boucle dans toutes les valeurs de l'historique de la cmd index HP
+          foreach ($historyHP as $history) {
 
-        } //*/
+            $valueDateTime = $history->getDatetime();
+            $value = $history->getValue();
 
+            //on ne veux enregistrer que les heures piles
+            if(date('i', strtotime($valueDateTime)) == "00"){ // on extrait le champ min et on verifie qu'il vaut 00
 
-        log::add('suiviCO2', 'debug', 'Bien arrivé jusqua la class, cmdIndex_id : ' . $cmdIndex_id);
+      //        log::add('suiviCO2', 'debug', 'Voici notre historique heures piles :' . $valueDateTime . ' : ' . $value);
 
+              foreach ($historyHP as $history_prev) { // on cherche dans le meme historique si on a une donnée 1h avant
 
-      }
+                $valueDateTime_prev = $history_prev->getDatetime();
+                $value_prev = $history_prev->getValue();
+
+                $datetimecherchee = date('Y-m-d H:i:00', strtotime('-1 hour ' . $valueDateTime));
+
+                if ($valueDateTime_prev == $datetimecherchee){
+
+                  $conso = round($value - $value_prev, 0);
+                  $cmd->addHistoryValue($conso, $valueDateTime);
+                  log::add('suiviCO2', 'debug', 'Conso historique enregistrée en DB :' . $valueDateTime . ' : ' . $conso);
+
+                }
+
+              } // fin foreach history_prev
+
+            } // fin if heure pile
+
+          } // fin foreach history
+
+        } // fin if cmd
+
+      } // fin fct
 
       public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 10, $_eqLogic_id = NULL){
 
@@ -210,7 +216,7 @@ class suiviCO2 extends eqLogic {
               //pour chaque equipement declaré par l'utilisateur
               foreach (self::byType('suiviCO2',true) as $suiviCO2) {
 
-                // on regarde si on a limité à un equipement ou s'il faut tous les traiter (selon que cette fct est appelée par le cron ou par la commande d'historisation)
+                // on regarde si on a limité à un equipement ou s'il faut tous les traiter (selon que cette fct est appelée par le cron ou par la commande d'historisation) // TODO ameliorer ca avec $this qui represente l'id de l'eq logic qui l'a appelé !
                 $suiviCO2_id = $suiviCO2->getId();
                 if(!isset($_eqLogic_id) || $_eqLogic_id == $suiviCO2_id){
 

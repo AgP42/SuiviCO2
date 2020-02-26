@@ -76,7 +76,7 @@ try {
       ajax::success($return);
     }
 
-    if (init('action') == 'getHistoriqueConso') {
+ /*   if (init('action') == 'getHistoriqueConso') {
 
       $eqLogic = eqLogic::byId(init('id'));
       if (!is_object($eqLogic)) {
@@ -88,10 +88,45 @@ try {
 
   //    log::add('suiviCO2', 'debug', 'Recu dans ajax - getHistoriqueConso');
 
-      $eqLogic->getHistoriqueConso(init('id'));
+      $eqLogic->getAndRecordHistoriqueConso($date['start'], $date['end'], init('id'));
 
       ajax::success($return);
-    }
+    }//*/
+
+    if (init('action') == 'getHistoriqueConso') {
+
+      // initialise les variables locales avec les infos de la conf from le JS
+      $date = array(
+        'start' => init('dateStart'),
+        'end' => init('dateEnd'),
+      );
+
+      $eqLogic = eqLogic::byId(init('id')); // on recupere l'eqLogic à partir de son ID
+
+  //    log::add('suiviCO2', 'debug', 'Dans ajax, eqLogic_id : ' . $eqLogic_id);
+
+      if ($date['start'] == '') {
+        $date['start'] = date('Y-m-d', strtotime('-1 months ' . date('Y-m-d')));
+      }
+      if ($date['end'] == '') {
+        $date['end'] = date('Y-m-d', strtotime('+1 days ' . date('Y-m-d')));
+      }
+      $return['date'] = $date; // je vois pas ou c'est utilisé apres, à virer ?
+
+      log::add('suiviCO2', 'debug', 'Dans ajax on a recu : ' . $eqLogic->getHumanName() . ' - ' . $date['start'] . ' - ' . $date['end']);
+
+
+      $eqLogic->getAndRecordHistoriqueConso($date['start'], $date['end']);
+
+  /*    $return = array(
+        'eqLogic' => utils::o2a($eqLogic),
+        'datas' => $eqLogic->getGraphsDatasSuiviCO2($date['start'], $date['end'])
+      ); */
+
+ //     log::add('suiviCO2', 'debug', 'Dans ajax, consowh : ' . $return['consowh'][0]);
+
+      ajax::success($return);
+    } // end getSuiviCO2Data
 
     throw new Exception(__('Aucune méthode correspondante à : ', __FILE__) . init('action'));
     /*     * *********Catch exeption*************** */
