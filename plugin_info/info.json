@@ -10,8 +10,8 @@
 	"hasDependency" : false,
 	"hasOwnDeamon" : false,
 	"maxDependancyInstallTime" : 0,
-	"changelog" : "https://agp42.github.io/SuiviCO2/#language#/changelog",
-	"documentation" : "https://agp42.github.io/SuiviCO2/#language#",
+	"changelog" : "https://agp42.github.io/suiviCO2/#language#/changelog",
+	"documentation" : "https://agp42.github.io/suiviCO2/#language#",
 	"link" : {
 		"forum":"Lien vers le forum",
 		"video" : "Lien vers une video"
