@@ -162,7 +162,7 @@ $date = array(
             </div>
 
             <div class="form-group">
-              <label class="col-sm-2 control-label">{{Tarif HPC (€ TTC / mois)}}</label>
+              <label class="col-sm-2 control-label">{{Tarif HC (€ TTC / mois)}}</label>
               <div class="col-sm-2">
                 <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="costHC" />
               </div>

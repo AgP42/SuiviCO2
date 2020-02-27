@@ -124,26 +124,28 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
         },
       });
 
-      series.push({
-        step: true,
-        name: 'HC ',
-        data: data.result.datas.cost.HC,
-        type: 'column',
-        color: '#AA4643',
-        stack : 1,
-    //    unite : 'kWh',
-        stacking : 'normal',
-        dataGrouping: {
-            approximation: "sum",
-            enabled: true,
-            forced: true,
-            units: [[groupBy,[1]]]
-        },
-        tooltip: {
-    //        valueDecimals: 2,
-            valueSuffix: ' €'
-        },
-      });
+      if(data.result.HCtoDisplay){
+        series.push({
+          step: true,
+          name: 'HC ',
+          data: data.result.datas.cost.HC,
+          type: 'column',
+          color: '#AA4643',
+          stack : 1,
+      //    unite : 'kWh',
+          stacking : 'normal',
+          dataGrouping: {
+              approximation: "sum",
+              enabled: true,
+              forced: true,
+              units: [[groupBy,[1]]]
+          },
+          tooltip: {
+      //        valueDecimals: 2,
+              valueSuffix: ' €'
+          },
+        });
+      }
 
       series.push({
         step: true,
@@ -221,26 +223,28 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
         },
       });
 
-      series.push({
-        step: true,
-        name: 'HC ',
-        data: data.result.datas.consoHC,
-        type: 'column',
-        color: '#AA4643',
-        stack : 1,
-    //    unite : 'kWh',
-        stacking : 'normal',
-        dataGrouping: {
-            approximation: "sum",
-            enabled: true,
-            forced: true,
-            units: [[groupBy,[1]]]
-        },
-        tooltip: {
-     //       valueDecimals: 2,
-            valueSuffix: ' kWh'
-        },
-      });
+      if(data.result.HCtoDisplay){
+        series.push({
+          step: true,
+          name: 'HC ',
+          data: data.result.datas.consoHC,
+          type: 'column',
+          color: '#AA4643',
+          stack : 1,
+      //    unite : 'kWh',
+          stacking : 'normal',
+          dataGrouping: {
+              approximation: "sum",
+              enabled: true,
+              forced: true,
+              units: [[groupBy,[1]]]
+          },
+          tooltip: {
+       //       valueDecimals: 2,
+              valueSuffix: ' kWh'
+          },
+        });
+      }
 
       drawSimpleGraph('div_chartConsokWh', series, ' kWh');
 

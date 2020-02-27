@@ -48,9 +48,17 @@ try {
    //   log::add('suiviCO2', 'debug', 'Dans ajax : ' . utils::o2a($eqLogic_id);
 
       $eqLogic = eqLogic::byId($eqLogic_id); // on recupere l'eqLogic à partir de son ID
+      if($eqLogic->getConfiguration('index_HC')!=''){ //si on a une commande HC definie
+    //    log::add('suiviCO2', 'debug', 'Dans ajax, on a une HC a afficher !');
+        $HCtoDisplay = true;
+      } else {
+        log::add('suiviCO2', 'debug', 'Dans ajax, on a PAS de HC a afficher !');
+    //    $HCtoDisplay = false;
+      }
 
       $return = array(
         'eqLogic' => utils::o2a($eqLogic),
+        'HCtoDisplay' => $HCtoDisplay,
         'datas' => $eqLogic->getGraphsDatasSuiviCO2($date['start'], $date['end'])
       );
 
@@ -69,7 +77,7 @@ try {
       $_nbRecordsAPI = init('nbRecordsAPI');
       $_nbRecordsATraiterDB = init('nbRecordsATraiterDB');
 
-      log::add('suiviCO2', 'debug', 'Recu dans ajax : ' . $_nbRecordsAPI . ' - ' . $_nbRecordsATraiterDB);
+  //    log::add('suiviCO2', 'debug', 'Recu dans ajax : ' . $_nbRecordsAPI . ' - ' . $_nbRecordsATraiterDB);
 
       $eqLogic->getAndRecordDataCo2($_nbRecordsAPI, $_nbRecordsATraiterDB, init('id'));
 
