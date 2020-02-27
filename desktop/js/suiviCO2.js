@@ -60,7 +60,7 @@ $('#bt_historyCO2').on('click', function () {
 
 $('#bt_historykWh').on('click', function () {
 
-    bootbox.confirm('{{Attention : L\'opération est exponentiellement longue selon la durée sélectionnée. Limitez à des période d\'1 mois (environ 1 min sur un RPI3). }}', function (result) {
+    bootbox.confirm('{{Attention : L\'opération est exponentiellement longue selon la durée sélectionnée. Environ 3s pour 1 mois, 20s pour 6 mois et 80s pour 1 an (RPI3). }}', function (result) {
         if (result) {
             $.ajax({
                 type: 'POST',
