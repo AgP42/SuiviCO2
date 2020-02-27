@@ -50,9 +50,9 @@ $date = array(
 // initialise le regrouper par à "jour" par defaut
 sendVarToJs('groupBy', init('groupBy', 'day'));
 
-// changement des dates demandées quand on passe en mois ou année pour chopper des range particulier
+// changement des dates demandées quand on passe en mois ou année pour chopper des range particulier // sauf que ca marche que pour l'affichage sur le datepicker et pas dans les datas renvoyées...
 
-if (init('groupBy', 'day') == 'hour') { // quand on selectionne "heure", on va changer le date picker pour selectionner de la veille à demain
+/*if (init('groupBy', 'day') == 'hour') { // quand on selectionne "heure", on va changer le date picker pour selectionner de la veille à demain
   $date = array(
     'start' => init('startDate', date('Y-m-d', strtotime('-1 day ' . date('Y-m-d')))),
     'end' => init('endDate', date('Y-m-d', strtotime('+1 day ' . date('Y-m-d')))),
