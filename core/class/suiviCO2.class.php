@@ -341,7 +341,6 @@ class suiviCO2 extends eqLogic {
 
    //   log::add('suiviCO2', 'debug', 'Config Abo lue : ' . $costAbo . ' - HP : ' . $costHP . ' - HC : ' . $costHC);
 
-
       /********************* Calculs pour conso HP et cost HP ********************/
       // on recupere la cmd HP
       $cmdConsoHP = $this->getCmd(null, 'consumptionHP');
@@ -369,17 +368,7 @@ class suiviCO2 extends eqLogic {
 
       }
 
-      if (isset($return['consoHP'])) {
-        sort($return['consoHP']);
-        $return['consoHP'] = array_values($return['consoHP']);
-      }
-
-      if (isset($return['cost']['HP'])) {
-        sort($return['cost']['HP']);
-        $return['cost']['HP'] = array_values($return['cost']['HP']);
-      }
-
-       /********************* Calculs pour conso HC ********************/
+       /********************* Calculs pour conso et cost HC ********************/
        // TODO ne faire que si HC est defini
        // on recupere la cmd HC
        $cmdConsoHC = $this->getCmd(null, 'consumptionHC');
@@ -400,25 +389,10 @@ class suiviCO2 extends eqLogic {
             $nbJourCeMois = date('t', strtotime($valueDateTime));
             $costAboHeure = $costAbo / $nbJourCeMois / 24;
      //       log::add('suiviCO2', 'debug', 'Nb jours ci mois ci : ' . $nbJourCeMois . ' - Cout abo par heure : ' . $costAboHeure);
-            $return['cost']['Abo'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($costAboHeure));
+            $return['cost']['Abo'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($costAboHeure)); // s'il était deja dedans, on l'écrase, donc pas de doublons !
             $return['total']['consokWh'] += floatval($value / 1000);
             $return['total']['cost'] += floatval($value / 1000 * $costHC + $costAboHeure);
           }
-       }
-
-       if (isset($return['consoHC'])) {
-         sort($return['consoHC']);
-         $return['consoHC'] = array_values($return['consoHC']);
-       }
-
-       if (isset($return['cost']['HC'])) {
-         sort($return['cost']['HC']);
-         $return['cost']['HC'] = array_values($return['cost']['HC']);
-       }
-
-       if (isset($return['cost']['Abo'])) {
-         sort($return['cost']['Abo']);
-         $return['cost']['Abo'] = array_values($return['cost']['Abo']);
        }
 
         /********************* Calculs pour les valeurs CO2 from API ********************/
@@ -435,17 +409,9 @@ class suiviCO2 extends eqLogic {
           $value = $history->getValue();
 
           // on retourne un tableau avec en index la datetime et en valeurs le couple timestamp, valeur
-         if($value != 0){
-           $return['CO2API'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value));
-         }
-
-          // on log tout ce petit bordel
-       //   log::add('suiviCO2', 'debug', 'Fct consowh dans class.php, $valueDateTime : ' . $valueDateTime . ' - $return[$valueDateTime] : ' . $return[$valueDateTime][0] . ' - ' . $return[$valueDateTime][1]);
-        }
-
-        if (isset($return['CO2API'])) {
-          sort($return['CO2API']);
-          $return['CO2API'] = array_values($return['CO2API']);
+          if($value != 0){
+            $return['CO2API'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value));
+          }
         }
 
         /********************* Calculs pour la conso CO2 selon conso HP et HC ********************/
@@ -454,45 +420,136 @@ class suiviCO2 extends eqLogic {
         $return['consoHP']
         $return['consoHC']
 */
-        // on va commencer par additionner nos datas HP et HC
-
-        // on stocke toutes les datas HP dans un nouveau tableau formaté pour le return
-        foreach ($return['consoHP'] as $consoHP) {
-          $return['consoCO2'][$consoHP[0]] = $consoHP;
-        }
-
-        // on ajoute toutes les datas HC
-        foreach ($return['consoHC'] as $consoHC) {
-
-          if(!isset($return['consoCO2'][$consoHC[0]])){
-            $return['consoCO2'][$consoHC[0]] = $consoHC;
-          } else { // on a deja une valeur, donc il y a a cette date des valeurs HC et HP, on additionne HC avec la valeur deja existante (HP donc)
-            $return['consoCO2'][$consoHC[0]] = array($consoHC[0], $return['consoCO2'][$consoHC[0]][1] + $consoHC[1]);
-    //        log::add('suiviCO2', 'debug', 'Ds la boucle HP ET HC - costAboHeure : ' . $costAboHeure);
-            $return['total']['cost'] -= floatval($costAboHeure); // et on retire 1 fois l'abo cout heure qui a deja ete compté pour les HP ET les HC
-      //      log::add('suiviCO2', 'debug', 'On a un timestamp avec des data HP et HC : ' . $consoHC[0] . ' = ' . date('Y-m-d H:i:00', $consoHC[0]/1000));
-          }
-        }
-
         // pour chacune des valeur de l'API CO2 on cherche la conso associée pour la multiplier
+        log::add('suiviCO2', 'debug', '###################### Calculs pour la conso CO2 ##########################');
         foreach ($return['CO2API'] as $co2API) {
 
-          if(isset($return['consoCO2'][$co2API[0]])){
-            $value = $return['consoCO2'][$co2API[0]][1] * $co2API[1];
-            $return['consoCO2'][$co2API[0]] = array($co2API[0], $value);
-            $return['total']['co2'] += floatval($value / 1000);
+          log::add('suiviCO2', 'debug', 'Ds la boucle API pour la date : ' . date('Y-m-d H:i:00', $co2API[0]/1000) . ' valeur API CO2: ' . $co2API[1]);
+
+          foreach ($return['consoHP'] as $consoHP) {
+
+            if($co2API[0] == $consoHP[0]){ // on est au meme timestamp sur la boucle CO2API et ConsoHP
+
+              $value = $consoHP[1] * $co2API[1];
+
+              log::add('suiviCO2', 'debug', 'Ds la boucle API puis boucle Conso HP : ' . date('Y-m-d H:i:00', $consoHP[0]/1000) . ' valeur Conso HP : ' . $consoHP[1] . ' resultat co2*conso : ' . $value);
+
+              $return['consoCO2'][$co2API[0]] = array($co2API[0], $value);
+
+              $return['total']['co2'] += floatval($value / 1000);
+
+            }
 
           }
 
+          // on ajoute toutes les datas HC
+          foreach ($return['consoHC'] as $consoHC) {
+
+            if($co2API[0] == $consoHC[0]){ // on est au meme timestamp sur la boucle CO2API et ConsoHC
+
+              $value = $consoHC[1] * $co2API[1];
+
+              if(!isset($return['consoCO2'][$consoHC[0]])){ // si c'est vide, on a donc que des HC a ce timestamp
+
+                log::add('suiviCO2', 'debug', 'Ds la boucle API puis boucle Conso   HC - uniquement du HC now : ' . date('Y-m-d H:i:00', $consoHC[0]/1000) . ' valeur conso HC : ' . $consoHC[1] . ' resultat co2*conso : ' . $value);
+
+                $return['consoCO2'][$co2API[0]] = array($co2API[0], $value);
+
+              } else { // on avait deja une valeur, il faut ajouter la nouvelle
+
+                log::add('suiviCO2', 'debug', 'Ds la boucle API puis boucle Conso   HC - avec deja du HP present : ' . date('Y-m-d H:i:00', $consoHC[0]/1000) . ' valeur conso HC : ' . $consoHC[1] . ' resultat co2*conso : ' . $value . ' total : ' . $return['consoCO2'][$co2API[0]][1] + $value);
+
+                $return['consoCO2'][$co2API[0]] = array($co2API[0], $return['consoCO2'][$co2API[0]][1] + $value);
+                $return['total']['cost'] -= floatval($costAboHeure); // et on retire 1 fois l'abo cout heure qui a deja ete compté pour les HP ET les HC
+              }
+
+              $return['total']['co2'] += floatval($value / 1000);
+
+            }
+
+          }
+
+            /*  if(!isset($return['consoCO2'][$consoHC[0]])){
+                $return['consoCO2'][$consoHC[0]] = $consoHC;
+              } else { // on a deja une valeur, donc il y a a cette date des valeurs HC et HP, on additionne HC avec la valeur deja existante (HP donc)
+                $return['consoCO2'][$consoHC[0]] = array($consoHC[0], $return['consoCO2'][$consoHC[0]][1] + $consoHC[1]);
+        //        log::add('suiviCO2', 'debug', 'Ds la boucle HP ET HC - costAboHeure : ' . $costAboHeure);
+                $return['total']['cost'] -= floatval($costAboHeure); // et on retire 1 fois l'abo cout heure qui a deja ete compté pour les HP ET les HC
+          //      log::add('suiviCO2', 'debug', 'On a un timestamp avec des data HP et HC : ' . $consoHC[0] . ' = ' . date('Y-m-d H:i:00', $consoHC[0]/1000));
+              }
+            } //*/
+
+
         }
+
+
+        // old algo
+        /*
+            // on va commencer par additionner nos datas HP et HC
+
+            // on stocke toutes les datas HP dans un nouveau tableau formaté pour le return
+            foreach ($return['consoHP'] as $consoHP) {
+              $return['consoCO2'][$consoHP[0]] = $consoHP;
+            }
+
+            // on ajoute toutes les datas HC
+            foreach ($return['consoHC'] as $consoHC) {
+
+              if(!isset($return['consoCO2'][$consoHC[0]])){
+                $return['consoCO2'][$consoHC[0]] = $consoHC;
+              } else { // on a deja une valeur, donc il y a a cette date des valeurs HC et HP, on additionne HC avec la valeur deja existante (HP donc)
+                $return['consoCO2'][$consoHC[0]] = array($consoHC[0], $return['consoCO2'][$consoHC[0]][1] + $consoHC[1]);
+        //        log::add('suiviCO2', 'debug', 'Ds la boucle HP ET HC - costAboHeure : ' . $costAboHeure);
+                $return['total']['cost'] -= floatval($costAboHeure); // et on retire 1 fois l'abo cout heure qui a deja ete compté pour les HP ET les HC
+          //      log::add('suiviCO2', 'debug', 'On a un timestamp avec des data HP et HC : ' . $consoHC[0] . ' = ' . date('Y-m-d H:i:00', $consoHC[0]/1000));
+              }
+            }
+
+            // pour chacune des valeur de l'API CO2 on cherche la conso associée pour la multiplier
+            foreach ($return['CO2API'] as $co2API) {
+
+              if(isset($return['consoCO2'][$co2API[0]])){
+                $value = $return['consoCO2'][$co2API[0]][1] * $co2API[1];
+                $return['consoCO2'][$co2API[0]] = array($co2API[0], $value);
+                $return['total']['co2'] += floatval($value / 1000);
+
+              }
+
+            }
+        */
 
         // TODO : virer les valeurs de conso enregistrées qui n'avaient pas de CO2 api associé
 
+        /********************* On formate tous nos tableaux avant de les renvoyer ********************/
+
+        if (isset($return['consoHP'])) {
+          sort($return['consoHP']);
+          $return['consoHP'] = array_values($return['consoHP']);
+        }
+        if (isset($return['consoHC'])) {
+          sort($return['consoHC']);
+          $return['consoHC'] = array_values($return['consoHC']);
+        }
+        if (isset($return['CO2API'])) {
+          sort($return['CO2API']);
+          $return['CO2API'] = array_values($return['CO2API']);
+        }
         if (isset($return['consoCO2'])) {
           sort($return['consoCO2']);
           $return['consoCO2'] = array_values($return['consoCO2']);
         }
-        /*******************/
+        if (isset($return['cost']['HP'])) {
+          sort($return['cost']['HP']);
+          $return['cost']['HP'] = array_values($return['cost']['HP']);
+        }
+        if (isset($return['cost']['HC'])) {
+          sort($return['cost']['HC']);
+          $return['cost']['HC'] = array_values($return['cost']['HC']);
+        }
+         if (isset($return['cost']['Abo'])) {
+          sort($return['cost']['Abo']);
+          $return['cost']['Abo'] = array_values($return['cost']['Abo']);
+        }
 
         $return['total']['cost'] = round($return['total']['cost'], 2);
         $return['total']['co2'] = round($return['total']['co2'], 2);
