@@ -34,6 +34,8 @@ require_once __DIR__  . '/../../../../core/php/core.inc.php';
         $test2 = date('H:i', strtotime($record_time . ' -15 min')); // on prend le $record_time au format H:i, on le converti en timestamp, on lui applique -15min et on le reconverti en format H:i
         log::add('suiviCO2', 'debug', 'Test dates : ' . $test2);
 
+        Tous les formats : https://www.php.net/manual/fr/function.date.php
+
         */
 
 /*          ce morceau de code va chercher tout l'historique de la commande et le loggue
@@ -106,6 +108,10 @@ class suiviCO2 extends eqLogic {
 
         foreach ($_typeConso as $_type) {
 
+      //    $nbcalculs = 0;
+          $nbdataimportees = 0;
+          $calculstarttime = date('H:i:s');
+
           // on recupere la cmd contenant l'index
           $index_cmd_id = $this->getConfiguration('index_' . $_type); //on va chercher l'id de la CMD contenant index_HP ou HC via la conf utilisateur, format #10#
 
@@ -131,18 +137,26 @@ class suiviCO2 extends eqLogic {
 
         //        log::add('suiviCO2', 'debug', 'Voici notre historique heures piles :' . $valueDateTime . ' : ' . $value);
 
-                foreach ($historyIndex as $history_prev) { // on cherche dans le meme historique si on a une donnée 1h avant
+                foreach ($historyIndex as $key => $history_prev) { // on cherche dans le meme historique si on a une donnée 1h avant
 
                   $valueDateTime_prev = $history_prev->getDatetime();
                   $value_prev = $history_prev->getValue();
 
                   $datetimecherchee = date('Y-m-d H:i:00', strtotime('-1 hour ' . $valueDateTime));
 
+              //    $nbcalculs++;
+
                   if ($valueDateTime_prev == $datetimecherchee){
 
                     $conso = round($value - $value_prev, 0);
                     $cmd->addHistoryValue($conso, $valueDateTime);
-                    log::add('suiviCO2', 'debug', 'Conso historique enregistrée en DB :' . $valueDateTime . ' : ' . $conso);
+                //    log::add('suiviCO2', 'debug', 'Conso historique enregistrée en DB :' . $valueDateTime . ' : ' . $conso);
+
+                    $nbdataimportees++;
+
+                    unset($historyIndex[$key]); // on vire la valeur 1h avant du tableau pour éviter de boucler inutilement dedans apres. Super optimisation de temps de calcul ca, divise par 8 le temps de calcul !
+                    break; // on a trouvé notre valeur 1h avant, donc on quitte la boucle. Bon gain de performance aussi. Permet de diviser le temps de calcul par 2 !
+                    // avant les 2 optimisations ci-dessus, on avait 50s pour 1 mois de data, now : 3s !! ;-)
 
                   }
 
@@ -153,6 +167,8 @@ class suiviCO2 extends eqLogic {
             } // fin foreach history
 
           } // fin if cmd
+
+          log::add('suiviCO2', 'debug', 'Import data ' . $_type . ' de ' . $_startDate . ' à ' . $_endDate . ', start à ' . $calculstarttime . ' fin à : ' . date('H:i:s') . ', nb data importées : ' . $nbdataimportees);
 
         } // fin foreach HP puis HC
 

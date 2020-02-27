@@ -96,7 +96,7 @@ try {
       }
       $return['date'] = $date; // je vois pas ou c'est utilisé apres, à virer ?
 
-      log::add('suiviCO2', 'debug', 'Dans ajax on a recu : ' . $eqLogic->getHumanName() . ' - ' . $date['start'] . ' - ' . $date['end']);
+  //    log::add('suiviCO2', 'debug', 'Dans ajax on a recu : ' . $eqLogic->getHumanName() . ' - ' . $date['start'] . ' - ' . $date['end']);
 
 
       $eqLogic->getAndRecordHistoriqueConso($date['start'], $date['end']);
