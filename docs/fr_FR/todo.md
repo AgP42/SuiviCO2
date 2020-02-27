@@ -1,0 +1,9 @@
+# TO DO
+
+- surveiller au prochain changement d'heure si les infos deconnent pas...
+- ajouter d'autres types d'inputs que des index edf ?
+- ajouter bouton pour importer historique de l'API consolidé et definitives
+- checker la mise en page pour differentes tailles d'écran et ajuster les dimensions
+- les boutons groupBy et choix de la période sont non cliquable sur écran trop peu larges...
+- Tester sur Jeedom v4 et refaire les copies d'écran pour le market
+- attentre les retours sur la beta...
