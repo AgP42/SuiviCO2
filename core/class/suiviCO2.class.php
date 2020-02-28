@@ -236,7 +236,7 @@ class suiviCO2 extends eqLogic {
               }
             }//*/
 
-            /************ Enregistrement des datas heures fixe en base de donnee ************/
+            /************ Enregistrement des datas en base de donnee ************/
 
             //on ne veux enregistrer que les heures piles (échantillonnage malheuresement sinon la fonction historisation de jeedom fait n importe quoi...)
      //       if(date('i', strtotime($record_time)) == "00"){ // on extrait le champ min et on verifie qu'il vaut 00
@@ -271,6 +271,55 @@ class suiviCO2 extends eqLogic {
          //   } // fin on a trouvé une heure entiere
           } // fin if on est dans un noeud avec un taux co2
         } //fin boucle dans toutes les datas recuperées
+      } //fin fonction
+
+      public function getAndRecordDataCo2Definitives($_nbRecordsAPI = 3000, $_date = ''){
+
+        $nbdataimportees = 0;
+        $calculstarttime = date('H:i:s');
+
+        //on va chercher les $_nbRecordsAPI dernieres data.
+        $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-cons-def&rows=' . $_nbRecordsAPI . '&sort=date_heure&refine.date_heure=' . $_date;
+        log::add('suiviCO2', 'debug', 'Appel API CO2, URL : ' . $url);
+
+        $request_http = new com_http($url);
+        $content = $request_http->exec(30);
+
+        if ($content === false) {
+          log::add('suiviCO2', 'error', 'Erreur lors de l appel API CO2, URL : ' . $url);
+          return;
+        }
+
+        //on decode le retour de l'API pour en faire un tableau
+        $json = json_decode($content, true);
+
+        //on va chercher dans le tableau les infos qui nous interessent (les 'records')
+        $apirecords = $json['records'];
+
+        $nbRecordsTraites = 0;
+
+        foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
+          if (isset($record['fields']['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
+
+            $record_date = $record['fields']['date']; // recu au format Y-m-d, ce qui demande Jeedom, donc c'est parfait
+            $record_time = $record['fields']['heure']; // recu au format H:i
+            $record_tauxco2 = $record['fields']['taux_co2'];
+
+            /************ Enregistrement des datas en base de donnee ************/
+
+         // on enregistre les infos dans la DB history avec la date donnéee dans le json
+         // pas besoin de verifier que la valeur existe pas encore, la DB gere unicité paire datetime/cmd
+            $cmd = $this->getCmd(null, 'co2kwhfromApi');
+            if (is_object($cmd)) {
+              $cmd->addHistoryValue($record_tauxco2, $record_date . ' ' . $record_time . ':00');
+              log::add('suiviCO2', 'debug', 'eqLogic_id : ' . $suiviCO2_id . ' - Taux_Co2 : ' . $record_tauxco2 . ' à : ' . $record_date . ' ' . $record_time . ':00');
+              $nbdataimportees++;
+            }
+
+          } // fin if on est dans un noeud avec un taux co2
+        } //fin boucle dans toutes les datas recuperées
+
+        log::add('suiviCO2', 'debug', 'Import data, date : ' . $_date . ', start à ' . $calculstarttime . ' fin à : ' . date('H:i:s') . ', nb data importées : ' . $nbdataimportees);
       } //fin fonction
 
       public static function cronHourly() {

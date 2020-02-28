@@ -12,6 +12,12 @@ $date = array(
   'end' => init('endDate', date('Y-m-d', strtotime('+1 days ' . date('Y-m-d')))),
 );//*/
 
+// initialise les dates du datepicker Co2_def quand on arrive sur la page : 2 mois avant now
+$dateCo2_def = array(
+  'start' => init('startDate', date('Y-m', strtotime('-2 month ' . date('Y-m-d')))),
+//  'end' => init('endDate', date('Y-m-d', strtotime('+1 days ' . date('Y-m-d')))),
+);//*/
+
 ?>
 
 <div class="row row-overflow">
@@ -191,17 +197,32 @@ $date = array(
         <br>
         <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-history"></i> {{Récupérer historique des données}}</legend>
+          <legend><i class="fas fa-history"></i> {{Récupérer historique des données CO2 par kWh en France}}</legend>
 
           <div class="form-group">
             <label class="col-sm-3 control-label">{{Données temps réel CO2 par kWh en France}}</label>
             <div class="col-sm-4">
               <a class="btn btn-success btn-sm" id="bt_historyCO2"><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
             </div>
+            <p class="col-sm-4">{{Il s'agit de 1 ou 2 mois des dernières données telles que publiées en temps réel par l'API}}</p>
           </div>
 
           <div class="form-group">
-            <label class="col-sm-3 control-label">{{Ma conso kWh (uniquement si les commandes contenant les index étaient déjà historisées dans jeedom)}}</label>
+            <label class="col-sm-3 control-label">{{Données consolidées et définitives CO2 par kWh en France}}</label>
+            <div class="col-sm-4">
+            <span>
+              <div>
+                {{Sélectionner un jour du mois voulu}} <input class="form-control input-sm in_datepicker_month_year" id='in_startDateCo2_def' style="display : inline-block; width: 150px;" value='<?php echo $dateCo2_def['start'] ?>'/>
+                <a class="btn btn-success btn-sm tooltips" id='bt_historyCo2_def'><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
+              </div>
+            </span>
+            </div>
+              <p class="col-sm-4">{{Il s'agit des donnés antérieures aux données Temps réel, aprés correction par les fournisseurs. Lancer cette fonction sur des données existantes dans Jeedom les écrasera avec les nouvelles valeurs. Fonction a lancer manuellement de temps à autre !}}</p>
+          </div>
+
+          <legend><i class="fas fa-history"></i> {{Récupérer historique de ma conso électrique}}</legend>
+          <div class="form-group">
+            <label class="col-sm-3 control-label">{{Ma conso kWh}}</label>
             <div class="col-sm-4">
             <span>
               <div>
@@ -211,6 +232,7 @@ $date = array(
               </div>
             </span>
             </div>
+            <p class="col-sm-4">{{Uniquement disponible si les commandes contenant les index étaient déjà historisées dans jeedom !)}}</p>
           </div>
 
           </fieldset>
