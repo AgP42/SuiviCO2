@@ -30,6 +30,16 @@ $(".in_datepicker_month_year").datepicker({
 
 });
 
+$('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').change(function () {
+  if($('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').value() == "gaz" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').value() == "fioul" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').value() == "other"){
+    $('.choix_taux_co2').show();
+    $('.historique_api_elec').hide();
+  } else {
+    $('.choix_taux_co2').hide();
+    $('.historique_api_elec').show();
+  }
+});
+
 $(".eqLogic").off('click','.listCmdInfo').on('click','.listCmdInfo', function () {
   var el = $(this).closest('.form-group').find('.eqLogicAttr');
   jeedom.cmd.getSelectModal({cmd: {type: 'info'}}, function (result) {

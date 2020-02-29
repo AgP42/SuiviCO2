@@ -119,10 +119,39 @@ $dateCo2_def = array(
 
       <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-bolt"></i> {{Index consommation électrique}}</legend>
+          <legend><i class="fas fa-bolt"></i> {{Type d'énergie}}</legend>
 
           <div class="form-group">
-            <label class="col-sm-2 control-label">{{Index fixe ou HP}}</label>
+            <label class="col-sm-2 control-label">{{Type d'énergie}}
+            </label>
+            <div class="col-sm-2">
+              <select class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="type">
+                <option value="elec">Electricité</option>
+                <option value="gaz">Gaz</option>
+                <option value="fioul">Fioul</option>
+                <option value="other">Autre</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="choix_taux_co2">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">{{Emission gCO2 par kWh}}</label>
+                <div class="col-sm-2">
+                    <input class="eqLogicAttr form-control" data-l1key="configuration"  data-l2key="gCO2_kwh"/>
+                </div>
+            </div>
+        </div>
+
+        </fieldset>
+      </form>
+
+      <form class="form-horizontal">
+        <fieldset>
+          <legend><i class="fas fa-bolt"></i> {{Index consommation}}</legend>
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{Index total ou HP}}</label>
             <div class="col-sm-4">
               <div class="input-group">
                 <input type="text" class="eqLogicAttr form-control tooltips roundedLeft" data-l1key="configuration" data-l2key="index_HP"/>
@@ -144,6 +173,7 @@ $dateCo2_def = array(
                 </div>
               </div>
             </div>
+
           </fieldset>
         </form>
 
@@ -151,7 +181,7 @@ $dateCo2_def = array(
 
         <form class="form-horizontal">
           <fieldset>
-            <legend><i class="fas fa-euro-sign"></i> {{Coût électricité}}</legend>
+            <legend><i class="fas fa-euro-sign"></i> {{Coût}}</legend>
 
             <div class="form-group">
               <label class="col-sm-2 control-label">{{Abonnement (€ TTC / mois)}}</label>
@@ -161,7 +191,7 @@ $dateCo2_def = array(
             </div>
 
             <div class="form-group">
-              <label class="col-sm-2 control-label">{{Tarif HP (€ TTC / kWh)}}</label>
+              <label class="col-sm-2 control-label">{{Tarif total ou HP (€ TTC / kWh)}}</label>
               <div class="col-sm-2">
                 <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="costHP" />
               </div>
@@ -197,9 +227,9 @@ $dateCo2_def = array(
         <br>
         <form class="form-horizontal">
         <fieldset>
-          <legend><i class="fas fa-history"></i> {{Récupérer historique des données CO2 par kWh en France}}</legend>
+          <legend class="historique_api_elec"><i class="fas fa-history"></i> {{Récupérer historique des données CO2 par kWh en France}}</legend>
 
-          <div class="form-group">
+          <div class="form-group historique_api_elec">
             <label class="col-sm-3 control-label">{{Données temps réel CO2 par kWh en France}}</label>
             <div class="col-sm-4">
               <a class="btn btn-success btn-sm" id="bt_historyCO2"><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
@@ -207,7 +237,7 @@ $dateCo2_def = array(
             <p class="col-sm-4">{{Il s'agit de 1 ou 2 mois des dernières données telles que publiées en temps réel par l'API}}</p>
           </div>
 
-          <div class="form-group">
+          <div class="form-group historique_api_elec">
             <label class="col-sm-3 control-label">{{Données consolidées et définitives CO2 par kWh en France}}</label>
             <div class="col-sm-4">
             <span>
@@ -220,7 +250,7 @@ $dateCo2_def = array(
               <p class="col-sm-4">{{Il s'agit des donnés antérieures aux données Temps réel, aprés correction par les fournisseurs. Lancer cette fonction sur des données existantes dans Jeedom les écrasera avec les nouvelles valeurs. Fonction a lancer manuellement de temps à autre !}}</p>
           </div>
 
-          <legend><i class="fas fa-history"></i> {{Récupérer historique de ma conso électrique}}</legend>
+          <legend><i class="fas fa-history"></i> {{Récupérer historique de ma conso}}</legend>
           <div class="form-group">
             <label class="col-sm-3 control-label">{{Ma conso kWh}}</label>
             <div class="col-sm-4">
