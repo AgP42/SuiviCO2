@@ -14,3 +14,4 @@
 # 0.0.2 - 2eme Beta
 
 - ajout de l'import des datas consolidées et définitives
+- correction typo
