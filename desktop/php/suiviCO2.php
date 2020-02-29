@@ -125,7 +125,7 @@ $dateCo2_def = array(
             <label class="col-sm-2 control-label">{{Type d'énergie}}
             </label>
             <div class="col-sm-2">
-              <select class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="type">
+              <select class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="conso_type">
                 <option value="elec">Electricité</option>
                 <option value="gaz">Gaz</option>
                 <option value="fioul">Fioul</option>

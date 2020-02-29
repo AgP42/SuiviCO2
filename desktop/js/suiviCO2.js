@@ -30,8 +30,8 @@ $(".in_datepicker_month_year").datepicker({
 
 });
 
-$('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').change(function () {
-  if($('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').value() == "gaz" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').value() == "fioul" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').value() == "other"){
+$('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').change(function () {
+  if($('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "gaz" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "fioul" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "other"){
     $('.choix_taux_co2').show();
     $('.historique_api_elec').hide();
   } else {
