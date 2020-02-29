@@ -15,7 +15,20 @@
  * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
  */
 
-$(".in_datepicker").datepicker();
+$(".in_datepicker").datepicker({
+    changeMonth: true,
+    changeYear: true,
+});
+
+$(".in_datepicker_month_year").datepicker({
+  changeMonth: true,
+  changeYear: true,
+  dateFormat: 'yy-mm',
+  onClose: function(dateText, inst) {
+      $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+  }
+
+});
 
 $(".eqLogic").off('click','.listCmdInfo').on('click','.listCmdInfo', function () {
   var el = $(this).closest('.form-group').find('.eqLogicAttr');
@@ -54,6 +67,37 @@ $('#bt_historyCO2').on('click', function () {
                 }
             });
         }
+    });
+});
+
+$('#bt_historyCo2_def').on('click', function () {
+
+    bootbox.confirm('{{L\'opération peut être longue, environ 20s sur un RPI3}}', function (result) {
+        if (result) {
+
+//          $('#div_alert').showAlert({message: 'Mois demandé ' + $('#in_startDateCo2_def').value(), level: 'success'});
+
+            $.ajax({
+                type: 'POST',
+                url: 'plugins/suiviCO2/core/ajax/suiviCO2.ajax.php',
+                data: {
+                    action: 'getHistoriqueCo2Def',
+                    id: $('.eqLogicAttr[data-l1key=id]').value(),
+                    date : $('#in_startDateCo2_def').value(),
+                },
+                dataType: 'json',
+                error: function (request, status, error) {
+                    handleAjaxError(request, status, error);
+                },
+                success: function (data) {
+                    if (data.state != 'ok') {
+                        $('#div_alert').showAlert({message: data.result, level: 'danger'});
+                        return;
+                    }
+                    $('#div_alert').showAlert({message: 'Historique du ' + $('#in_startDateCo2_def').value() + 'chargé avec succès', level: 'success'});
+                }
+            }); //*/
+        } // fin if result (bouton du pop up)
     });
 });
 

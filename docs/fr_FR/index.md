@@ -50,7 +50,9 @@ Onglet Historique
 
 Le plugin chargera les données de l'API ainsi que le calcul de nos consommations toutes les heures, toutefois vous pouvez récuperer ici les données passés :
 
-- Données temps réel CO2 par kWh en France : cette commande va chercher les données de l'API "temps réel", c'est à dire les données prévisionnelles, par 15 min, qui sont mises à jour toutes les heures. Cette commande permet de recuperer la totalité des données présentes sur le serveur, c'est à dire environ 1,5 mois de données. Le temps de chargement prend environ 1 min avec un RPI3 et une connection internet correcte.
+- Données temps réel CO2 par kWh en France : cette commande va chercher les données de l'API "temps réel", c'est à dire les données prévisionnelles, par 15 min, qui sont mises à jour toutes les heures. Cette commande permet de récuperer la totalité des données présentes sur le serveur, c'est à dire environ 1,5 mois de données. Le temps de chargement prend environ 1 min avec un RPI3 et une connection internet correcte.
+
+- Données consolidées et définitives CO2 par kWh en France : cette commande va chercher les données de l'API "consolidées et définitives", c'est à dire des données plus proches de la réalité suite à la prise en compte d'informations plus completes et détaillées. Ces informations sont mises à jour tous les jours et contiennent toutes les dates antérieures aux données "temps réel" depuis janvier 2012. Pour limiter le temps de chargement (environ 20s avec un RPI3 et une connection internet correcte), il est demandé de recuperer les informations mois par mois.
 
 - Ma conso kWh : uniquement si les commandes contenant les index étaient déjà historisées dans jeedom. Cette commande permet avec les données d'index historisées de calculer et d'enregistrer vos conso HP et HC pour les visualiser dans le panneau desktop. Il est possible de choisir la période voulue, attention, les données peuvent être longues à charger.
 Pour infos voici quelques durées avec un RPI3 :

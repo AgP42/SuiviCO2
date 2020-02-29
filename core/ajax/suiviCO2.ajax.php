@@ -84,6 +84,24 @@ try {
       ajax::success($return);
     }
 
+    if (init('action') == 'getHistoriqueCo2Def') {
+
+      $eqLogic = eqLogic::byId(init('id'));
+      if (!is_object($eqLogic)) {
+        throw new Exception(__('Equipement introuvable : ', __FILE__) . init('id'));
+      }
+
+      $date = init('date');
+
+      $_nbRecordsAPI = 3000;
+
+      log::add('suiviCO2', 'debug', 'Recu dans ajax : ' . $date . ' - pour l eqLogic '  . init('id'));
+
+      $eqLogic->getAndRecordDataCo2Definitives($_nbRecordsAPI, $date);
+
+      ajax::success($return);
+    }
+
     if (init('action') == 'getHistoriqueConso') {
 
       // initialise les variables locales avec les infos de la conf from le JS
