@@ -171,32 +171,34 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
       drawSimpleGraph('div_chartCost', series, ' €');
 
 
+      if(conso_type == 'elec'){
       // pour le graph CO2 API
-      var series = []
+        var series = []
 
-      series.push({
-        step: true,
-        name: 'Emission CO2 par kWh produit en France',
-        data: data.result.datas.CO2API,
-        type: 'spline',
-        color: '#558000',
-        stack : 1,
-  //      unite : 'gCO2',
-        stacking : 'normal',
-        dataGrouping: {
-            approximation: "average",
-            enabled: true,
-            forced: true,
-            units: [[groupBy,[1]]]
-        },
-        tooltip: {
-  //          valueDecimals: 2,
-            pointFormat: '<span style="color:{series.color}"></span><b>{point.y}</b><br/>',
-            valueSuffix: ' gCO2/kWh'
-        },
-      });
+        series.push({
+          step: true,
+          name: 'Emission CO2 par kWh produit en France',
+          data: data.result.datas.CO2API,
+          type: 'spline',
+          color: '#558000',
+          stack : 1,
+    //      unite : 'gCO2',
+          stacking : 'normal',
+          dataGrouping: {
+              approximation: "average",
+              enabled: true,
+              forced: true,
+              units: [[groupBy,[1]]]
+          },
+          tooltip: {
+    //          valueDecimals: 2,
+              pointFormat: '<span style="color:{series.color}"></span><b>{point.y}</b><br/>',
+              valueSuffix: ' gCO2/kWh'
+          },
+        });
 
-      drawSimpleGraph('div_chartCO2parkWh', series); // données brut API
+        drawSimpleGraph('div_chartCO2parkWh', series); // données brut API
+      }
 
 
       // pour le graph conso kWh HP et HC
