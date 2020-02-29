@@ -174,8 +174,22 @@ if (init('groupBy', 'day') == 'year') { // quand on selectionne "year", on prend
 
     <?php
     $eqLogic = eqLogic::byId($eqLogic_id);
-    if($eqLogic->getConfiguration('conso_type') == 'elec') {
-      sendVarToJs('conso_type', 'elec');
+    $conso_type = $eqLogic->getConfiguration('conso_type');
+
+    $costAbo = str_replace(',', '.', $eqLogic->getConfiguration('costAbo')); // si on a une , au lieu d'un . on va la remplacer
+    $costHP = str_replace(',', '.', $eqLogic->getConfiguration('costHP'));
+    $costHC = str_replace(',', '.', $eqLogic->getConfiguration('costHC'));
+
+    if($costAbo == '' && $costHP == '' && $costHC == ''){
+      $no_cost = true;
+    } else {
+      $no_cost = false;
+    }
+
+    sendVarToJs('conso_type', $conso_type);
+    sendVarToJs('cost_to_display', !$no_cost);
+
+    if($conso_type == 'elec' && !$no_cost) { // type elec et on a des couts
       echo '
       <!-- moitier haute avec 2 graphs en ligne -->
       <div class="row">
@@ -201,10 +215,31 @@ if (init('groupBy', 'day') == 'year') { // quand on selectionne "year", on prend
         </div>
       </div>
       ';
-    } else {
-      sendVarToJs('conso_type', 'not_elec');
+    } elseif ($conso_type == 'elec' && $no_cost) { // type elect mais pas de couts
       echo '
-      <!-- moitier haute avec 2 graphs en ligne -->
+      <!-- moitier haute avec 1 graph en ligne -->
+      <div class="row">
+        <div class="col-lg-12">
+          <legend><i class="fas fa-bolt"></i>  {{Mes émissions gCO2}}</legend>
+          <div id="div_chartConsoCO2"></div>
+        </div>
+      </div>
+
+      <!-- moitier basse avec 1 graph en ligne -->
+      <div class="row">
+      <div class="col-lg-6">
+        <legend><i class="fas fa-leaf"></i>  {{gCO2 émis par kWh en France}}</legend>
+        <div id="div_chartCO2parkWh"></div>
+      </div>
+        <div class="col-lg-6">
+          <legend><i class="fas fa-bolt"></i>  {{Ma conso kWh}}</legend>
+          <div id="div_chartConsokWh"></div>
+        </div>
+      </div>
+      ';
+    } elseif ($conso_type != 'elec' && !$no_cost) { // pas elec mais des couts
+      echo '
+      <!-- moitier haute avec 1 graph en ligne -->
       <div class="row">
         <div class="col-lg-12">
           <legend><i class="fas fa-bolt"></i>  {{Mes émissions gCO2}}</legend>
@@ -219,6 +254,24 @@ if (init('groupBy', 'day') == 'year') { // quand on selectionne "year", on prend
           <div id="div_chartCost"></div>
         </div>
         <div class="col-lg-6">
+          <legend><i class="fas fa-bolt"></i>  {{Ma conso kWh}}</legend>
+          <div id="div_chartConsokWh"></div>
+        </div>
+      </div>
+      ';
+    } elseif ($conso_type != 'elec' && $no_cost) { // pas elec et pas de couts
+      echo '
+      <!-- moitier haute avec 1 graph en ligne -->
+      <div class="row">
+        <div class="col-lg-12">
+          <legend><i class="fas fa-bolt"></i>  {{Mes émissions gCO2}}</legend>
+          <div id="div_chartConsoCO2"></div>
+        </div>
+      </div>
+
+      <!-- moitier basse avec 1 graph en ligne -->
+      <div class="row">
+        <div class="col-lg-12">
           <legend><i class="fas fa-bolt"></i>  {{Ma conso kWh}}</legend>
           <div id="div_chartConsokWh"></div>
         </div>
