@@ -34,14 +34,14 @@ Cliquer sur la commande permet de visualiser son historique :
 ### Configuration pour équipement électrique :
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/OngletEquipementElec.png)
 - Choisir Type d'énergie "Electricité"
-- Index de consommation à fournir en Wh (unité de base de la téléinformation). Si vous n'avez pas d'heures creuses, laisser le champs vide
+- Index de consommation à fournir en Wh (unité de base de la téléinformation). Si vous n'avez pas d'heures creuses, laisser le champs vide. Si votre consommation n'est pas en Wh, vous pouvez remplir le champ "Coefficient" permettant de réaliser la conversion d'unité.
 - Remplir vos coûts d'abonnement et de consommation par kWh
 
 ### Configuration pour équipement de type gaz, fioul ou autre :
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/OngletEquipementOther.png)
 - Choisir Type d'énergie voulu
 - Fournir la valeur de g de CO2 émis par kWh consommé. Ce champs n'est pas à fournir pour l'électricité car l'information provient alors d'une API avec actualisation toutes les 15 min. Cette valeur usuelle pour votre type d'énergie se trouve sur internet.
-- Index de consommation à fournir en Wh. Si vous n'avez pas d'heures creuses, laisser le champs vide. Si votre consommation n'est pas en Wh, vous pouvez remplir le champ "Coefficient thermique" permettant de réaliser la conversion d'unité. Ce Coefficient est normalement donné sur votre facture, il dépend notamment de votre région.
+- Index de consommation à fournir en Wh. Si vous n'avez pas d'heures creuses, laisser le champs vide. Si votre consommation n'est pas en Wh, vous pouvez remplir le champ "Coefficient" permettant de réaliser la conversion d'unité. Ce Coefficient est normalement donné sur votre facture, il dépend notamment de votre région.
 - Remplir vos coûts d'abonnement et de consommation par kWh.
 
 Onglet Commandes

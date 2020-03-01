@@ -89,9 +89,9 @@ class suiviCO2 extends eqLogic {
           //on calcule la consommation entre les 2 derniers index
           $consumption = $index - $lastValue;
 
-          //si on est PAS en conso de type elec, et qu'on a un coef_thermique declaré, on va l'utiliser
-          if($suiviCO2->getConfiguration('conso_type') != 'elec' && $suiviCO2->getConfiguration('coef_thermique') != ''){
-            $coef_thermique = $suiviCO2->getConfiguration('coef_thermique');
+          //si on a un coef declaré et numerique, on va l'utiliser
+          $coef_thermique = $suiviCO2->getConfiguration('coef_thermique');
+          if($coef_thermique != '' && is_numeric($coef_thermique)){
             $consumption = $consumption*$coef_thermique;
           }
 
@@ -159,8 +159,9 @@ class suiviCO2 extends eqLogic {
 
                   if ($valueDateTime_prev == $datetimecherchee){
 
-                    if($this->getConfiguration('conso_type') != 'elec' && $this->getConfiguration('coef_thermique') != ''){ //si on est PAS en conso de type elec, et qu'on a un coef_thermique declaré, on va l'utiliser
-                      $coef_thermique = $this->getConfiguration('coef_thermique');
+                    //si on a un coef declaré et numerique, on va l'utiliser
+                    $coef_thermique = $this->getConfiguration('coef_thermique');
+                    if($coef_thermique != '' && is_numeric($coef_thermique)){
                       $conso = round($value*$coef_thermique - $value_prev*$coef_thermique, 0);
               //        log::add('suiviCO2', 'debug', 'coef_thermique :' . $coef_thermique . ' - conso calculée : ' . $conso);
                     } else {
