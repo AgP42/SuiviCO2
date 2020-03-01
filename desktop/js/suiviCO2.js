@@ -30,6 +30,16 @@ $(".in_datepicker_month_year").datepicker({
 
 });
 
+$('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').change(function () {
+  if($('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "gaz" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "fioul" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "other"){
+    $('.type_gaz_fioul_autre').show();
+    $('.type_elec').hide();
+  } else {
+    $('.type_gaz_fioul_autre').hide();
+    $('.type_elec').show();
+  }
+});
+
 $(".eqLogic").off('click','.listCmdInfo').on('click','.listCmdInfo', function () {
   var el = $(this).closest('.form-group').find('.eqLogicAttr');
   jeedom.cmd.getSelectModal({cmd: {type: 'info'}}, function (result) {

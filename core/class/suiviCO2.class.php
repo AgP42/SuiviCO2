@@ -76,6 +76,7 @@ class suiviCO2 extends eqLogic {
           //on va chercher l'info index_HP ou HC via la conf utilisateur
           $index = jeedom::evaluateExpression($suiviCO2->getConfiguration('index_' . $_type));
 
+
           //on recupere la precedente valeur stockée, selon HP ou HC
           $lastValue = $suiviCO2->getConfiguration('lastValue' . $_type);
 
@@ -88,6 +89,12 @@ class suiviCO2 extends eqLogic {
           //on calcule la consommation entre les 2 derniers index
           $consumption = $index - $lastValue;
 
+          //si on est PAS en conso de type elec, et qu'on a un coef_thermique declaré, on va l'utiliser
+          if($suiviCO2->getConfiguration('conso_type') != 'elec' && $suiviCO2->getConfiguration('coef_thermique') != ''){
+            $coef_thermique = $suiviCO2->getConfiguration('coef_thermique');
+            $consumption = $consumption*$coef_thermique;
+          }
+
           //si cette consommation est >0, on va la stocker en base - NON, il faut stocker les 0 sinon l'archivage de l'historique fait n'importe quoi... dommage de stocker des 0...
           // TODO a ameliorer...
 
@@ -95,14 +102,14 @@ class suiviCO2 extends eqLogic {
             $cmd = $suiviCO2->getCmd(null, 'consumption' . $_type);
             if (is_object($cmd)) {
               $cmd->setCollectDate($datetime);
-              log::add('suiviCO2', 'debug', 'eqLogic_id : ' . $suiviCO2->getId() . ' - Index now ' . $_type . ' : ' . $index . ' - Prev Index '  . $_type . ' : ' . $lastValue . ' = conso ' . $_type . ' (Wh) : ' . $consumption);
+        //      log::add('suiviCO2', 'debug', 'eqLogic_id : ' . $suiviCO2->getId() . ' - Index now ' . $_type . ' : ' . $index . ' - Prev Index '  . $_type . ' : ' . $lastValue . ' = conso ' . $_type . ' (Wh) : ' . $consumption);
               $cmd->event($consumption);
             }
           }
 
       }
 
-      public function getAndRecordHistoriqueConso($_startDate, $_endDate){
+      public function getAndRecordHistoriqueConso($_startDate, $_endDate){ // fct appelée par l'AJAX
 
         if($this->getConfiguration('index_HC')!=''){
           $_typeConso = array('HP', 'HC');
@@ -152,7 +159,14 @@ class suiviCO2 extends eqLogic {
 
                   if ($valueDateTime_prev == $datetimecherchee){
 
-                    $conso = round($value - $value_prev, 0);
+                    if($this->getConfiguration('conso_type') != 'elec' && $this->getConfiguration('coef_thermique') != ''){ //si on est PAS en conso de type elec, et qu'on a un coef_thermique declaré, on va l'utiliser
+                      $coef_thermique = $this->getConfiguration('coef_thermique');
+                      $conso = round($value*$coef_thermique - $value_prev*$coef_thermique, 0);
+              //        log::add('suiviCO2', 'debug', 'coef_thermique :' . $coef_thermique . ' - conso calculée : ' . $conso);
+                    } else {
+                      $conso = round($value - $value_prev, 0);
+                    }
+
                     $cmd->addHistoryValue($conso, $valueDateTime);
                 //    log::add('suiviCO2', 'debug', 'Conso historique enregistrée en DB :' . $valueDateTime . ' : ' . $conso);
 
@@ -178,7 +192,7 @@ class suiviCO2 extends eqLogic {
 
       } // fin fct
 
-      public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 10, $_eqLogic_id = NULL){
+      public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 10, $_eqLogic_id = NULL){ // fct appellée soit par l'AJAX, soit par le crouHourly
 
         /* *************** Infos sur l'API opendata.reseaux-energies.fr
         96 données par jours
@@ -273,7 +287,7 @@ class suiviCO2 extends eqLogic {
         } //fin boucle dans toutes les datas recuperées
       } //fin fonction
 
-      public function getAndRecordDataCo2Definitives($_nbRecordsAPI = 3000, $_date = ''){
+      public function getAndRecordDataCo2Definitives($_nbRecordsAPI = 3000, $_date = ''){ // fct appellée par l'AJAX
 
         $nbdataimportees = 0;
         $calculstarttime = date('H:i:s');
@@ -322,6 +336,7 @@ class suiviCO2 extends eqLogic {
         log::add('suiviCO2', 'debug', 'Import data, date : ' . $_date . ', start à ' . $calculstarttime . ' fin à : ' . date('H:i:s') . ', nb data importées : ' . $nbdataimportees);
       } //fin fonction
 
+      // Fonction exécutée automatiquement toutes les heures par Jeedom
       public static function cronHourly() {
         $datetime = date('Y-m-d H:i:00');
 
@@ -340,9 +355,11 @@ class suiviCO2 extends eqLogic {
 
         } // fin foreach equipement
 
-        //appel de l'api et stock des données en base
-        sleep(60);//attend 1 min, si execution à l'heure pile on recoit pas les datas (due a la mise à jour de l'API)
-        self::getAndRecordDataCo2();
+        //appel de l'api et stock des données en base, si on est en type elec
+        if($suiviCO2->getConfiguration('conso_type') == 'elec'){ //si on est en conso de type elec
+          sleep(60);//attend 1 min, si execution à l'heure pile on recoit pas les datas (due a la mise à jour de l'API)
+          self::getAndRecordDataCo2();
+        }
 
       } //fin fonction cron
 
@@ -364,13 +381,8 @@ class suiviCO2 extends eqLogic {
 
     /*     * *********************Méthodes d'instance************************* */
 
-    /*ce morceau de code va chercher tout l'historique de la commande et le loggue
-            $previous = $cmd->getHistory();
-            foreach ($previous as $value) {
-              log::add('suiviCO2', 'debug', ' previous : ' . $value->getValue());*/
-
+    // fonction appellée via l'AJAX pour l'affichage du panel
     public function getGraphsDatasSuiviCO2($_startDate = null, $_endDate = null) {
-
 
       $return = array(
         'consoHP' => array(), // conso kWh HP
@@ -385,7 +397,7 @@ class suiviCO2 extends eqLogic {
         ),
       );
 
-      /******** Aller chercher et formater les infos de cout EDF *********/
+      /******** Aller chercher et formater les infos de cout elec ou autre *********/
       $costAbo = str_replace(',', '.', $this->getConfiguration('costAbo')); // si on a une , au lieu d'un . on va la remplacer
       $costHP = str_replace(',', '.', $this->getConfiguration('costHP'));
       $costHC = str_replace(',', '.', $this->getConfiguration('costHC'));
@@ -399,7 +411,7 @@ class suiviCO2 extends eqLogic {
         return array();
       }
 
-      $calculstarttime = date('H:i:s');
+      $calculstarttime = date('H:i:s'); // pour debug only
 
       // on boucle dans toutes les valeurs de l'historique de la cmd HP
       foreach ($cmdConsoHP->getHistory($_startDate, $_endDate) as $history) {
@@ -454,23 +466,27 @@ class suiviCO2 extends eqLogic {
     //   log::add('suiviCO2', 'debug', 'Calculs pour conso HC et cost HC de ' . $_startDate . ' à ' . $_endDate . ', start à ' . $calculstarttime . ' fin à : ' . date('H:i:s'));
 
         /********************* Calculs pour les valeurs CO2 from API ********************/
-        // on recupere la cmd
-        $cmdCO2API = $this->getCmd(null, 'co2kwhfromApi');
-        if (!is_object($cmdCO2API)) {
-          return array();
-        }
 
-  //      $calculstarttime = date('H:i:s');
+        if($this->getConfiguration('conso_type') == 'elec'){ //si on est en conso de type elec, on va chercher les infos de l'API pour afficher le graph, sinon on passe
 
-        // on boucle dans toutes les valeurs de l'historique de la cmd
-        foreach ($cmdCO2API->getHistory($_startDate, $_endDate) as $history) {
+          // on recupere la cmd
+          $cmdCO2API = $this->getCmd(null, 'co2kwhfromApi');
+          if (!is_object($cmdCO2API)) {
+            return array();
+          }
 
-          $valueDateTime = $history->getDatetime();
-          $value = $history->getValue();
+    //      $calculstarttime = date('H:i:s');
 
-          // on retourne un tableau avec en index la datetime et en valeurs le couple timestamp, valeur
-          if($value != 0){
-            $return['CO2API'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value));
+          // on boucle dans toutes les valeurs de l'historique de la cmd
+          foreach ($cmdCO2API->getHistory($_startDate, $_endDate) as $history) {
+
+            $valueDateTime = $history->getDatetime();
+            $value = $history->getValue();
+
+            // on retourne un tableau avec en index la datetime et en valeurs le couple timestamp, valeur
+            if($value != 0){
+              $return['CO2API'][$valueDateTime] = array(floatval(strtotime($valueDateTime . " UTC")) * 1000, floatval($value));
+            }
           }
         }
 
@@ -482,50 +498,91 @@ class suiviCO2 extends eqLogic {
         $return['consoHP']
         $return['consoHC']
 
+
 */
   //      $calculstarttime = date('H:i:s');
 
     //    log::add('suiviCO2', 'debug', '###################### Calculs pour la conso CO2 ##########################');
-        // pour chacune des valeur de l'API CO2 on cherche la conso associée pour la multiplier
-        foreach ($return['CO2API'] as $co2API) {
+        if($this->getConfiguration('conso_type') == 'elec'){ //si on est en conso de type elec, on va utiliser les infos de l'API
 
-          foreach ($return['consoHP'] as $consoHP) { // on tourne maintenant dans les HP
-            if($co2API[0] == $consoHP[0]){ // on est au meme timestamp sur la boucle CO2API et ConsoHP
+          // pour chacune des valeur de l'API CO2 on cherche la conso associée pour la multiplier
+          foreach ($return['CO2API'] as $co2API) {
 
-              $value = $consoHP[1] * $co2API[1];
-              $return['consoCO2'][$co2API[0]] = array($co2API[0], $value);
-              $return['total']['co2'] += floatval($value / 1000);
-          //    log::add('suiviCO2', 'debug', 'Ds la boucle API puis boucle Conso HP : ' . date('Y-m-d H:i:00', $consoHP[0]/1000) . ' valeur Conso HP : ' . $consoHP[1] . ' resultat co2*conso : ' . $value);
-              break;
+            foreach ($return['consoHP'] as $consoHP) { // on tourne maintenant dans les HP
+              if($co2API[0] == $consoHP[0]){ // on est au meme timestamp sur la boucle CO2API et ConsoHP
+
+                $value = $consoHP[1] * $co2API[1];
+                $return['consoCO2'][$co2API[0]] = array($co2API[0], $value);
+                $return['total']['co2'] += floatval($value / 1000);
+            //    log::add('suiviCO2', 'debug', 'Ds la boucle API puis boucle Conso HP : ' . date('Y-m-d H:i:00', $consoHP[0]/1000) . ' valeur Conso HP : ' . $consoHP[1] . ' resultat co2*conso : ' . $value);
+                break;
+              }
             }
+
+            if($this->getConfiguration('index_HC')!=''){ //si on a une commande HC definie
+              // on ajoute toutes les datas HC
+              foreach ($return['consoHC'] as $consoHC) {
+                if($co2API[0] == $consoHC[0]){ // on est au meme timestamp sur la boucle CO2API et ConsoHC
+
+                  $value = $consoHC[1] * $co2API[1];
+
+                  if(!isset($return['consoCO2'][$consoHC[0]])){ // si c'est vide, on a donc que des HC a ce timestamp
+
+             //       log::add('suiviCO2', 'debug', 'Ds la boucle API puis boucle Conso   HC - uniquement du HC now : ' . date('Y-m-d H:i:00', $consoHC[0]/1000) . ' valeur conso HC : ' . $consoHC[1] . ' resultat co2*conso : ' . $value);
+
+                    $return['consoCO2'][$co2API[0]] = array($co2API[0], $value);
+
+                  } else { // on avait deja une valeur, il faut ajouter la nouvelle
+
+                    $return['consoCO2'][$co2API[0]] = array($co2API[0], $return['consoCO2'][$co2API[0]][1] + $value);
+                    $return['total']['cost'] -= floatval($costAboHeure); // et on retire 1 fois l'abo cout heure qui a deja ete compté pour les HP ET les HC
+               //     log::add('suiviCO2', 'debug', 'Ds la boucle API puis boucle Conso   HC - avec deja du HP present : ' . date('Y-m-d H:i:00', $consoHC[0]/1000) . ' valeur conso HC : ' . $consoHC[1] . ' resultat co2*conso : ' . $value . ' total : ' . $return['consoCO2'][$co2API[0]][1] + $value);
+                  }
+
+                  $return['total']['co2'] += floatval($value / 1000);
+                  break;
+                }
+              } // fin foreach HC
+            } // fin if on a des HC
+          } // fin foreach API co2
+        } else { // on est en gaz ou fioul ou autre, on prend la valeur donnée dans la configuration
+
+          $gCO2_kwh = str_replace(',', '.', $this->getConfiguration('gCO2_kwh')); // on choppe la valeur donnée par l'utilisateur
+
+          foreach ($return['consoHP'] as $consoHP) { // on tourne dans les HP
+
+            $value = $consoHP[1] * $gCO2_kwh;
+            $return['consoCO2'][$consoHP[0]] = array($consoHP[0], $value);
+            $return['total']['co2'] += floatval($value / 1000);
+      //      log::add('suiviCO2', 'debug', 'Ds la boucle Conso HP : ' . date('Y-m-d H:i:00', $consoHP[0]/1000) . ' valeur Conso HP : ' . $consoHP[1] . ' resultat co2*conso : ' . $value);
+
           }
 
           if($this->getConfiguration('index_HC')!=''){ //si on a une commande HC definie
             // on ajoute toutes les datas HC
             foreach ($return['consoHC'] as $consoHC) {
-              if($co2API[0] == $consoHC[0]){ // on est au meme timestamp sur la boucle CO2API et ConsoHC
 
-                $value = $consoHC[1] * $co2API[1];
+              $value = $consoHC[1] * $gCO2_kwh;
 
-                if(!isset($return['consoCO2'][$consoHC[0]])){ // si c'est vide, on a donc que des HC a ce timestamp
+              if(!isset($return['consoCO2'][$consoHC[0]])){ // si c'est vide, on a donc que des HC a ce timestamp
 
-           //       log::add('suiviCO2', 'debug', 'Ds la boucle API puis boucle Conso   HC - uniquement du HC now : ' . date('Y-m-d H:i:00', $consoHC[0]/1000) . ' valeur conso HC : ' . $consoHC[1] . ' resultat co2*conso : ' . $value);
+      //         log::add('suiviCO2', 'debug', 'Ds la boucle Conso   HC - uniquement du HC now : ' . date('Y-m-d H:i:00', $consoHC[0]/1000) . ' valeur conso HC : ' . $consoHC[1] . ' resultat co2*conso : ' . $value);
 
-                  $return['consoCO2'][$co2API[0]] = array($co2API[0], $value);
+                $return['consoCO2'][$consoHC[0]] = array($consoHC[0], $value);
 
-                } else { // on avait deja une valeur, il faut ajouter la nouvelle
+              } else { // on avait deja une valeur, il faut ajouter la nouvelle et deduire le doublons de l'abo dans le cout global
 
-                  $return['consoCO2'][$co2API[0]] = array($co2API[0], $return['consoCO2'][$co2API[0]][1] + $value);
-                  $return['total']['cost'] -= floatval($costAboHeure); // et on retire 1 fois l'abo cout heure qui a deja ete compté pour les HP ET les HC
-             //     log::add('suiviCO2', 'debug', 'Ds la boucle API puis boucle Conso   HC - avec deja du HP present : ' . date('Y-m-d H:i:00', $consoHC[0]/1000) . ' valeur conso HC : ' . $consoHC[1] . ' resultat co2*conso : ' . $value . ' total : ' . $return['consoCO2'][$co2API[0]][1] + $value);
-                }
-
-                $return['total']['co2'] += floatval($value / 1000);
-                break;
+                $return['consoCO2'][$consoHC[0]] = array($consoHC[0], $return['consoCO2'][$consoHC[0]][1] + $value);
+                $return['total']['cost'] -= floatval($costAboHeure); // et on retire 1 fois l'abo cout heure qui a deja ete compté pour les HP ET les HC
+      //          log::add('suiviCO2', 'debug', 'Ds la boucle Conso   HC - avec deja du HP present : ' . date('Y-m-d H:i:00', $consoHC[0]/1000) . ' valeur conso HC : ' . $consoHC[1] . ' resultat co2*conso : ' . $value . ' total : ' . $return['consoCO2'][$consoHC[0]][1] + $value);
               }
+
+              $return['total']['co2'] += floatval($value / 1000);
+
             } // fin foreach HC
           } // fin if on a des HC
-        } // fin foreach API co2
+        } // fin else, on est pas en type "elec"
+
 
   //      log::add('suiviCO2', 'debug', 'Calculs pour la conso CO2 selon conso HP et HC de ' . $_startDate . ' à ' . $_endDate . ', start à ' . $calculstarttime . ' fin à : ' . date('H:i:s'));
 
@@ -571,11 +628,6 @@ class suiviCO2 extends eqLogic {
 
 
         return $return;
-    }
-
-    public function consoco2($_startDate = null, $_endDate = null) {
-
-      return $return;
     }
 
 
@@ -637,23 +689,30 @@ class suiviCO2 extends eqLogic {
         log::add('suiviCO2', 'warning', 'Pas de commande dans le champs HC');
       }
 
-      // cmd qui va historiser les valeurs de l'API
-      $cmd = $this->getCmd(null, 'co2kwhfromApi');
-      if (!is_object($cmd)) {
-        $cmd = new suiviCO2Cmd();
-        $cmd->setLogicalId('co2kwhfromApi');
-    //    $cmd->setTemplate('dashboard', 'tile');
-        $cmd->setIsVisible(1);
+      if($this->getConfiguration('conso_type')== 'elec'){ //si on est en conso de type elec
+        // cmd qui va historiser les valeurs de l'API
+        $cmd = $this->getCmd(null, 'co2kwhfromApi');
+        if (!is_object($cmd)) {
+          $cmd = new suiviCO2Cmd();
+          $cmd->setLogicalId('co2kwhfromApi');
+      //    $cmd->setTemplate('dashboard', 'tile');
+          $cmd->setIsVisible(1);
+        }
+        $cmd->setIsHistorized(1);
+        $cmd->setConfiguration('historizeMode', 'avg'); //max, min, avg, none. a 16:00 il min, max ou avg sur toutes les valeurs de 16:xx. None : il supprime juste les doublons aux dates successives
+        $cmd->setConfiguration('historizeRound', 2);
+        $cmd->setName(__('gCO2/kWh électricité', __FILE__));
+        $cmd->setEqLogic_id($this->getId());
+        $cmd->setType('info');
+        $cmd->setSubType('numeric');
+        $cmd->setUnite('gCO2');
+        $cmd->save();
+      } else { // sinon et si la commande existait deja, on va la supprimer
+          $cmd = $this->getCmd(null, 'co2kwhfromApi');
+          if (is_object($cmd)) {
+            $cmd->remove();
+          }
       }
-      $cmd->setIsHistorized(1);
-      $cmd->setConfiguration('historizeMode', 'avg'); //max, min, avg, none. a 16:00 il min, max ou avg sur toutes les valeurs de 16:xx. None : il supprime juste les doublons aux dates successives
-      $cmd->setConfiguration('historizeRound', 2);
-      $cmd->setName(__('gCO2/kWh produit - Fr', __FILE__));
-      $cmd->setEqLogic_id($this->getId());
-      $cmd->setType('info');
-      $cmd->setSubType('numeric');
-      $cmd->setUnite('gCO2');
-      $cmd->save();
 
     }
 
@@ -663,6 +722,10 @@ class suiviCO2 extends eqLogic {
 
       if ($this->getConfiguration('index_HP') == '') {
           throw new Exception(__('Le champs Index fixe ou HP ne peut être vide',__FILE__));
+      }
+
+      if ($this->getConfiguration('conso_type') == '') {
+          throw new Exception(__('Merci de choisir un type d\'énergie',__FILE__));
       }
 
   }

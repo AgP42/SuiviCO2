@@ -15,3 +15,7 @@
 
 - ajout de l'import des datas consolidées et définitives
 - correction typo
+
+# 0.0.3 - 3eme Beta
+
+- ajout des datas type gaz, fioul ou autre avec valeur fixe pour gCO2/kWh et coef thermique

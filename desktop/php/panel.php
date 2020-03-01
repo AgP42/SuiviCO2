@@ -39,7 +39,7 @@ if (init('eqLogic_id') == '') { // on cherche le 1er equipement a afficher quand
 
 }
 
-sendVarToJs('eqLogic_id', $eqLogic_id); // sert à quoi exactement ?
+sendVarToJs('eqLogic_id', $eqLogic_id);
 
 // initialise les dates du datepicker quand on arrive sur la page : debut 1 mois avant now et fin demain
 $date = array(
@@ -122,7 +122,7 @@ if (init('groupBy', 'day') == 'year') { // quand on selectionne "year", on prend
 
           <span class='label label-default' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="co2"></span> kg CO2</span>
           <span class='label label-primary' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="consokWh"></span> kWh</span>
-          <span class='label label-info' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="cost"> </span> €</span>
+          <span class='label label-info' id='total_cost' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="cost"> </span> €</span>
 
           <span class="pull-right">
 
@@ -172,29 +172,121 @@ if (init('groupBy', 'day') == 'year') { // quand on selectionne "year", on prend
       </legend>
     </div>
 
-    <!-- moitier haute avec 2 graphs en ligne -->
-    <div class="row">
-      <div class="col-lg-6">
-        <legend><i class="fas fa-bolt"></i>  {{Mes émissions gCO2}}</legend>
-        <div id="div_chartConsoCO2"></div>
-      </div>
-      <div class="col-lg-6">
-        <legend><i class="fas fa-euro-sign"></i>  {{Mes coûts €}}</legend>
-        <div id="div_chartCost"></div>
-      </div>
-    </div>
+    <?php
+    $eqLogic = eqLogic::byId($eqLogic_id);
+    $conso_type = $eqLogic->getConfiguration('conso_type');
 
-    <!-- moitier basse avec 2 graphs en ligne -->
-    <div class="row">
+    $costAbo = str_replace(',', '.', $eqLogic->getConfiguration('costAbo')); // si on a une , au lieu d'un . on va la remplacer
+    $costHP = str_replace(',', '.', $eqLogic->getConfiguration('costHP'));
+    $costHC = str_replace(',', '.', $eqLogic->getConfiguration('costHC'));
+
+    if($costAbo == '' && $costHP == '' && $costHC == ''){
+      $no_cost = true;
+    } else {
+      $no_cost = false;
+    }
+
+    if($eqLogic->getConfiguration('index_HC')!=''){ //si on a une commande HC definie
+      $HCtoDisplay = true;
+    } else {
+      $HCtoDisplay = false;
+    }
+
+    sendVarToJs('HCtoDisplay', $HCtoDisplay);
+    sendVarToJs('conso_type', $conso_type);
+    sendVarToJs('cost_to_display', !$no_cost);
+
+    if($conso_type == 'elec' && !$no_cost) { // type elec et on a des couts
+      echo '
+      <!-- moitier haute avec 2 graphs en ligne -->
+      <div class="row">
+        <div class="col-lg-6">
+          <legend><i class="fas fa-bolt"></i>  {{Mes émissions gCO2}}</legend>
+          <div id="div_chartConsoCO2"></div>
+        </div>
+        <div class="col-lg-6">
+          <legend><i class="fas fa-euro-sign"></i>  {{Mes coûts €}}</legend>
+          <div id="div_chartCost"></div>
+        </div>
+      </div>
+
+      <!-- moitier basse avec 2 graphs en ligne -->
+      <div class="row">
+        <div class="col-lg-6">
+          <legend><i class="fas fa-leaf"></i>  {{gCO2 émis par kWh en France}}</legend>
+          <div id="div_chartCO2parkWh"></div>
+        </div>
+        <div class="col-lg-6">
+          <legend><i class="fas fa-bolt"></i>  {{Ma conso kWh}}</legend>
+          <div id="div_chartConsokWh"></div>
+        </div>
+      </div>
+      ';
+    } elseif ($conso_type == 'elec' && $no_cost) { // type elect mais pas de couts
+      echo '
+      <!-- moitier haute avec 1 graph en ligne -->
+      <div class="row">
+        <div class="col-lg-12">
+          <legend><i class="fas fa-bolt"></i>  {{Mes émissions gCO2}}</legend>
+          <div id="div_chartConsoCO2"></div>
+        </div>
+      </div>
+
+      <!-- moitier basse avec 1 graph en ligne -->
+      <div class="row">
       <div class="col-lg-6">
         <legend><i class="fas fa-leaf"></i>  {{gCO2 émis par kWh en France}}</legend>
         <div id="div_chartCO2parkWh"></div>
       </div>
-      <div class="col-lg-6">
-        <legend><i class="fas fa-bolt"></i>  {{Ma conso kWh}}</legend>
-        <div id="div_chartConsokWh"></div>
+        <div class="col-lg-6">
+          <legend><i class="fas fa-bolt"></i>  {{Ma conso kWh}}</legend>
+          <div id="div_chartConsokWh"></div>
+        </div>
       </div>
-    </div>
+      ';
+    } elseif ($conso_type != 'elec' && !$no_cost) { // pas elec mais des couts
+      echo '
+      <!-- moitier haute avec 1 graph en ligne -->
+      <div class="row">
+        <div class="col-lg-12">
+          <legend><i class="fas fa-bolt"></i>  {{Mes émissions gCO2}}</legend>
+          <div id="div_chartConsoCO2"></div>
+        </div>
+      </div>
+
+      <!-- moitier basse avec 2 graphs en ligne -->
+      <div class="row">
+        <div class="col-lg-6">
+          <legend><i class="fas fa-euro-sign"></i>  {{Mes coûts €}}</legend>
+          <div id="div_chartCost"></div>
+        </div>
+        <div class="col-lg-6">
+          <legend><i class="fas fa-bolt"></i>  {{Ma conso kWh}}</legend>
+          <div id="div_chartConsokWh"></div>
+        </div>
+      </div>
+      ';
+    } elseif ($conso_type != 'elec' && $no_cost) { // pas elec et pas de couts
+      echo '
+      <!-- moitier haute avec 1 graph en ligne -->
+      <div class="row">
+        <div class="col-lg-12">
+          <legend><i class="fas fa-bolt"></i>  {{Mes émissions gCO2}}</legend>
+          <div id="div_chartConsoCO2"></div>
+        </div>
+      </div>
+
+      <!-- moitier basse avec 1 graph en ligne -->
+      <div class="row">
+        <div class="col-lg-12">
+          <legend><i class="fas fa-bolt"></i>  {{Ma conso kWh}}</legend>
+          <div id="div_chartConsokWh"></div>
+        </div>
+      </div>
+      ';
+    }
+    ?>
+
 
     <br/>
 

@@ -43,22 +43,14 @@ try {
       if ($date['end'] == '') {
         $date['end'] = date('Y-m-d', strtotime('+1 days ' . date('Y-m-d')));
       }
-      $return['date'] = $date; // je vois pas ou c'est utilisé apres, à virer ?
+  //    $return['date'] = $date; // je vois pas ou c'est utilisé apres, à virer ?
 
    //   log::add('suiviCO2', 'debug', 'Dans ajax : ' . utils::o2a($eqLogic_id);
 
       $eqLogic = eqLogic::byId($eqLogic_id); // on recupere l'eqLogic à partir de son ID
-      if($eqLogic->getConfiguration('index_HC')!=''){ //si on a une commande HC definie
-    //    log::add('suiviCO2', 'debug', 'Dans ajax, on a une HC a afficher !');
-        $HCtoDisplay = true;
-      } else {
-        log::add('suiviCO2', 'debug', 'Dans ajax, on a PAS de HC a afficher !');
-    //    $HCtoDisplay = false;
-      }
 
       $return = array(
         'eqLogic' => utils::o2a($eqLogic),
-        'HCtoDisplay' => $HCtoDisplay,
         'datas' => $eqLogic->getGraphsDatasSuiviCO2($date['start'], $date['end'])
       );
 
@@ -120,7 +112,6 @@ try {
       if ($date['end'] == '') {
         $date['end'] = date('Y-m-d', strtotime('+1 days ' . date('Y-m-d')));
       }
-      $return['date'] = $date; // je vois pas ou c'est utilisé apres, à virer ?
 
   //    log::add('suiviCO2', 'debug', 'Dans ajax on a recu : ' . $eqLogic->getHumanName() . ' - ' . $date['start'] . ' - ' . $date['end']);
 

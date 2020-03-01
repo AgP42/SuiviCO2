@@ -26,9 +26,15 @@ $('#bt_validChangeDateSuiviCO2').on('click', function () {
   $('#div_chartCost').packery('destroy');
   displayGraphsCO2(eqLogic_id, $('#in_startDate').value(), $('#in_endDate').value());
 
-//  $('#div_alert').showAlert({message: $('#in_startDate').value(), level: 'info'});
 });
 
+if(cost_to_display){
+  $('#total_cost').show();
+} else {
+  $('#total_cost').hide();
+}
+
+// $('#div_alert').showAlert({message: cost_to_display, level: 'info'});
 
 //setTimeout(function(){ displayGraphsCO2(eqLogic_id); }, 1); //TODO a tester
 
@@ -72,7 +78,7 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
 
       // affiche les graphs
 
-      // pour le graph conso CO2
+      // pour le graph conso CO2 --> dans tous les cas
       var series = []
 
       series.push({
@@ -100,37 +106,60 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
        drawSimpleGraph('div_chartConsoCO2', series, ' gCO2');
 
 
-      // pour le graph cout
-      var series = []
+      if(cost_to_display){
+        // pour le graph cout
+        var series = []
 
-      series.push({
-        step: true,
-        name: 'HP ',
-        data: data.result.datas.cost.HP,
-        type: 'column',
-        color: '#4572A7',
-        stack : 1,
-     //   unite : 'kWh',
-        stacking : 'normal',
-        dataGrouping: {
-            approximation: "sum",
-            enabled: true,
-            forced: true,
-            units: [[groupBy,[1]]]
-        },
-        tooltip: {
-  //          valueDecimals: 2,
-            valueSuffix: ' €'
-        },
-      });
-
-      if(data.result.HCtoDisplay){
         series.push({
           step: true,
-          name: 'HC ',
-          data: data.result.datas.cost.HC,
+          name: 'HP ',
+          data: data.result.datas.cost.HP,
           type: 'column',
-          color: '#AA4643',
+          color: '#4572A7',
+          stack : 1,
+       //   unite : 'kWh',
+          stacking : 'normal',
+          dataGrouping: {
+              approximation: "sum",
+              enabled: true,
+              forced: true,
+              units: [[groupBy,[1]]]
+          },
+          tooltip: {
+    //          valueDecimals: 2,
+              valueSuffix: ' €'
+          },
+        });
+
+        if(HCtoDisplay){
+          series.push({
+            step: true,
+            name: 'HC ',
+            data: data.result.datas.cost.HC,
+            type: 'column',
+            color: '#AA4643',
+            stack : 1,
+        //    unite : 'kWh',
+            stacking : 'normal',
+            dataGrouping: {
+                approximation: "sum",
+                enabled: true,
+                forced: true,
+                units: [[groupBy,[1]]]
+            },
+            tooltip: {
+        //        valueDecimals: 2,
+                valueSuffix: ' €'
+            },
+          });
+        }
+
+        series.push({
+          step: true,
+          name: 'Abo ',
+          data: data.result.datas.cost.Abo,
+          type: 'column',
+          color: '#000000',
           stack : 1,
       //    unite : 'kWh',
           stacking : 'normal',
@@ -141,62 +170,43 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
               units: [[groupBy,[1]]]
           },
           tooltip: {
-      //        valueDecimals: 2,
+   //           valueDecimals: 2,
               valueSuffix: ' €'
           },
         });
+
+        drawSimpleGraph('div_chartCost', series, ' €');
       }
 
-      series.push({
-        step: true,
-        name: 'Abo ',
-        data: data.result.datas.cost.Abo,
-        type: 'column',
-        color: '#000000',
-        stack : 1,
-    //    unite : 'kWh',
-        stacking : 'normal',
-        dataGrouping: {
-            approximation: "sum",
-            enabled: true,
-            forced: true,
-            units: [[groupBy,[1]]]
-        },
-        tooltip: {
- //           valueDecimals: 2,
-            valueSuffix: ' €'
-        },
-      });
 
-      drawSimpleGraph('div_chartCost', series, ' €');
-
-
+      if(conso_type == 'elec'){
       // pour le graph CO2 API
-      var series = []
+        var series = []
 
-      series.push({
-        step: true,
-        name: 'Emission CO2 par kWh produit en France',
-        data: data.result.datas.CO2API,
-        type: 'spline',
-        color: '#558000',
-        stack : 1,
-  //      unite : 'gCO2',
-        stacking : 'normal',
-        dataGrouping: {
-            approximation: "average",
-            enabled: true,
-            forced: true,
-            units: [[groupBy,[1]]]
-        },
-        tooltip: {
-  //          valueDecimals: 2,
-            pointFormat: '<span style="color:{series.color}"></span><b>{point.y}</b><br/>',
-            valueSuffix: ' gCO2/kWh'
-        },
-      });
+        series.push({
+          step: true,
+          name: 'Emission CO2 par kWh produit en France',
+          data: data.result.datas.CO2API,
+          type: 'spline',
+          color: '#558000',
+          stack : 1,
+    //      unite : 'gCO2',
+          stacking : 'normal',
+          dataGrouping: {
+              approximation: "average",
+              enabled: true,
+              forced: true,
+              units: [[groupBy,[1]]]
+          },
+          tooltip: {
+    //          valueDecimals: 2,
+              pointFormat: '<span style="color:{series.color}"></span><b>{point.y}</b><br/>',
+              valueSuffix: ' gCO2/kWh'
+          },
+        });
 
-      drawSimpleGraph('div_chartCO2parkWh', series); // données brut API
+        drawSimpleGraph('div_chartCO2parkWh', series); // données brut API
+      }
 
 
       // pour le graph conso kWh HP et HC
@@ -223,7 +233,7 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
         },
       });
 
-      if(data.result.HCtoDisplay){
+      if(HCtoDisplay){
         series.push({
           step: true,
           name: 'HC ',
