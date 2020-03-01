@@ -28,6 +28,12 @@ $('#bt_validChangeDateSuiviCO2').on('click', function () {
 
 });
 
+if(cost_to_display){
+  $('#total_cost').show();
+} else {
+  $('#total_cost').hide();
+}
+
 // $('#div_alert').showAlert({message: cost_to_display, level: 'info'});
 
 //setTimeout(function(){ displayGraphsCO2(eqLogic_id); }, 1); //TODO a tester

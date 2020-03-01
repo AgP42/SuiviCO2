@@ -122,7 +122,7 @@ if (init('groupBy', 'day') == 'year') { // quand on selectionne "year", on prend
 
           <span class='label label-default' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="co2"></span> kg CO2</span>
           <span class='label label-primary' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="consokWh"></span> kWh</span>
-          <span class='label label-info' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="cost"> </span> €</span>
+          <span class='label label-info' id='total_cost' style="font-size: 0.9em;"><span class="suiviCO2Attr" data-l1key="total" data-l2key="cost"> </span> €</span>
 
           <span class="pull-right">
 
