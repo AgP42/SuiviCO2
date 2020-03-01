@@ -41,7 +41,7 @@ Cliquer sur la commande permet de visualiser son historique :
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/OngletEquipementOther.png)
 - Choisir Type d'énergie voulu
 - Fournir la valeur de g de CO2 émis par kWh consommé. Ce champs n'est pas à fournir pour l'électricité car l'information provient alors d'une API avec actualisation toutes les 15 min. Cette valeur usuelle pour votre type d'énergie se trouve sur internet.
-- Index de consommation à fournir en Wh (unité de base de la téléinformation). Si vous n'avez pas d'heures creuses, laisser le champs vide. Si votre consommation n'est pas en Wh, vous pouvez remplir le champ "Coefficient thermique" permettant de réaliser la conversion d'unité. Ce Coefficient est normalement donné sur votre facture, il dépend notamment de votre région.
+- Index de consommation à fournir en Wh. Si vous n'avez pas d'heures creuses, laisser le champs vide. Si votre consommation n'est pas en Wh, vous pouvez remplir le champ "Coefficient thermique" permettant de réaliser la conversion d'unité. Ce Coefficient est normalement donné sur votre facture, il dépend notamment de votre région.
 - Remplir vos coûts d'abonnement et de consommation par kWh.
 
 Onglet Commandes
@@ -55,11 +55,13 @@ Onglet Historique
 
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/OngletHistorique.png)
 
-Le plugin chargera les données de l'API ainsi que le calcul de nos consommations toutes les heures, toutefois vous pouvez récuperer ici les données passés :
+Pour l'électricité, le plugin chargera les données de l'API toutes les heures, il est possible de charger un historique plus ancien via les boutons suivants :
 
 - Données temps réel CO2 par kWh en France : cette commande va chercher les données de l'API "temps réel", c'est à dire les données prévisionnelles, par 15 min, qui sont mises à jour toutes les heures. Cette commande permet de récuperer la totalité des données présentes sur le serveur, c'est à dire environ 1,5 mois de données. Le temps de chargement prend environ 1 min avec un RPI3 et une connection internet correcte.
 
 - Données consolidées et définitives CO2 par kWh en France : cette commande va chercher les données de l'API "consolidées et définitives", c'est à dire des données plus proches de la réalité suite à la prise en compte d'informations plus completes et détaillées. Ces informations sont mises à jour tous les jours et contiennent toutes les dates antérieures aux données "temps réel" depuis janvier 2012. Pour limiter le temps de chargement (environ 20s avec un RPI3 et une connection internet correcte), il est demandé de recuperer les informations mois par mois.
+
+Pour tous les types d'énergie, le plugin calculera et enregistrera les consommations toutes les heures, toutefois vous pouvez récuperer dans cet onglet les données passés. Pour les énergies de type gaz, fioul ou autre, le coefficient thermique sera appliqué lors de l'import de facon à stocker des valeurs en Wh.
 
 - Ma conso kWh : uniquement si les commandes contenant les index étaient déjà historisées dans jeedom. Cette commande permet avec les données d'index historisées de calculer et d'enregistrer vos conso HP et HC pour les visualiser dans le panneau desktop. Il est possible de choisir la période voulue, attention, les données peuvent être longues à charger.
 Pour infos voici quelques durées avec un RPI3 :
@@ -67,7 +69,7 @@ Pour infos voici quelques durées avec un RPI3 :
      - 2 mois : 7s
      - 6 mois : 20s
      - 1 an : 77s
-Eviter de charger plus d'1 an. Timeout aprés 10min.
+Eviter de charger plus d'1 an. Timeout après 10min.
 
 Il est possible de relancer l'historique sur des dates déjà enregistrées.
 
