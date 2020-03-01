@@ -2,8 +2,8 @@ Présentation
 ============
 
 Ce plugin suiviCO2 pour Jeedom a 2 fonctions principales :
-- Disposer de la valeur actuelle de gCO2 par kWh produit, émis en France, en temps réel. De facon à pouvoir conditionner ses équipements facultatifs (retarder un peu le chauffe-eau en HC par exemple)
-- Visualiser ses émissions de CO2 liées à sa consommation électrique (ainsi que la consommation, coût associé et les émissions globales de la production en France) :
+- Disposer de la valeur actuelle de gCO2 par kWh électrique produit, émis en France, en temps réel. De facon à pouvoir conditionner ses équipements facultatifs (retarder un peu le chauffe-eau en HC par exemple)
+- Visualiser ses émissions de CO2 liées à sa consommation électrique, de gaz, fioul ou autre (ainsi que la consommation, coût associé) :
 
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/PanneauDesktop.png)
 
@@ -24,7 +24,6 @@ Vous pouvez alors définir plusieurs "sources d'émission CO2". Chacune est ind�
 
 Onglet Equipement
 -----------------
-
 Pour que cet équipement soit visible dans le panneau desktop, il faut l'assigner à un objet parent et cocher la case "Activer".
 La case "Visible" permet de définir la visibilité du widget sur le dashboard Jeedom :
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/widget.png)
