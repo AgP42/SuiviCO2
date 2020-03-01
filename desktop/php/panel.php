@@ -186,6 +186,13 @@ if (init('groupBy', 'day') == 'year') { // quand on selectionne "year", on prend
       $no_cost = false;
     }
 
+    if($eqLogic->getConfiguration('index_HC')!=''){ //si on a une commande HC definie
+      $HCtoDisplay = true;
+    } else {
+      $HCtoDisplay = false;
+    }
+
+    sendVarToJs('HCtoDisplay', $HCtoDisplay);
     sendVarToJs('conso_type', $conso_type);
     sendVarToJs('cost_to_display', !$no_cost);
 

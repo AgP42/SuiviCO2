@@ -131,7 +131,7 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
           },
         });
 
-        if(data.result.HCtoDisplay){
+        if(HCtoDisplay){
           series.push({
             step: true,
             name: 'HC ',
@@ -233,7 +233,7 @@ function displayGraphsCO2(_eqLogic_id, _dateStart, _dateEnd) {
         },
       });
 
-      if(data.result.HCtoDisplay){
+      if(HCtoDisplay){
         series.push({
           step: true,
           name: 'HC ',
