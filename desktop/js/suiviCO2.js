@@ -32,11 +32,11 @@ $(".in_datepicker_month_year").datepicker({
 
 $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').change(function () {
   if($('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "gaz" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "fioul" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "other"){
-    $('.choix_taux_co2').show();
-    $('.historique_api_elec').hide();
+    $('.type_gaz_fioul_autre').show();
+    $('.type_elec').hide();
   } else {
-    $('.choix_taux_co2').hide();
-    $('.historique_api_elec').show();
+    $('.type_gaz_fioul_autre').hide();
+    $('.type_elec').show();
   }
 });
 
