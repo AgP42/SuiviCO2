@@ -151,7 +151,7 @@ $dateCo2_def = array(
           <legend><i class="fas fa-bolt"></i> {{Index consommation}}</legend>
 
           <div class="form-group">
-            <label class="col-sm-2 control-label">{{Index total ou HP}}<sup><i class="fas fa-question-circle tooltips" title="{{En Wh ou M³ avec un coefficient thermique ou L avec un coefficient thermique}}"></i></sup></label>
+            <label class="col-sm-2 control-label">{{Index total ou HP, en Wh}}<sup><i class="fas fa-question-circle tooltips" title="{{En Wh ou m³ avec un coefficient thermique ou L avec un coefficient thermique}}"></i></sup></label>
             <div class="col-sm-4">
               <div class="input-group">
                 <input type="text" class="eqLogicAttr form-control tooltips roundedLeft" data-l1key="configuration" data-l2key="index_HP"/>
@@ -161,8 +161,8 @@ $dateCo2_def = array(
               </div>
             </div>
 
-            <div class="form-group type_gaz_fioul_autre">
-              <label class="col-sm-2 control-label">{{Coefficient thermique}}<sup><i class="fas fa-question-circle tooltips" title="{{Il s'agit du coefficient entre l'unité de la commande à gauche vers des Wh. Par exemple pour le gaz il s'agit de passer de m³ à Wh, le coefficient thermique étant donné sur votre facture. S'appliquera aux HP et HC}}"></i></sup></label>
+            <div class="form-group">
+              <label class="col-sm-2 control-label">{{Coefficient}}<sup><i class="fas fa-question-circle tooltips" title="{{Il s'agit du coefficient entre l'unité de la commande à gauche vers des Wh. Par exemple pour le gaz il s'agit de passer de m³ à Wh, le coefficient thermique étant donné sur votre facture. S'appliquera aux HP et HC. Vous pouvez aussi mettre un coefficient de 1000 pour passer de kWh à Wh}}"></i></sup></label>
               <div class="col-sm-2">
                 <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="coef_thermique" />
               </div>
@@ -171,7 +171,7 @@ $dateCo2_def = array(
           </div>
 
           <div class="form-group">
-            <label class="col-sm-2 control-label">{{Index HC (facultatif)}}<sup><i class="fas fa-question-circle tooltips" title="{{En Wh ou m³ avec un coefficient thermique ou L avec un coefficient thermique. Ne pas remplir si vous n'avez pas d'index HC}}"></i></sup></label>
+            <label class="col-sm-2 control-label">{{Index HC (facultatif), en Wh}}<sup><i class="fas fa-question-circle tooltips" title="{{En Wh ou m³ avec un coefficient thermique ou L avec un coefficient thermique. Ne pas remplir si vous n'avez pas d'index HC}}"></i></sup></label>
               <div class="col-sm-4">
                 <div class="input-group">
                   <input type="text" class="eqLogicAttr form-control tooltips roundedLeft" data-l1key="configuration" data-l2key="index_HC"/>
