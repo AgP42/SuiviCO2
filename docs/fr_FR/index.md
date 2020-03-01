@@ -3,7 +3,7 @@ Présentation
 
 Ce plugin suiviCO2 pour Jeedom a 2 fonctions principales :
 - Disposer de la valeur actuelle de gCO2 par kWh électrique produit, émis en France, en temps réel. De facon à pouvoir conditionner ses équipements facultatifs (retarder un peu le chauffe-eau en HC par exemple)
-- Visualiser ses émissions de CO2 liées à sa consommation électrique, de gaz, fioul ou autre (ainsi que la consommation, coût associé) :
+- Visualiser ses émissions de CO2 liées à sa consommation électrique, de gaz, fioul ou autre (ainsi que la consommation et les coûts associé) :
 
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/PanneauDesktop.png)
 
@@ -27,16 +27,17 @@ Onglet Equipement
 Pour que cet équipement soit visible dans le panneau desktop, il faut l'assigner à un objet parent et cocher la case "Activer".
 La case "Visible" permet de définir la visibilité du widget sur le dashboard Jeedom :
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/widget.png)
+
 Cliquer sur la commande permet de visualiser son historique :
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/historique.png)
 
-Configuration pour équipement électrique :
+### Configuration pour équipement électrique :
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/OngletEquipementElec.png)
 - Choisir Type d'énergie "Electricité"
 - Index de consommation à fournir en Wh (unité de base de la téléinformation). Si vous n'avez pas d'heures creuses, laisser le champs vide
 - Remplir vos coûts d'abonnement et de consommation par kWh
 
-Configuration pour équipement de type gaz, fioul ou autre :
+### Configuration pour équipement de type gaz, fioul ou autre :
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/OngletEquipementOther.png)
 - Choisir Type d'énergie voulu
 - Fournir la valeur de g de CO2 émis par kWh consommé. Ce champs n'est pas à fournir pour l'électricité car l'information provient alors d'une API avec actualisation toutes les 15 min. Cette valeur usuelle pour votre type d'énergie se trouve sur internet.
