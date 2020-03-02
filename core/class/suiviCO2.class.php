@@ -44,6 +44,14 @@ require_once __DIR__  . '/../../../../core/php/core.inc.php';
               log::add('suiviCO2', 'debug', ' previous : ' . $value->getValue());
             }*/
 
+/*
+
+        $abo = 18;
+        $valueDateTime = '2020-02-20 12:50:00';
+
+        $nbJourCeMois = date('t', strtotime($valueDateTime));
+        log::add('suiviCO2', 'debug', 'Nb jours ci mois ci : ' . $nbJourCeMois . ' - Cout abo par heure : ' . $abo/$nbJourCeMois/24);
+*/
 
 
 
@@ -61,28 +69,22 @@ class suiviCO2 extends eqLogic {
   /*    public static function cron() {
 
 
-        $abo = 18;
-        $valueDateTime = '2020-02-20 12:50:00';
-
-        $nbJourCeMois = date('t', strtotime($valueDateTime));
-        log::add('suiviCO2', 'debug', 'Nb jours ci mois ci : ' . $nbJourCeMois . ' - Cout abo par heure : ' . $abo/$nbJourCeMois/24);
-
       }
      //*/
 
 
-      public function calculConso($_type = 'HP', $suiviCO2){
+      public function calculConso($_type = 'HP'){
 
           //on va chercher l'info index_HP ou HC via la conf utilisateur
-          $index = jeedom::evaluateExpression($suiviCO2->getConfiguration('index_' . $_type));
+          $index = jeedom::evaluateExpression($this->getConfiguration('index_' . $_type));
 
 
           //on recupere la precedente valeur stockée, selon HP ou HC
-          $lastValue = $suiviCO2->getConfiguration('lastValue' . $_type);
+          $lastValue = $this->getConfiguration('lastValue' . $_type);
 
            //on sauvegarde la valeur actuelle pour le prochain tour
-          $suiviCO2->setConfiguration('lastValue' . $_type, $index);
-          $suiviCO2->save();
+          $this->setConfiguration('lastValue' . $_type, $index);
+          $this->save();
 
      //     log::add('suiviCO2', 'debug', 'lastIndex' . $_type . ' : ' . $lastValue . ' Index'  . $_type . ' : ' . $index);
 
@@ -90,7 +92,7 @@ class suiviCO2 extends eqLogic {
           $consumption = $index - $lastValue;
 
           //si on a un coef declaré et numerique, on va l'utiliser
-          $coef_thermique = $suiviCO2->getConfiguration('coef_thermique');
+          $coef_thermique = $this->getConfiguration('coef_thermique');
           if($coef_thermique != '' && is_numeric($coef_thermique)){
             $consumption = $consumption*$coef_thermique;
           }
@@ -99,10 +101,10 @@ class suiviCO2 extends eqLogic {
           // TODO a ameliorer...
 
           if ($consumption < 1000) { //1000 kWh c'est environ 170€, si on consomme ca par heure c'est qu'on a un gros probleme... Ce test permet de ne pas sauvegarder l'index entier lors de la 1ere boucle apres la creation de l'objet.
-            $cmd = $suiviCO2->getCmd(null, 'consumption' . $_type);
+            $cmd = $this->getCmd(null, 'consumption' . $_type);
             if (is_object($cmd)) {
               $cmd->setCollectDate($datetime);
-        //      log::add('suiviCO2', 'debug', 'eqLogic_id : ' . $suiviCO2->getId() . ' - Index now ' . $_type . ' : ' . $index . ' - Prev Index '  . $_type . ' : ' . $lastValue . ' = conso ' . $_type . ' (Wh) : ' . $consumption);
+              log::add('suiviCO2', 'debug', 'eqLogic_id : ' . $this->getId() . ' - Index now ' . $_type . ' : ' . $index . ' - Prev Index '  . $_type . ' : ' . $lastValue . ' = conso ' . $_type . ' (Wh) : ' . $consumption);
               $cmd->event($consumption);
             }
           }
@@ -494,11 +496,11 @@ class suiviCO2 extends eqLogic {
         foreach (self::byType('suiviCO2',true) as $suiviCO2) {
 
           /* Traitement HP */
-          $suiviCO2->calculConso('HP', $suiviCO2);
+          $suiviCO2->calculConso('HP');
 
           /* Traitement HC */
           if($suiviCO2->getConfiguration('index_HC')!=''){ //si on a un index HC
-            $suiviCO2->calculConso('HC', $suiviCO2);
+            $suiviCO2->calculConso('HC');
           }
 
           /* Calculs des totaux pour le dashboard */
