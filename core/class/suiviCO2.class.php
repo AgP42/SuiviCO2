@@ -109,7 +109,6 @@ class suiviCO2 extends eqLogic {
 
       }
 
-
        public function calculTotauxCo2(){ // appellé par le cron Hourly, pour les calculs de totaux sur le dashboard
 
         $cmdTotalDay = $this->getCmd(null, 'totalCO2jour');
@@ -119,7 +118,7 @@ class suiviCO2 extends eqLogic {
         if (is_object($cmdTotalDay) && $cmdTotalDay->getIsVisible()){
 
           $startDate = date('Y-m-d 00:00:00');
-          $dendDate = date('Y-m-d H:i:00');
+          $endDate = date('Y-m-d H:i:00');
 
           $totalCO2jour = 0;
 
