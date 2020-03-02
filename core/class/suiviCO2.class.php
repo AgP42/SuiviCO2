@@ -193,7 +193,7 @@ class suiviCO2 extends eqLogic {
 
       } // fin fct
 
-      public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 10, $_eqLogic_id = NULL){ // fct appellée soit par l'AJAX, soit par le crouHourly
+      public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 14, $_eqLogic_id = NULL){ // fct appellée soit par l'AJAX, soit par le crouHourly
 
         /* *************** Infos sur l'API opendata.reseaux-energies.fr
         96 données par jours
