@@ -109,121 +109,150 @@ class suiviCO2 extends eqLogic {
 
       }
 
+      public function calculTotauxCo2Periode($startDate, $endDate){
+
+        log::add('suiviCO2', 'debug', 'calculTotauxCo2Periode pour : ' . $startDate . ' - ' . $endDate);
+
+        $totalCO2 = 0;
+
+        if($this->getConfiguration('conso_type') == 'elec'){ //si on est en conso de type elec, on va utiliser les infos de l'API
+
+          // on recupere la cmd API
+          $cmdCO2API = $this->getCmd(null, 'co2kwhfromApi');
+          if (!is_object($cmdCO2API)) { // si elle existe pas, on coupe tout
+            return array();
+          }
+
+          $cmdConsoHP = $this->getCmd(null, 'consumptionHP');
+          if (!is_object($cmdConsoHP)) { // si elle existe pas, on coupe tout
+            return array();
+          }
+          $consoHP = $cmdConsoHP->getHistory($startDate, $endDate);
+
+
+          $cmdConsoHC = $this->getCmd(null, 'consumptionHC');
+          if (is_object($cmdConsoHC)) { // si elle existe, on choppe son historique, sinon on fait rien
+            $consoHC = $cmdConsoHC->getHistory($startDate, $endDate);
+          }
+
+          // on boucle dans toutes les valeurs de l'historique de la cmd API
+          foreach ($cmdCO2API->getHistory($startDate, $endDate) as $historyAPI) {
+
+            $valueDateTimeAPI = $historyAPI->getDatetime();
+            $valueAPI = $historyAPI->getValue();
+
+            // on filtre sur les heures piles
+            if(date('i', strtotime($valueDateTimeAPI)) == "00"){ // on extrait le champ min et on verifie qu'il vaut 00
+
+                // on boucle dans toutes les valeurs de l'historique de la cmd HP pour recuperer les valeurs et on les additionne
+                foreach ($consoHP as $historyHP) {
+
+                  $valueHP = $historyHP->getValue();
+                  $valueDateTimeHP = $historyHP->getDatetime();
+
+                  if ($valueDateTimeHP == $valueDateTimeAPI){ // si on est a la meme heure, on multiplie
+                    $totalCO2 += floatval($valueHP / 1000 * $valueAPI);
+                  }
+                }
+
+                if (is_object($cmdConsoHC)) { // que si elle existe bien
+                  // on boucle dans toutes les valeurs de l'historique de la cmd HC
+                  foreach ($consoHC as $historyHC) {
+                    $valueHC = $historyHC->getValue();
+                    $valueDateTimeHC = $historyHC->getDatetime();
+
+                    if ($valueDateTimeHC == $valueDateTimeAPI){ // si on est a la meme heure, on multiplie
+                      $totalCO2 += floatval($valueHC / 1000 * $valueAPI);
+                    }
+                  }
+                } // fin on a bien une HC
+
+            } // fin on est sur une heure pleine
+
+          } // fin foreach API
+
+          log::add('suiviCO2', 'debug', 'totalCO2 - ELEC : ' . $totalCO2);
+
+        } else { // on est en gaz ou fioul ou autre, on prend la valeur donnée dans la configuration
+
+          $totalConso = 0;
+
+          $gCO2_kwh = str_replace(',', '.', $this->getConfiguration('gCO2_kwh')); // on choppe la valeur donnée par l'utilisateur
+
+          // on recupere la cmd HP
+          $cmdConsoHP = $this->getCmd(null, 'consumptionHP');
+          if (!is_object($cmdConsoHP)) {
+            return array();
+          }
+          // on boucle dans toutes les valeurs de l'historique de la cmd HP pour recuperer les valeurs et on les additionne
+          foreach ($cmdConsoHP->getHistory($startDate, $endDate) as $history) {
+            $value = $history->getValue();
+            $totalConso += floatval($value / 1000);
+          }
+
+          $cmdConsoHC = $this->getCmd(null, 'consumptionHC');
+          if (is_object($cmdConsoHC)) { // si elle est définie, on fait les calculs, sinon on passe
+
+            // on boucle dans toutes les valeurs de l'historique de la cmd HC
+            foreach ($cmdConsoHC->getHistory($startDate, $endDate) as $history) {
+              $value = $history->getValue();
+              $totalConso += floatval($value / 1000);
+            }
+          } // fin si consumptionHC est une cmd valide
+
+          $totalCO2 = $totalConso * $gCO2_kwh; // on multiple par notre taux de gCO2/kWh et on a notre valeur
+          log::add('suiviCO2', 'debug', 'totalCO2 - non ELEC : ' . $totalCO2);
+
+        } // fin else : on est pas en type elec
+
+        return $totalCO2;
+
+      }
+
        public function calculTotauxCo2(){ // appellé par le cron Hourly, pour les calculs de totaux sur le dashboard
+
+  //      $calculstarttime = date('H:i:s');
 
         $cmdTotalDay = $this->getCmd(null, 'totalCO2jour');
         $cmdTotalWeek = $this->getCmd(null, 'totalCO2semaine');
         $cmdTotalMonth = $this->getCmd(null, 'totalCO2mois');
 
-        if (is_object($cmdTotalDay) && $cmdTotalDay->getIsVisible()){
+        if (is_object($cmdTotalDay) && $cmdTotalDay->getIsVisible()){ // si cette commande existe et qu'elle est visible
 
-          $startDate = date('Y-m-d 00:00:00');
-          $endDate = date('Y-m-d H:i:00');
+          $startDate = date('Y-m-d 00:00:00'); // 00:00 ce matin
+          $endDate = date('Y-m-d H:i:00'); // now sans les minutes
 
-          $totalCO2jour = 0;
-
-          if($this->getConfiguration('conso_type') == 'elec'){ //si on est en conso de type elec, on va utiliser les infos de l'API
-
-            // on recupere la cmd API
-            $cmdCO2API = $this->getCmd(null, 'co2kwhfromApi');
-            if (!is_object($cmdCO2API)) { // si elle existe pas, on coupe tout
-              return array();
-            }
-
-            $cmdConsoHP = $this->getCmd(null, 'consumptionHP');
-            if (!is_object($cmdConsoHP)) { // si elle existe pas, on coupe tout
-              return array();
-            }
-            $consoHP = $cmdConsoHP->getHistory($startDate, $endDate);
-
-
-            $cmdConsoHC = $this->getCmd(null, 'consumptionHC');
-            if (is_object($cmdConsoHC)) { // si elle existe, on choppe son historique, sinon on fait rien
-              $consoHC = $cmdConsoHC->getHistory($startDate, $endDate);
-            }
-
-            // on boucle dans toutes les valeurs de l'historique de la cmd API
-            foreach ($cmdCO2API->getHistory($startDate, $endDate) as $historyAPI) {
-
-              $valueDateTimeAPI = $historyAPI->getDatetime();
-              $valueAPI = $historyAPI->getValue();
-
-              // on filtre sur les heures piles
-              if(date('i', strtotime($valueDateTimeAPI)) == "00"){ // on extrait le champ min et on verifie qu'il vaut 00
-
-                  // on boucle dans toutes les valeurs de l'historique de la cmd HP pour recuperer les valeurs et on les additionne
-                  foreach ($consoHP as $historyHP) {
-
-                    $valueHP = $historyHP->getValue();
-                    $valueDateTimeHP = $historyHP->getDatetime();
-
-                    if ($valueDateTimeHP == $valueDateTimeAPI){ // si on est a la meme heure, on multiplie
-                      $totalCO2jour += floatval($valueHP / 1000 * $valueAPI);
-                    }
-                  }
-
-                  if (is_object($cmdConsoHC)) { // que si elle existe bien
-                    // on boucle dans toutes les valeurs de l'historique de la cmd HC
-                    foreach ($consoHC as $historyHC) {
-                      $valueHC = $historyHC->getValue();
-                      $valueDateTimeHC = $historyHC->getDatetime();
-
-                      if ($valueDateTimeHC == $valueDateTimeAPI){ // si on est a la meme heure, on multiplie
-                        $totalCO2jour += floatval($valueHC / 1000 * $valueAPI);
-                      }
-                    }
-                  } // fin on a bien une HC
-
-              } // fin on est sur une heure pleine
-
-            } // fin foreach API
-
-            log::add('suiviCO2', 'debug', 'totalCO2jour - ELEC : ' . $totalCO2jour);
-
-          } else { // on est en gaz ou fioul ou autre, on prend la valeur donnée dans la configuration
-
-            $totalConsoHPjour = 0;
-
-            $gCO2_kwh = str_replace(',', '.', $this->getConfiguration('gCO2_kwh')); // on choppe la valeur donnée par l'utilisateur
-
-            // on recupere la cmd HP
-            $cmdConsoHP = $this->getCmd(null, 'consumptionHP');
-            if (!is_object($cmdConsoHP)) {
-              return array();
-            }
-            // on boucle dans toutes les valeurs de l'historique de la cmd HP pour recuperer les valeurs et on les additionne
-            foreach ($cmdConsoHP->getHistory($startDate, $endDate) as $history) {
-              $value = $history->getValue();
-              $totalConsojour += floatval($value / 1000);
-            }
-
-            $cmdConsoHC = $this->getCmd(null, 'consumptionHC');
-            if (is_object($cmdConsoHC)) { // si elle est définie, on fait les calculs, sinon on passe
-
-              // on boucle dans toutes les valeurs de l'historique de la cmd HC
-              foreach ($cmdConsoHC->getHistory($startDate, $endDate) as $history) {
-                $value = $history->getValue();
-                $totalConsojour += floatval($value / 1000);
-              }
-            } // fin si consumptionHC est une cmd valide
-
-            $totalCO2jour = $totalConsojour * $gCO2_kwh; // on multiple par notre taux de gCO2/kWh et on a notre valeur
-            log::add('suiviCO2', 'debug', 'totalCO2jour - non ELEC : ' . $totalCO2jour);
-
-          } // fin else : on est pas en type elec
+          $totalCO2 = $this->calculTotauxCo2Periode($startDate, $endDate);
 
           $cmdTotalDay->setCollectDate($datetime);
-          $cmdTotalDay->event($totalCO2jour);
+          $cmdTotalDay->event($totalCO2);
 
         } // fin calcul jour
 
- /*       if ($cmdTotalWeek->getIsVisible()){
-          log::add('suiviCO2', 'debug', 'totalCO2semaine est visible, a calculer');
+        if ($cmdTotalWeek->getIsVisible()){
+
+          $startDate = date('Y-m-d 00:00:00', strtotime('Monday ' . date('Y-m-d H:00:00'))); // 00:00 lundi de cette semaine
+          $endDate = date('Y-m-d H:i:00');
+
+          $totalCO2 = $this->calculTotauxCo2Periode($startDate, $endDate);
+
+          $cmdTotalWeek->setCollectDate($datetime);
+          $cmdTotalWeek->event($totalCO2);
+
         }
 
         if ($cmdTotalMonth->getIsVisible()){
-          log::add('suiviCO2', 'debug', 'totalCO2mois est visible, a calculer');
-        } */
+
+          $startDate = date('Y-m-00 00:00:00');
+          $endDate = date('Y-m-d H:i:00');
+
+          $totalCO2 = $this->calculTotauxCo2Periode($startDate, $endDate);
+
+          $cmdTotalMonth->setCollectDate($datetime);
+          $cmdTotalMonth->event($totalCO2);
+        }
+
+    //    log::add('suiviCO2', 'debug', 'Calculs totaux CO2 pour le dashboard, start à ' . $calculstarttime . ' fin à : ' . date('H:i:s')); // ca va, tout en moins d'1s, acceptable
 
        }
 
