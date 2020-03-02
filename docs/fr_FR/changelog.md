@@ -19,3 +19,7 @@
 # 0.0.3 - 3eme Beta
 
 - ajout des datas type gaz, fioul ou autre avec valeur fixe pour gCO2/kWh et coef thermique
+
+# 0.0.4 - 4eme Beta
+
+- ajout des totaux jours, semaine et mois pour affichage dans le dashboard

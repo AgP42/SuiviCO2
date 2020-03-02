@@ -44,6 +44,14 @@ require_once __DIR__  . '/../../../../core/php/core.inc.php';
               log::add('suiviCO2', 'debug', ' previous : ' . $value->getValue());
             }*/
 
+/*
+
+        $abo = 18;
+        $valueDateTime = '2020-02-20 12:50:00';
+
+        $nbJourCeMois = date('t', strtotime($valueDateTime));
+        log::add('suiviCO2', 'debug', 'Nb jours ci mois ci : ' . $nbJourCeMois . ' - Cout abo par heure : ' . $abo/$nbJourCeMois/24);
+*/
 
 
 
@@ -61,28 +69,22 @@ class suiviCO2 extends eqLogic {
   /*    public static function cron() {
 
 
-        $abo = 18;
-        $valueDateTime = '2020-02-20 12:50:00';
-
-        $nbJourCeMois = date('t', strtotime($valueDateTime));
-        log::add('suiviCO2', 'debug', 'Nb jours ci mois ci : ' . $nbJourCeMois . ' - Cout abo par heure : ' . $abo/$nbJourCeMois/24);
-
       }
      //*/
 
 
-      public function calculConso($_type = 'HP', $suiviCO2){
+      public function calculConso($_type = 'HP'){
 
           //on va chercher l'info index_HP ou HC via la conf utilisateur
-          $index = jeedom::evaluateExpression($suiviCO2->getConfiguration('index_' . $_type));
+          $index = jeedom::evaluateExpression($this->getConfiguration('index_' . $_type));
 
 
           //on recupere la precedente valeur stockée, selon HP ou HC
-          $lastValue = $suiviCO2->getConfiguration('lastValue' . $_type);
+          $lastValue = $this->getConfiguration('lastValue' . $_type);
 
            //on sauvegarde la valeur actuelle pour le prochain tour
-          $suiviCO2->setConfiguration('lastValue' . $_type, $index);
-          $suiviCO2->save();
+          $this->setConfiguration('lastValue' . $_type, $index);
+          $this->save();
 
      //     log::add('suiviCO2', 'debug', 'lastIndex' . $_type . ' : ' . $lastValue . ' Index'  . $_type . ' : ' . $index);
 
@@ -90,7 +92,7 @@ class suiviCO2 extends eqLogic {
           $consumption = $index - $lastValue;
 
           //si on a un coef declaré et numerique, on va l'utiliser
-          $coef_thermique = $suiviCO2->getConfiguration('coef_thermique');
+          $coef_thermique = $this->getConfiguration('coef_thermique');
           if($coef_thermique != '' && is_numeric($coef_thermique)){
             $consumption = $consumption*$coef_thermique;
           }
@@ -99,15 +101,162 @@ class suiviCO2 extends eqLogic {
           // TODO a ameliorer...
 
           if ($consumption < 1000) { //1000 kWh c'est environ 170€, si on consomme ca par heure c'est qu'on a un gros probleme... Ce test permet de ne pas sauvegarder l'index entier lors de la 1ere boucle apres la creation de l'objet.
-            $cmd = $suiviCO2->getCmd(null, 'consumption' . $_type);
+            $cmd = $this->getCmd(null, 'consumption' . $_type);
             if (is_object($cmd)) {
               $cmd->setCollectDate($datetime);
-        //      log::add('suiviCO2', 'debug', 'eqLogic_id : ' . $suiviCO2->getId() . ' - Index now ' . $_type . ' : ' . $index . ' - Prev Index '  . $_type . ' : ' . $lastValue . ' = conso ' . $_type . ' (Wh) : ' . $consumption);
+              log::add('suiviCO2', 'debug', 'eqLogic_id : ' . $this->getId() . ' - Index now ' . $_type . ' : ' . $index . ' - Prev Index '  . $_type . ' : ' . $lastValue . ' = conso ' . $_type . ' (Wh) : ' . $consumption);
               $cmd->event($consumption);
             }
           }
 
       }
+
+      public function calculTotauxCo2Periode($startDate, $endDate){
+
+        log::add('suiviCO2', 'debug', 'calculTotauxCo2Periode pour : ' . $startDate . ' - ' . $endDate);
+
+        $totalCO2 = 0;
+
+        if($this->getConfiguration('conso_type') == 'elec'){ //si on est en conso de type elec, on va utiliser les infos de l'API
+
+          // on recupere la cmd API
+          $cmdCO2API = $this->getCmd(null, 'co2kwhfromApi');
+          if (!is_object($cmdCO2API)) { // si elle existe pas, on coupe tout
+            return array();
+          }
+
+          $cmdConsoHP = $this->getCmd(null, 'consumptionHP');
+          if (!is_object($cmdConsoHP)) { // si elle existe pas, on coupe tout
+            return array();
+          }
+          $consoHP = $cmdConsoHP->getHistory($startDate, $endDate);
+
+
+          $cmdConsoHC = $this->getCmd(null, 'consumptionHC');
+          if (is_object($cmdConsoHC)) { // si elle existe, on choppe son historique, sinon on fait rien
+            $consoHC = $cmdConsoHC->getHistory($startDate, $endDate);
+          }
+
+          // on boucle dans toutes les valeurs de l'historique de la cmd API
+          foreach ($cmdCO2API->getHistory($startDate, $endDate) as $historyAPI) {
+
+            $valueDateTimeAPI = $historyAPI->getDatetime();
+            $valueAPI = $historyAPI->getValue();
+
+            // on filtre sur les heures piles
+            if(date('i', strtotime($valueDateTimeAPI)) == "00"){ // on extrait le champ min et on verifie qu'il vaut 00
+
+                // on boucle dans toutes les valeurs de l'historique de la cmd HP pour recuperer les valeurs et on les additionne
+                foreach ($consoHP as $historyHP) {
+
+                  $valueHP = $historyHP->getValue();
+                  $valueDateTimeHP = $historyHP->getDatetime();
+
+                  if ($valueDateTimeHP == $valueDateTimeAPI){ // si on est a la meme heure, on multiplie
+                    $totalCO2 += floatval($valueHP / 1000 * $valueAPI);
+                  }
+                }
+
+                if (is_object($cmdConsoHC)) { // que si elle existe bien
+                  // on boucle dans toutes les valeurs de l'historique de la cmd HC
+                  foreach ($consoHC as $historyHC) {
+                    $valueHC = $historyHC->getValue();
+                    $valueDateTimeHC = $historyHC->getDatetime();
+
+                    if ($valueDateTimeHC == $valueDateTimeAPI){ // si on est a la meme heure, on multiplie
+                      $totalCO2 += floatval($valueHC / 1000 * $valueAPI);
+                    }
+                  }
+                } // fin on a bien une HC
+
+            } // fin on est sur une heure pleine
+
+          } // fin foreach API
+
+          log::add('suiviCO2', 'debug', 'totalCO2 - ELEC : ' . $totalCO2);
+
+        } else { // on est en gaz ou fioul ou autre, on prend la valeur donnée dans la configuration
+
+          $totalConso = 0;
+
+          $gCO2_kwh = str_replace(',', '.', $this->getConfiguration('gCO2_kwh')); // on choppe la valeur donnée par l'utilisateur
+
+          // on recupere la cmd HP
+          $cmdConsoHP = $this->getCmd(null, 'consumptionHP');
+          if (!is_object($cmdConsoHP)) {
+            return array();
+          }
+          // on boucle dans toutes les valeurs de l'historique de la cmd HP pour recuperer les valeurs et on les additionne
+          foreach ($cmdConsoHP->getHistory($startDate, $endDate) as $history) {
+            $value = $history->getValue();
+            $totalConso += floatval($value / 1000);
+          }
+
+          $cmdConsoHC = $this->getCmd(null, 'consumptionHC');
+          if (is_object($cmdConsoHC)) { // si elle est définie, on fait les calculs, sinon on passe
+
+            // on boucle dans toutes les valeurs de l'historique de la cmd HC
+            foreach ($cmdConsoHC->getHistory($startDate, $endDate) as $history) {
+              $value = $history->getValue();
+              $totalConso += floatval($value / 1000);
+            }
+          } // fin si consumptionHC est une cmd valide
+
+          $totalCO2 = $totalConso * $gCO2_kwh; // on multiple par notre taux de gCO2/kWh et on a notre valeur
+          log::add('suiviCO2', 'debug', 'totalCO2 - non ELEC : ' . $totalCO2);
+
+        } // fin else : on est pas en type elec
+
+        return $totalCO2;
+
+      }
+
+       public function calculTotauxCo2(){ // appellé par le cron Hourly, pour les calculs de totaux sur le dashboard
+
+  //      $calculstarttime = date('H:i:s');
+
+        $cmdTotalDay = $this->getCmd(null, 'totalCO2jour');
+        $cmdTotalWeek = $this->getCmd(null, 'totalCO2semaine');
+        $cmdTotalMonth = $this->getCmd(null, 'totalCO2mois');
+
+        if (is_object($cmdTotalDay) && $cmdTotalDay->getIsVisible()){ // si cette commande existe et qu'elle est visible
+
+          $startDate = date('Y-m-d 00:00:00'); // 00:00 ce matin
+          $endDate = date('Y-m-d H:i:00'); // now sans les minutes
+
+          $totalCO2 = $this->calculTotauxCo2Periode($startDate, $endDate);
+
+          $cmdTotalDay->setCollectDate($datetime);
+          $cmdTotalDay->event($totalCO2);
+
+        } // fin calcul jour
+
+        if ($cmdTotalWeek->getIsVisible()){
+
+          $startDate = date('Y-m-d 00:00:00', strtotime('Monday ' . date('Y-m-d H:00:00'))); // 00:00 lundi de cette semaine
+          $endDate = date('Y-m-d H:i:00');
+
+          $totalCO2 = $this->calculTotauxCo2Periode($startDate, $endDate);
+
+          $cmdTotalWeek->setCollectDate($datetime);
+          $cmdTotalWeek->event($totalCO2);
+
+        }
+
+        if ($cmdTotalMonth->getIsVisible()){
+
+          $startDate = date('Y-m-01 00:00:00');
+          $endDate = date('Y-m-d H:i:00');
+
+          $totalCO2 = $this->calculTotauxCo2Periode($startDate, $endDate);
+
+          $cmdTotalMonth->setCollectDate($datetime);
+          $cmdTotalMonth->event($totalCO2);
+        }
+
+    //    log::add('suiviCO2', 'debug', 'Calculs totaux CO2 pour le dashboard, start à ' . $calculstarttime . ' fin à : ' . date('H:i:s')); // ca va, tout en moins d'1s, acceptable
+
+       }
 
       public function getAndRecordHistoriqueConso($_startDate, $_endDate){ // fct appelée par l'AJAX
 
@@ -193,7 +342,7 @@ class suiviCO2 extends eqLogic {
 
       } // fin fct
 
-      public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 10, $_eqLogic_id = NULL){ // fct appellée soit par l'AJAX, soit par le crouHourly
+      public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 14, $_eqLogic_id = NULL){ // fct appellée soit par l'AJAX, soit par le crouHourly
 
         /* *************** Infos sur l'API opendata.reseaux-energies.fr
         96 données par jours
@@ -347,12 +496,15 @@ class suiviCO2 extends eqLogic {
         foreach (self::byType('suiviCO2',true) as $suiviCO2) {
 
           /* Traitement HP */
-          $suiviCO2->calculConso('HP', $suiviCO2);
+          $suiviCO2->calculConso('HP');
 
           /* Traitement HC */
           if($suiviCO2->getConfiguration('index_HC')!=''){ //si on a un index HC
-            $suiviCO2->calculConso('HC', $suiviCO2);
+            $suiviCO2->calculConso('HC');
           }
+
+          /* Calculs des totaux pour le dashboard */
+          $suiviCO2->calculTotauxCo2();
 
         } // fin foreach equipement
 
@@ -715,7 +867,58 @@ class suiviCO2 extends eqLogic {
           }
       }
 
-    }
+      $cmd = $this->getCmd(null, 'totalCO2jour');
+      if (!is_object($cmd)) {
+        //ce qui est ici est declaré à la 1ere creation de l'objet seulement et donc peut etre changé par l'utilisateur par la suite
+        $cmd = new suiviCO2Cmd();
+        $cmd->setLogicalId('totalCO2jour');
+    //    $cmd->setTemplate('dashboard', 'tile');
+        $cmd->setIsVisible(1);
+        $cmd->setEqLogic_id($this->getId());
+        $cmd->setName(__('Total CO2 jour', __FILE__));
+      }
+      $cmd->setIsHistorized(0);
+      $cmd->setOrder(0);
+      $cmd->setType('info');
+      $cmd->setSubType('numeric');
+      $cmd->setUnite('gCO2');
+      $cmd->save();
+
+      $cmd = $this->getCmd(null, 'totalCO2semaine');
+      if (!is_object($cmd)) {
+        //ce qui est ici est declaré à la 1ere creation de l'objet seulement et donc peut etre changé par l'utilisateur par la suite
+        $cmd = new suiviCO2Cmd();
+        $cmd->setLogicalId('totalCO2semaine');
+    //    $cmd->setTemplate('dashboard', 'tile');
+        $cmd->setIsVisible(1);
+        $cmd->setEqLogic_id($this->getId());
+        $cmd->setName(__('Total CO2 semaine', __FILE__));
+      }
+      $cmd->setIsHistorized(0);
+      $cmd->setOrder(1);
+      $cmd->setType('info');
+      $cmd->setSubType('numeric');
+      $cmd->setUnite('gCO2');
+      $cmd->save();
+
+      $cmd = $this->getCmd(null, 'totalCO2mois');
+      if (!is_object($cmd)) {
+        //ce qui est ici est declaré à la 1ere creation de l'objet seulement et donc peut etre changé par l'utilisateur par la suite
+        $cmd = new suiviCO2Cmd();
+        $cmd->setLogicalId('totalCO2mois');
+    //    $cmd->setTemplate('dashboard', 'tile');
+        $cmd->setIsVisible(1);
+        $cmd->setEqLogic_id($this->getId());
+        $cmd->setName(__('Total CO2 mois', __FILE__));
+      }
+      $cmd->setIsHistorized(0);
+      $cmd->setOrder(2);
+      $cmd->setType('info');
+      $cmd->setSubType('numeric');
+      $cmd->setUnite('gCO2');
+      $cmd->save();
+
+  } //fin postSave
 
   // preUpdate ⇒ Méthode appellée avant la mise à jour de votre objet
   // ici on vérifie la présence de nos champs de config obligatoire

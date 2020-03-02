@@ -160,14 +160,6 @@ $dateCo2_def = array(
                 </span>
               </div>
             </div>
-
-            <div class="form-group">
-              <label class="col-sm-2 control-label">{{Coefficient}}<sup><i class="fas fa-question-circle tooltips" title="{{Il s'agit du coefficient entre l'unité de la commande à gauche vers des Wh. Par exemple pour le gaz il s'agit de passer de m³ à Wh, le coefficient thermique étant donné sur votre facture. S'appliquera aux HP et HC. Vous pouvez aussi mettre un coefficient de 1000 pour passer de kWh à Wh}}"></i></sup></label>
-              <div class="col-sm-2">
-                <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="coef_thermique" />
-              </div>
-            </div>
-
           </div>
 
           <div class="form-group">
@@ -179,6 +171,13 @@ $dateCo2_def = array(
                     <a class="btn btn-default listCmdInfo roundedRight"><i class="fa fa-list-alt"></i></a>
                   </span>
                 </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-2 control-label">{{Coefficient}}<sup><i class="fas fa-question-circle tooltips" title="{{Il s'agit du coefficient entre l'unité de la commande à gauche vers des Wh. Par exemple pour le gaz il s'agit de passer de m³ à Wh, le coefficient thermique étant donné sur votre facture. S'appliquera aux HP et HC. Vous pouvez aussi mettre un coefficient de 1000 pour passer de kWh à Wh}}"></i></sup></label>
+              <div class="col-sm-2">
+                <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="coef_thermique" />
               </div>
             </div>
 
