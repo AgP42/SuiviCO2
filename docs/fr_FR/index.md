@@ -47,8 +47,15 @@ Cliquer sur la commande permet de visualiser son historique :
 Onglet Commandes
 -----------------
 
-Les commandes sont automatiquement créées à la sauvegarde de l'équipement. Il n'y a rien a configurer ici. Vous pouvez éventuellement aller dans les paramétres de chaque commande pour définir leur visibilité sur le dashboard.
+Les commandes sont automatiquement créées à la sauvegarde de l'équipement. Vous pouvez éventuellement aller dans les paramétres de chaque commande pour définir leur visibilité sur le dashboard.
 Les commandes présentes dependront du type d'énergie choisi et de votre configuration HP/HC.
+Les commandes disponibles à afficher sur le widget sont :
+- Le total gCO2 du jour (depuis minuit)
+- Le total gCO2 de la semaine (depuis minuit lundi)
+- Le total gCO2 du mois (depuis minuit le premier jour du mois courant)
+- Le taux de CO2 par kWh émis par la production Francaise, en temps réel. Uniquement si votre équipement est de type "Electrique"
+
+![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/widget.png)
 
 Onglet Historique
 --------------

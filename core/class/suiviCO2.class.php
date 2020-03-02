@@ -245,7 +245,7 @@ class suiviCO2 extends eqLogic {
 
         if ($cmdTotalMonth->getIsVisible()){
 
-          $startDate = date('Y-m-00 00:00:00');
+          $startDate = date('Y-m-01 00:00:00');
           $endDate = date('Y-m-d H:i:00');
 
           $totalCO2 = $this->calculTotauxCo2Periode($startDate, $endDate);
@@ -878,6 +878,7 @@ class suiviCO2 extends eqLogic {
         $cmd->setName(__('Total CO2 jour', __FILE__));
       }
       $cmd->setIsHistorized(0);
+      $cmd->setOrder(0);
       $cmd->setType('info');
       $cmd->setSubType('numeric');
       $cmd->setUnite('gCO2');
@@ -894,6 +895,7 @@ class suiviCO2 extends eqLogic {
         $cmd->setName(__('Total CO2 semaine', __FILE__));
       }
       $cmd->setIsHistorized(0);
+      $cmd->setOrder(1);
       $cmd->setType('info');
       $cmd->setSubType('numeric');
       $cmd->setUnite('gCO2');
@@ -910,6 +912,7 @@ class suiviCO2 extends eqLogic {
         $cmd->setName(__('Total CO2 mois', __FILE__));
       }
       $cmd->setIsHistorized(0);
+      $cmd->setOrder(2);
       $cmd->setType('info');
       $cmd->setSubType('numeric');
       $cmd->setUnite('gCO2');
