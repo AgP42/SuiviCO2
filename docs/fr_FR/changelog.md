@@ -23,3 +23,8 @@
 # 0.0.4 - 4eme Beta
 
 - ajout des totaux jours, semaine et mois pour affichage dans le dashboard
+
+# 0.0.5 - 5eme Beta --> stable
+
+- nouvelle fonction optimisée pour l'import des historiques de conso Wh - merci @jpty
+- passage en stable
