@@ -254,12 +254,12 @@ $dateCo2_def = array(
               </div>
             </span>
             </div>
-              <p class="col-sm-4">{{Il s'agit des donnés antérieures aux données Temps réel, aprés correction par les fournisseurs. Lancer cette fonction sur des données existantes dans Jeedom les écrasera avec les nouvelles valeurs. Fonction a lancer manuellement de temps à autre !}}</p>
+              <p class="col-sm-4">{{Il s'agit des donnés antérieures aux données Temps réel, après correction par les fournisseurs. Lancer cette fonction sur des données existantes dans Jeedom les écrasera avec les nouvelles valeurs. Fonction à lancer manuellement de temps à autre !}}</p>
           </div>
 
           <legend><i class="fas fa-history"></i> {{Récupérer historique de ma conso}}</legend>
           <div class="form-group">
-            <label class="col-sm-3 control-label">{{Ma conso kWh}}</label>
+            <label class="col-sm-3 control-label">{{Ma conso Wh}}</label>
             <div class="col-sm-4">
             <span>
               <div>
