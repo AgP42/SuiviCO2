@@ -114,7 +114,7 @@ $('#bt_historyCo2_def').on('click', function () {
 
 $('#bt_historykWh').on('click', function () {
 
-    bootbox.confirm('{{Attention : L\'opération est exponentiellement longue selon la durée sélectionnée et le nombre d\'enregistrement dans votre historique. En cas d\'erreur 500 ou de timeout, merci de sélectionner une période plus courte.}}', function (result) {
+    bootbox.confirm('{{L\'opération peut être longue selon la durée sélectionnée}}', function (result) {
         if (result) {
             $.ajax({
                 type: 'POST',

@@ -70,14 +70,7 @@ Pour l'électricité, le plugin chargera les données de l'API toutes les heures
 
 Pour tous les types d'énergie, le plugin calculera et enregistrera les consommations toutes les heures, toutefois vous pouvez récupérer dans cet onglet les données passés. Pour les énergies de type gaz, fioul ou autre, le coefficient thermique sera appliqué lors de l'import de façon à stocker des valeurs en Wh.
 
-- Ma conso Wh : uniquement si les commandes contenant les index étaient déjà historisées dans jeedom. Cette commande permet avec les données d'index historisées de calculer et d'enregistrer vos conso HP et HC pour les visualiser dans le panneau desktop. Il est possible de choisir la période voulue, attention, les données peuvent être longues à charger.
-Pour infos voici quelques durées avec un RPI3 pour un historique d'1 valeur par heure :
-     - 1 mois, HP et HC : 3s
-     - 2 mois : 7s
-     - 6 mois : 20s
-     - 1 an : 77s
-Si votre table d'historique est trop chargée (un enregistrement par minute par exemple) vous pouvez avoir une erreur 500, dans ce cas relancez la requête sur une période plus courte (1 mois).
-Dans tous les cas, éviter de charger plus d'1 an. Timeout après 10min.
+- Ma conso Wh : uniquement si les commandes contenant les index étaient déjà historisées dans jeedom. Cette commande permet avec les données d'index historisées de calculer et d'enregistrer vos conso HP et HC pour les visualiser dans le panneau desktop. Il est possible de choisir la période voulue, attention, les données peuvent être longues à charger. Merci @jpty qui a optimisé cette fonction !
 
 Il est possible de relancer l'historique sur des dates déjà enregistrées.
 

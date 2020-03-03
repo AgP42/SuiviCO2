@@ -258,7 +258,49 @@ class suiviCO2 extends eqLogic {
 
        }
 
+      /* code modifé par @jpty du forum jeedom, merci à lui !!*/
       public function getAndRecordHistoriqueConso($_startDate, $_endDate){ // fct appelée par l'AJAX
+
+        if($this->getConfiguration('index_HC')!=''){
+          $_typeConso = array('HP', 'HC');
+        } else {
+          $_typeConso = array('HP');
+        }
+
+        foreach ($_typeConso as $_type) {
+          $nbdataimportees = 0;
+          $calculstarttime = date('H:i:s');
+
+          // on recupere la cmd contenant l'index
+          $index_cmd_id = $this->getConfiguration('index_' . $_type); //on va chercher l'id de la CMD contenant index_HP ou HC via la conf utilisateur, format #10#
+          $cmdIndex = cmd::byId(str_replace('#', '', $index_cmd_id)); // on vire les # et on prend cette commande (d'un autre objet !)
+          if (!is_object($cmdIndex)) {
+            log::add('suiviCO2', 'warning', 'Pas de commande dans le champs ' . $_type . ' ou ' . $index_cmd_id . ' n est pas une commande valide - Fin de l import');
+            return array();
+          }
+
+          $cmd = $this->getCmd(null, 'consumption' . $_type); // on prend la commande dans laquelle on va ecrire notre resultat de calcul conso
+          if (is_object($cmd)) {
+            $historyIndex = suiviCo2History::suiviCo2GetHistory($cmdIndex->getId(),$_startDate,$_endDate); // appel de la fonction dédiée, voir cette class en fin du present fichier
+            $coef_thermique = $this->getConfiguration('coef_thermique',1);
+            $nb = 0;
+            foreach ($historyIndex as $history) {
+              $value = $history->getValue();
+              if ($nb != 0) {
+                $valueDateTime = $history->getDatetime();
+                $conso = round($value * $coef_thermique - $prevHisto * $coef_thermique, 0);
+                $cmd->addHistoryValue($conso, $valueDateTime);
+                $nbdataimportees++;
+              }
+              $prevHisto = $value;
+              $nb++;
+            }
+          }
+          log::add(__CLASS__, 'info', 'Import data ' . $_type . ' de ' . $_startDate . ' à ' . $_endDate . ', start à ' . $calculstarttime . ' fin à : ' . date('H:i:s') . ', nb data importées : ' . $nbdataimportees);
+        }
+      }
+
+/*      public function getAndRecordHistoriqueConso($_startDate, $_endDate){ // fct appelée par l'AJAX
 
         if($this->getConfiguration('index_HC')!=''){
           $_typeConso = array('HP', 'HC');
@@ -340,7 +382,7 @@ class suiviCO2 extends eqLogic {
 
         } // fin foreach HP puis HC
 
-      } // fin fct
+      } // fin fct */
 
       public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 14, $_eqLogic_id = NULL){ // fct appellée soit par l'AJAX, soit par le crouHourly
 
@@ -989,6 +1031,38 @@ class suiviCO2Cmd extends cmd {
     }
 
     /*     * **********************Getteur Setteur*************************** */
+}
+
+/* code modifé par @jpty du forum jeedom, merci à lui !!*/
+class suiviCo2History extends history {
+
+  function suiviCo2GetHistory($_cmd_id,$_startTime = null,$_endTime = null){
+
+    $values = array( 'cmd_id' => $_cmd_id,);
+
+    if ($_startTime !== null) $values['startTime'] = $_startTime;
+    if ($_endTime !== null) $values['endTime'] = $_endTime;
+
+    $sql = 'SELECT ' . DB::buildField('history');
+    $sql .= ' FROM ( SELECT ' . DB::buildField('history') . ' FROM history WHERE cmd_id=:cmd_id';
+
+    if ($_startTime !== null) $sql .= ' AND datetime>=:startTime';
+    if ( $_endTime != null ) $sql .= ' AND datetime<=:endTime';
+
+    $sql .= " AND datetime LIKE '%:00:%'";
+    $sql .= ' UNION ALL SELECT ' . DB::buildField('history') . ' FROM historyArch WHERE cmd_id=:cmd_id';
+
+    if ($_startTime !== null) $sql .= ' AND datetime>=:startTime';
+    if ( $_endTime != null ) $sql .= ' AND datetime<=:endTime';
+
+    $sql .= " AND datetime LIKE '%:00:%'";
+    $sql .= ' ) as dt ORDER BY datetime ASC';
+
+  //  log::add(__CLASS__,'debug',"SQL: $sql");
+
+    return DB::Prepare($sql, $values, DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, 'history');
+
+  }
 }
 
 
