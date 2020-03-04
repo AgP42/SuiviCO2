@@ -281,7 +281,7 @@ class suiviCO2 extends eqLogic {
 
           $cmd = $this->getCmd(null, 'consumption' . $_type); // on prend la commande dans laquelle on va ecrire notre resultat de calcul conso
           if (is_object($cmd)) {
-            $historyIndex = suiviCo2History::suiviCo2GetHistory($cmdIndex->getId(),$_startDate,$_endDate); // appel de la fonction dédiée, voir cette class en fin du present fichier
+            $historyIndex = self::getHistorySuiviCO2($cmdIndex->getId(),$_startDate,$_endDate); // appel de la fonction dédiée qui ne recupere que les heures entieres
             $coef_thermique = $this->getConfiguration('coef_thermique',1);
             $nb = 0;
             foreach ($historyIndex as $history) {
@@ -298,6 +298,35 @@ class suiviCO2 extends eqLogic {
           }
           log::add(__CLASS__, 'info', 'Import data ' . $_type . ' de ' . $_startDate . ' à ' . $_endDate . ', start à ' . $calculstarttime . ' fin à : ' . date('H:i:s') . ', nb data importées : ' . $nbdataimportees);
         }
+      }
+
+      /* code modifé par @jpty du forum jeedom, merci à lui !!*/
+      public function getHistorySuiviCO2($_cmd_id, $_startTime = null, $_endTime = null){
+
+        $values = array( 'cmd_id' => $_cmd_id,);
+
+        if ($_startTime !== null) $values['startTime'] = $_startTime;
+        if ($_endTime !== null) $values['endTime'] = $_endTime;
+
+        $sql = 'SELECT ' . DB::buildField('history');
+        $sql .= ' FROM ( SELECT ' . DB::buildField('history') . ' FROM history WHERE cmd_id=:cmd_id';
+
+        if ($_startTime !== null) $sql .= ' AND datetime>=:startTime';
+        if ( $_endTime != null ) $sql .= ' AND datetime<=:endTime';
+
+        $sql .= " AND datetime LIKE '%:00:%'";
+        $sql .= ' UNION ALL SELECT ' . DB::buildField('history') . ' FROM historyArch WHERE cmd_id=:cmd_id';
+
+        if ($_startTime !== null) $sql .= ' AND datetime>=:startTime';
+        if ( $_endTime != null ) $sql .= ' AND datetime<=:endTime';
+
+        $sql .= " AND datetime LIKE '%:00:%'";
+        $sql .= ' ) as dt ORDER BY datetime ASC';
+
+      //  log::add(__CLASS__,'debug',"SQL: $sql");
+
+        return DB::Prepare($sql, $values, DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, 'history');
+
       }
 
 /*      public function getAndRecordHistoriqueConso($_startDate, $_endDate){ // fct appelée par l'AJAX
@@ -1019,6 +1048,7 @@ class suiviCO2Cmd extends cmd {
 
     /*     * *********************Methode d'instance************************* */
 
+
     /*
      * Non obligatoire permet de demander de ne pas supprimer les commandes même si elles ne sont pas dans la nouvelle configuration de l'équipement envoyé en JS
       public function dontRemoveCmd() {
@@ -1032,37 +1062,3 @@ class suiviCO2Cmd extends cmd {
 
     /*     * **********************Getteur Setteur*************************** */
 }
-
-/* code modifé par @jpty du forum jeedom, merci à lui !!*/
-class suiviCo2History extends history {
-
-  function suiviCo2GetHistory($_cmd_id,$_startTime = null,$_endTime = null){
-
-    $values = array( 'cmd_id' => $_cmd_id,);
-
-    if ($_startTime !== null) $values['startTime'] = $_startTime;
-    if ($_endTime !== null) $values['endTime'] = $_endTime;
-
-    $sql = 'SELECT ' . DB::buildField('history');
-    $sql .= ' FROM ( SELECT ' . DB::buildField('history') . ' FROM history WHERE cmd_id=:cmd_id';
-
-    if ($_startTime !== null) $sql .= ' AND datetime>=:startTime';
-    if ( $_endTime != null ) $sql .= ' AND datetime<=:endTime';
-
-    $sql .= " AND datetime LIKE '%:00:%'";
-    $sql .= ' UNION ALL SELECT ' . DB::buildField('history') . ' FROM historyArch WHERE cmd_id=:cmd_id';
-
-    if ($_startTime !== null) $sql .= ' AND datetime>=:startTime';
-    if ( $_endTime != null ) $sql .= ' AND datetime<=:endTime';
-
-    $sql .= " AND datetime LIKE '%:00:%'";
-    $sql .= ' ) as dt ORDER BY datetime ASC';
-
-  //  log::add(__CLASS__,'debug',"SQL: $sql");
-
-    return DB::Prepare($sql, $values, DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, 'history');
-
-  }
-}
-
-
