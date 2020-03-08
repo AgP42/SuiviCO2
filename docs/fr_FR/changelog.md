@@ -28,3 +28,8 @@
 
 - nouvelle fonction optimisée pour l'import des historiques de conso Wh - merci @jpty
 - passage en stable
+
+# 1.0.1
+
+- changement icone, merci @mich0111
+- inversion des couleurs HP et HC pour avoir le HP en rouge
