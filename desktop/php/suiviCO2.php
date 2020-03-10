@@ -272,6 +272,20 @@ $dateCo2_def = array(
             <p class="col-sm-4">{{Uniquement disponible si les commandes contenant les index étaient déjà historisées dans jeedom !)}}</p>
           </div>
 
+          <legend><i class="fas fa-history"></i> {{DEBUG - Test interface plugin Suivi Conso}}</legend>
+          <div class="form-group">
+            <label class="col-sm-3 control-label">{{Test appel calculs }}</label>
+            <div class="col-sm-4">
+            <span>
+              <div>
+                {{Période du}} <input class="form-control input-sm in_datepicker" id='in_startDateTest' style="display : inline-block; width: 150px;" value='<?php echo $date['start'] ?>'/> {{au}}
+                <input class="form-control input-sm in_datepicker" id='in_endDateTest' style="display : inline-block; width: 150px;" value='<?php echo $date['end'] ?>'/>
+                <a class="btn btn-success btn-sm tooltips" id='bt_testSuiviConso' ><i class="fas fa-database"></i>{{ Récupérer infos}}</a>
+              </div>
+            </span>
+            </div>
+          </div>
+
           </fieldset>
         </form>
 

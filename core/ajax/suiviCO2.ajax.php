@@ -26,6 +26,26 @@ try {
 
     ajax::init();
 
+    if (init('action') == 'getCO2DataForSuiviConso') {
+
+      // initialise les variables locales avec les infos de la conf from le JS
+      $date = array(
+        'start' => init('dateStart'),
+        'end' => init('dateEnd'),
+      );
+
+      $eqLogic = eqLogic::byId(init('id')); // on recupere l'eqLogic à partir de son ID
+
+      $return = array(
+        'eqLogic' => utils::o2a($eqLogic),
+        'date' => $date,
+        'datas' => $eqLogic->calculTotauxCo2Periode($date['start'], $date['end'])
+      );
+
+      ajax::success($return);
+    } // end getCO2DataForSuiviConso
+
+
     if (init('action') == 'getSuiviCO2Data') {
 
       // initialise les variables locales avec les infos de la conf from le JS

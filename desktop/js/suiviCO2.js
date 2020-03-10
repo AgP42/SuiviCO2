@@ -51,6 +51,31 @@ $(".eqLogic").off('click','.listCmdInfo').on('click','.listCmdInfo', function ()
   });
 });
 
+$('#bt_testSuiviConso').on('click', function () {
+
+    $.ajax({
+      type: 'POST',
+      url: 'plugins/suiviCO2/core/ajax/suiviCO2.ajax.php',
+      data: {
+          action: 'getCO2DataForSuiviConso',
+          id: $('.eqLogicAttr[data-l1key=id]').value(),
+          dateStart : $('#in_startDateTest').value(),
+          dateEnd : $('#in_endDateTest').value(),
+          },
+      dataType: 'json',
+          error: function (request, status, error) {
+          handleAjaxError(request, status, error);
+          },
+          success: function (data) {
+            if (data.state != 'ok') {
+              $('#div_alert').showAlert({message: data.result, level: 'danger'});
+              return;
+            }
+            $('#div_alert').showAlert({message: 'Dates : ' + data.result.date.start + ' - ' + data.result.date.end + ', valeur : ' + data.result.datas, level: 'success'});
+          }
+    }); //*/
+
+});
 
 $('#bt_historyCO2').on('click', function () {
     bootbox.confirm('{{Environ 1,5 mois de données, l\'opération peut prendre plusieurs minutes}}', function (result) {
