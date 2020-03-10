@@ -33,3 +33,7 @@
 
 - changement icone, merci @mich0111
 - inversion des couleurs HP et HC pour avoir le HP en rouge
+
+# 1.0.1 - beta 1
+
+- ajout fct calculs totaux CO2 pour intégration au plugin suivi conso
