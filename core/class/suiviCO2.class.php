@@ -560,11 +560,19 @@ class suiviCO2 extends eqLogic {
       // Fonction exécutée automatiquement toutes les heures par Jeedom
       public static function cronHourly() {
         $datetime = date('Y-m-d H:i:00');
+        $elec_present = false;
 
         log::add('suiviCO2', 'debug', '#################### CRON Hourly à ' . $datetime . ' ###################');
 
         //pour chaque equipement declaré par l'utilisateur
         foreach (self::byType('suiviCO2',true) as $suiviCO2) {
+
+          log::add('suiviCO2', 'debug', 'CronHourly, mes eqLogics : ' . $suiviCO2->getHumanName() . ' - visible : ' . $suiviCO2->getIsVisible() . ' - enable : ' . $suiviCO2->getIsEnable());
+
+          //on regarde si on a au moins 1 equipement en type elec
+          if($suiviCO2->getConfiguration('conso_type') == 'elec'){ //si on est en conso de type elec
+            $elec_present = true;
+          }
 
           /* Traitement HP */
           $suiviCO2->calculConso('HP');
@@ -579,8 +587,8 @@ class suiviCO2 extends eqLogic {
 
         } // fin foreach equipement
 
-        //appel de l'api et stock des données en base, si on est en type elec
-        if($suiviCO2->getConfiguration('conso_type') == 'elec'){ //si on est en conso de type elec
+        //appel de l'api et stock des données en base, si on est en type elec (1 seul appel meme si plusieurs equipements a traiter pour ne pas faire plusieurs appels API)
+        if($elec_present){ //si on a au moins 1 equipement en conso de type elec
           sleep(60);//attend 1 min, si execution à l'heure pile on recoit pas les datas (due a la mise à jour de l'API)
           self::getAndRecordDataCo2();
         }

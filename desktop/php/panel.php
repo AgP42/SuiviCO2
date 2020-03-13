@@ -32,11 +32,12 @@ if (init('eqLogic_id') == '') { // on cherche le 1er equipement a afficher quand
       }
     }
   }
-
 } else { //si on a &eqLogic_id dans l'URL
-
   $eqLogic_id = init('eqLogic_id');
+}
 
+if (!isset($eqLogic_id)) {
+  throw new Exception('{{Aucun équipement actif}}');
 }
 
 sendVarToJs('eqLogic_id', $eqLogic_id);
