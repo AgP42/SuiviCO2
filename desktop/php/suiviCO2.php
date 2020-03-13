@@ -6,15 +6,6 @@ $plugin = plugin::byId('suiviCO2');
 sendVarToJS('eqType', $plugin->getId());
 $eqLogics = eqLogic::byType($plugin->getId());
 
-$pluginSuiviConso = plugin::byId('conso');
-
-if($pluginSuiviConso && $pluginSuiviConso->isActive()) {
-  sendVarToJS('suiviConsoActif', true);
-} else {
-  sendVarToJS('suiviConsoActif', false);
-}
-
-
 // initialise les dates du datepicker quand on arrive sur la page : debut 1 mois avant now et fin demain
 $date = array(
   'start' => init('startDate', date('Y-m-d', strtotime('-1 month ' . date('Y-m-d')))),
@@ -281,32 +272,52 @@ $dateCo2_def = array(
             <p class="col-sm-4">{{Uniquement disponible si les commandes contenant les index étaient déjà historisées dans jeedom !)}}</p>
           </div>
 
-          <legend class='import_suivi_conso'><i class="fas fa-history"></i> {{Récupérer historique de ma conso via le plugin SUIVI CONSO}}</legend>
 
-          <div class="form-group import_suivi_conso">
-            <label class="col-sm-3 control-label">{{Choisir votre équipement SUIVI CONSO dont vous voulez récuperer les historiques }}</label>
-            <div class="col-sm-4">
-              <div class="input-group">
-                <input type="text" class="eqLogicAttr form-control tooltips roundedLeft" data-l1key="configuration" data-l2key="cmdSuiviConso"/>
-                <span class="input-group-btn">
-                  <a class="btn btn-default listCmdInfo roundedRight"><i class="fa fa-list-alt"></i></a>
-                </span>
+          <!-- Import des datas via le plugin suivi conco - uniquement si le plugin est présent ! -->
+
+          <?php
+
+          $pluginSuiviConso = plugin::byId('conso');
+
+          if($pluginSuiviConso && $pluginSuiviConso->isActive()) {
+
+            ?>
+
+            <legend><i class="fas fa-history"></i> {{Récupérer historique de ma conso via le plugin SUIVI CONSO}}</legend>
+
+            <div class="form-group">
+              <label class="col-sm-3 control-label" >{{Equipement Suivi Conso à utiliser}}</label>
+              <div class="col-sm-4">
+                <select id="sel_object" class="eqLogicAttr form-control" data-l1key="suiviconso_eqLogic_id">
+                  <?php
+                    $allObject = jeeObject::buildTree();
+                    foreach ($allObject as $object_li) {
+                      foreach ($object_li->getEqLogic(true, false, 'conso') as $eqLogic) {
+                        echo '<option value="' . $eqLogic->getId() . '">' . $eqLogic->getHumanName() . '</option>';
+                      }
+                    }
+                    ?>
+                </select>
+              </div>
+
+              <div class="col-sm-4">
+              <span>
+                <div>
+                  {{Période du}} <input class="form-control input-sm in_datepicker" id='in_startDateSuiviConso' style="display : inline-block; width: 150px;" value='<?php
+                  echo $date['start']
+                  ?>'/> {{au}}
+                  <input class="form-control input-sm in_datepicker" id='in_endDateSuiviConso' style="display : inline-block; width: 150px;" value='<?php
+                  echo $date['end']
+                  ?>'/>
+                  <a class="btn btn-success btn-sm tooltips" id='bt_ImportSuiviConso' ><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
+                </div>
+              </span>
               </div>
             </div>
-            <div class="col-sm-4">
-            <span>
-              <div>
-                {{Période du}} <input class="form-control input-sm in_datepicker" id='in_startDateSuiviConso' style="display : inline-block; width: 150px;" value='<?php
-                echo $date['start']
-                ?>'/> {{au}}
-                <input class="form-control input-sm in_datepicker" id='in_endDateSuiviConso' style="display : inline-block; width: 150px;" value='<?php
-                echo $date['end']
-                ?>'/>
-                <a class="btn btn-success btn-sm tooltips" id='bt_ImportSuiviConso' ><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
-              </div>
-            </span>
-            </div>
-          </div>
+
+          <?php
+          }
+          ?>
 
           <!--
           <legend><i class="fas fa-history"></i> {{DEBUG - Test interface plugin Suivi Conso}}</legend>
