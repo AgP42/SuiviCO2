@@ -15,6 +15,9 @@
  * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
  */
 
+ $('#div_alert').showAlert({message: 'suiviConsoActif : ' + suiviConsoActif, level: 'success'});
+
+
 $(".in_datepicker").datepicker({
     changeMonth: true,
     changeYear: true,
@@ -29,6 +32,13 @@ $(".in_datepicker_month_year").datepicker({
   }
 
 });
+
+if(suiviConsoActif){
+  $('.import_suivi_conso').show();
+} else {
+  $('.import_suivi_conso').hide();
+
+}
 
 $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').change(function () {
   if($('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "gaz" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "fioul" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "other"){
