@@ -323,7 +323,7 @@ class suiviCO2 extends eqLogic {
         $sql .= " AND datetime LIKE '%:00:%'";
         $sql .= ' ) as dt ORDER BY datetime ASC';
 
-      //  log::add(__CLASS__,'debug',"SQL: $sql");
+    //    log::add(__CLASS__,'debug',"SQL: $sql");
 
         return DB::Prepare($sql, $values, DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, 'history');
 
@@ -412,6 +412,50 @@ class suiviCO2 extends eqLogic {
         } // fin foreach HP puis HC
 
       } // fin fct */
+
+      /* Fonction pour l'import des datas à partir du plugin suivi conso */
+      public function recordHistoryFromSuiviConso($_datas){ // fct appelée par l'AJAX
+
+        if($this->getConfiguration('index_HC')!=''){
+          $_typeConso = array('HP', 'HC');
+        } else {
+          $_typeConso = array('HP');
+        }
+
+        foreach ($_typeConso as $_type) {
+          $nbdataimportees = 0;
+          $calculstarttime = date('H:i:s');
+
+          // on recupere la cmd contenant l'index
+          $index_cmd_id = $this->getConfiguration('index_' . $_type); //on va chercher l'id de la CMD contenant index_HP ou HC via la conf utilisateur, format #10#
+
+          $cmd = $this->getCmd(null, 'consumption' . $_type); // on prend la commande dans laquelle on va ecrire notre resultat de calcul conso
+          if (is_object($cmd)) {
+
+            $nb = 0;
+            foreach ($_datas as $data) {
+
+              log::add('suiviCO2', 'debug', 'Import data ' . $data['rec_date'] . ' - ' . $data['rec_time']  . ' - ' . $data['hchp'] . ' - ' . $data['hchc']);
+
+              if($_type == 'HP') {
+                $value = $data['hchp'];
+              }else if($_type == 'HC'){
+                $value = $data['hchc'];
+              }
+
+              if ($nb != 0) {
+                $valueDateTime = $data['rec_date'] . ' ' . $data['rec_time'];
+                $conso = round($value - $prevHisto, 0);
+                $cmd->addHistoryValue($conso, $valueDateTime);
+                $nbdataimportees++;
+              }
+              $prevHisto = $value;
+              $nb++;
+            }
+          }
+          log::add(__CLASS__, 'info', 'Import data ' . $_type . ' from SuiviConso eqLogic id : ' . $_datas[0]['id_equipement'] . ' , start à ' . $calculstarttime . ' fin à : ' . date('H:i:s') . ', nb data importées : ' . $nbdataimportees);
+        } //*/
+      }
 
       public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 14, $_eqLogic_id = NULL){ // fct appellée soit par l'AJAX, soit par le crouHourly
 

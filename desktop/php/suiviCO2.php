@@ -283,9 +283,9 @@ $dateCo2_def = array(
 
             ?>
 
-            <legend><i class="fas fa-history"></i> {{Récupérer historique de ma conso via le plugin SUIVI CONSO}}</legend>
+            <legend class='type_elec'><i class="fas fa-history"></i> {{Récupérer historique de ma conso électrique via le plugin SUIVI CONSO}}</legend>
 
-            <div class="form-group">
+            <div class="form-group type_elec">
               <label class="col-sm-3 control-label" >{{Equipement Suivi Conso à utiliser}}</label>
               <div class="col-sm-4">
                 <select id="sel_object" class="eqLogicAttr form-control" data-l1key="suiviconso_eqLogic_id">
@@ -309,7 +309,7 @@ $dateCo2_def = array(
                   <input class="form-control input-sm in_datepicker" id='in_endDateSuiviConso' style="display : inline-block; width: 150px;" value='<?php
                   echo $date['end']
                   ?>'/>
-                  <a class="btn btn-success btn-sm tooltips" id='bt_ImportSuiviConso' ><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
+                  <a class="btn btn-success btn-sm tooltips" id='bt_importSuiviConso' ><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
                 </div>
               </span>
               </div>
@@ -319,7 +319,7 @@ $dateCo2_def = array(
           }
           ?>
 
-          <!--
+          <!-- Pour DEBUG - Activer pour tester la fonction de recuperation des totaux CO2 à destination de suivi Conso
           <legend><i class="fas fa-history"></i> {{DEBUG - Test interface plugin Suivi Conso}}</legend>
           <div class="form-group">
             <label class="col-sm-3 control-label">{{Test appel calculs }}</label>

@@ -37,7 +37,7 @@ if (init('eqLogic_id') == '') { // on cherche le 1er equipement a afficher quand
 }
 
 if (!isset($eqLogic_id)) {
-  throw new Exception('{{Aucun équipement actif}}');
+  throw new Exception('{{Aucun équipement suiviCO2 actif}}');
 }
 
 sendVarToJs('eqLogic_id', $eqLogic_id);

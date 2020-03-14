@@ -139,7 +139,21 @@ try {
       $eqLogic->getAndRecordHistoriqueConso($date['start'], $date['end']);
 
       ajax::success($return);
-    } // end getSuiviCO2Data
+    } // end getHistoriqueConso
+
+
+    if (init('action') == 'recordHistoryFromSuiviConso') {
+
+      // initialise les variables locales avec les infos de la conf from le JS
+      $eqLogic = eqLogic::byId(init('id')); // on recupere l'eqLogic à partir de son ID
+      $datas = init('datas');
+
+    //  log::add('suiviCO2', 'debug', 'Dans ajax, eqLogic_id : ' . $eqLogic->getId());
+
+      $eqLogic->recordHistoryFromSuiviConso($datas);
+
+      ajax::success($return);
+    } // end recordHistoryFromSuiviConso
 
     throw new Exception(__('Aucune méthode correspondante à : ', __FILE__) . init('action'));
     /*     * *********Catch exeption*************** */

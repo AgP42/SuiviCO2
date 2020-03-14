@@ -33,13 +33,6 @@ $(".in_datepicker_month_year").datepicker({
 
 });
 
-/*if(suiviConsoActif){
-  $('.import_suivi_conso').show();
-} else {
-  $('.import_suivi_conso').hide();
-
-}*/
-
 $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').change(function () {
   if($('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "gaz" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "fioul" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "other"){
     $('.type_gaz_fioul_autre').show();
@@ -59,6 +52,61 @@ $(".eqLogic").off('click','.listCmdInfo').on('click','.listCmdInfo', function ()
       el.value(result.human);
     }
   });
+});
+
+$('#bt_importSuiviConso').on('click', function () {
+
+  if(isset($('.eqLogicAttr[data-l1key=suiviconso_eqLogic_id]').value())) {
+
+    $.ajax({
+      type: 'POST',
+      url: 'plugins/conso/core/ajax/api.ajax.php',
+      data: {
+        action: 'getHistory',
+        suiviconso_eqLogic_id: $('.eqLogicAttr[data-l1key=suiviconso_eqLogic_id]').value(),
+        startTime: $('#in_startDateSuiviConso').value(),
+        endTime: $('#in_endDateSuiviConso').value()
+      },
+      dataType: 'json',
+      error: function (request, status, error) {
+        handleAjaxError(request, status, error, $('#div_DashboardAlert'));
+      },
+      success: function (data) {
+        if (data.state != 'ok') {
+          $('#div_alert').showAlert({message: data.result, level: 'danger'});
+          return;
+        }
+
+        // on a fini l'appel a suivi conso, maintenant on passe les datas a notre ajax pour les traiter et enregistrer
+        $.ajax({
+            type: 'POST',
+            url: 'plugins/suiviCO2/core/ajax/suiviCO2.ajax.php',
+            data: {
+                action: 'recordHistoryFromSuiviConso',
+                id: $('.eqLogicAttr[data-l1key=id]').value(),
+                datas : data.result,
+            },
+            dataType: 'json',
+            error: function (request, status, error) {
+                handleAjaxError(request, status, error);
+            },
+            success: function (data) {
+                if (data.state != 'ok') {
+                    $('#div_alert').showAlert({message: data.result, level: 'danger'});
+                    return;
+                }
+                $('#div_alert').showAlert({message: 'Historique du plugin SuiviConso chargé avec succès', level: 'success'});
+            }
+        });
+
+      }
+    });
+
+  }else{
+    $('#div_alert').showAlert({message: 'Vous devez choisir l\'équipement Suivi Conso à utiliser', level: 'danger'});
+  }
+
+
 });
 
 $('#bt_testSuiviConso').on('click', function () {
