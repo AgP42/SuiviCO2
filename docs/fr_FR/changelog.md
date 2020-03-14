@@ -38,7 +38,11 @@
 
 - ajout fct calculs totaux CO2 pour intégration au plugin suivi conso
 
-# 1.0.1 - beta 2
+# 1.0.2 - beta 2
 
 - correction erreur 500 si aucun equipement actif
 (https://community.jeedom.com/t/plugin-tiers-plugin-suivico2-new-plugin-cherche-beta-testeur/19069/55)
+
+# 1.0.3 - beta 3
+
+- Ajout possibilité d'importer les historiques de conso via le plugin SuiviConso, si présent

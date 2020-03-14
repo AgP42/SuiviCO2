@@ -76,6 +76,8 @@ Il est possible de relancer l'historique sur des dates déjà enregistrées.
 
 Lors de la création de l'équipement, il est possible que la 1ere valeur de consommation HP/HC soit manquante, vous pouvez alors relancer l'historisation des données sur cette journée pour la récupérer.
 
+-  Récupérer historique de ma conso électrique via le plugin SUIVI CONSO : si vous avez le plugin Suivi Conso installé et actif sur votre Jeedom, vous pouvez choisir l'équipement suivi conso correspondant et recupérer les historiques enregistrés via ce plugin.
+
 Utilisation du panneau desktop
 ======================
 
