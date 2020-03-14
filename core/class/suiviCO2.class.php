@@ -435,7 +435,7 @@ class suiviCO2 extends eqLogic {
             $nb = 0;
             foreach ($_datas as $data) {
 
-              log::add('suiviCO2', 'debug', 'Import data ' . $data['rec_date'] . ' - ' . $data['rec_time']  . ' - ' . $data['hchp'] . ' - ' . $data['hchc']);
+            //  log::add('suiviCO2', 'debug', 'Import data ' . $data['rec_date'] . ' - ' . $data['rec_time']  . ' - ' . $data['hchp'] . ' - ' . $data['hchc']);
 
               if($_type == 'HP') {
                 $value = $data['hchp'];
@@ -443,7 +443,7 @@ class suiviCO2 extends eqLogic {
                 $value = $data['hchc'];
               }
 
-              if ($nb != 0) {
+              if ($nb != 0 && $data['rec_time'] != '00:00:00') {
                 $valueDateTime = $data['rec_date'] . ' ' . $data['rec_time'];
                 $conso = round($value - $prevHisto, 0);
                 $cmd->addHistoryValue($conso, $valueDateTime);
