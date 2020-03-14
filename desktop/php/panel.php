@@ -17,6 +17,14 @@ if (is_object($object)) {
   $_GET['object_id'] = $object->getId();
 }
 
+if (jeedom::version() < "4.0.0") {
+
+} else {
+  echo '<style type="text/css">
+  .highcharts-stack-labels text tspan {fill: var(--txt-color) !important; color: var(--txt-color) !important;}
+    .highcharts-text-outline {stroke: "#80808000" var(--txt-color) !important;}
+  </style>';
+}
 
 if (init('eqLogic_id') == '') { // on cherche le 1er equipement a afficher quand on arrive sur le panel, quand &eqLogic_id n'est pas dans l'URL
 

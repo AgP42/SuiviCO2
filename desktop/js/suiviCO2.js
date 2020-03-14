@@ -43,6 +43,43 @@ $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').change(functi
   }
 });
 
+$('.eqLogicAttr[data-l1key=configuration][data-l2key=suiviconso_eqLogic_id]').change(function () {
+  let suiviconso_eqLogic_id = $('.eqLogicAttr[data-l1key=configuration][data-l2key=suiviconso_eqLogic_id]').value();
+
+  if(suiviconso_eqLogic_id != ''){
+
+    $.ajax({
+          type: 'POST',
+          url: 'plugins/conso/core/ajax/api.ajax.php',
+          data: {
+            action: 'GetEquipement',
+            type: null
+          },
+          dataType: 'json',
+          error: function (request, status, error) {
+            handleAjaxError(request, status, error, $('#div_DashboardAlert'));
+          },
+          success: function (data) {
+
+        //    console.log(suiviconso_eqLogic_id);
+            console.log(data.result[suiviconso_eqLogic_id]);
+
+        //    $('#div_alert').showAlert({message: 'cmd hp : ' + data.result[suiviconso_eqLogic_id].hchp + ' - cmd hc : ' + data.result[suiviconso_eqLogic_id].hchc, level: 'success'});
+
+            $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HP]').value(data.result[suiviconso_eqLogic_id].hchp_human);
+            $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HC]').value(data.result[suiviconso_eqLogic_id].hchc_human);
+
+          }
+    });
+
+  } else {
+    $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HP]').value('');
+    $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HC]').value('');
+  }
+
+
+});
+
 $(".eqLogic").off('click','.listCmdInfo').on('click','.listCmdInfo', function () {
   var el = $(this).closest('.form-group').find('.eqLogicAttr');
   jeedom.cmd.getSelectModal({cmd: {type: 'info'}}, function (result) {

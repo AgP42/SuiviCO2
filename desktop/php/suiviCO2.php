@@ -132,6 +132,34 @@ $dateCo2_def = array(
                 <option value="other">Autre</option>
               </select>
             </div>
+
+            <?php
+
+            $pluginSuiviConso = plugin::byId('conso');
+
+            if($pluginSuiviConso && $pluginSuiviConso->isActive()) {
+
+              ?>
+
+              <label class="col-sm-2 control-label type_elec" >{{Configuration via le plugin Suivi Conso }}</label>
+              <div class="col-sm-2 type_elec">
+                <select class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="suiviconso_eqLogic_id">
+                  <option value="">{{Non}}</option>
+                  <?php
+                    $allObject = jeeObject::buildTree();
+                    foreach ($allObject as $object_li) {
+                      foreach ($object_li->getEqLogic(true, false, 'conso') as $eqLogic) {
+                        echo '<option value="' . $eqLogic->getId() . '">' . $eqLogic->getHumanName() . '</option>';
+                      }
+                    }
+                    ?>
+                </select>
+              </div>
+
+            <?php
+            }
+            ?>
+
           </div>
 
           <div class="type_gaz_fioul_autre">
@@ -265,7 +293,7 @@ $dateCo2_def = array(
               <div>
                 {{Période du}} <input class="form-control input-sm in_datepicker" id='in_startDate' style="display : inline-block; width: 150px;" value='<?php echo $date['start'] ?>'/> {{au}}
                 <input class="form-control input-sm in_datepicker" id='in_endDate' style="display : inline-block; width: 150px;" value='<?php echo $date['end'] ?>'/>
-                <a class="btn btn-success btn-sm tooltips" id='bt_historykWh' title="{{Attention une trop grande plage de date peut mettre très longtemps a être calculée}}"><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
+                <a class="btn btn-success btn-sm tooltips" id='bt_historykWh' title="{{Merci d'enregistrer avant d'appeller l\'historique}}"><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
               </div>
             </span>
             </div>
@@ -288,7 +316,7 @@ $dateCo2_def = array(
             <div class="form-group type_elec">
               <label class="col-sm-3 control-label" >{{Equipement Suivi Conso à utiliser}}</label>
               <div class="col-sm-4">
-                <select id="sel_object" class="eqLogicAttr form-control" data-l1key="suiviconso_eqLogic_id">
+                <select class="eqLogicAttr form-control" data-l1key="suiviconso_eqLogic_id">
                   <?php
                     $allObject = jeeObject::buildTree();
                     foreach ($allObject as $object_li) {
@@ -309,7 +337,7 @@ $dateCo2_def = array(
                   <input class="form-control input-sm in_datepicker" id='in_endDateSuiviConso' style="display : inline-block; width: 150px;" value='<?php
                   echo $date['end']
                   ?>'/>
-                  <a class="btn btn-success btn-sm tooltips" id='bt_importSuiviConso' ><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
+                  <a class="btn btn-success btn-sm tooltips" id='bt_importSuiviConso' title="{{Merci d'enregistrer avant d'appeller l\'historique}}"><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
                 </div>
               </span>
               </div>
