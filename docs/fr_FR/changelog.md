@@ -52,3 +52,6 @@
 - Correction bug courbe en jeedom v4, merci @Titi_Titi
 - Implementation de l'utilisation de la configuration du plugin Suivi Conso pour la configuration de SuiviCO2
 (elec only pour l'instant)
+- Update affichage page de configuration
+- Correction bug sur calcul total CO2 semaine
+- update doc

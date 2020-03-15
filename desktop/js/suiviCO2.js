@@ -17,7 +17,6 @@
 
 // $('#div_alert').showAlert({message: 'suiviConsoActif : ' + suiviConsoActif, level: 'success'});
 
-
 $(".in_datepicker").datepicker({
     changeMonth: true,
     changeYear: true,
@@ -37,9 +36,12 @@ $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').change(functi
   if($('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "gaz" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "fioul" || $('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "other"){
     $('.type_gaz_fioul_autre').show();
     $('.type_elec').hide();
-  } else {
+  } else if($('.eqLogicAttr[data-l1key=configuration][data-l2key=conso_type]').value() == "elec"){
     $('.type_gaz_fioul_autre').hide();
     $('.type_elec').show();
+  } else {
+    $('.type_elec').hide();
+    $('.type_gaz_fioul_autre').hide();
   }
 });
 
@@ -61,20 +63,31 @@ $('.eqLogicAttr[data-l1key=configuration][data-l2key=suiviconso_eqLogic_id]').ch
           },
           success: function (data) {
 
-        //    console.log(suiviconso_eqLogic_id);
             console.log(data.result[suiviconso_eqLogic_id]);
 
-        //    $('#div_alert').showAlert({message: 'cmd hp : ' + data.result[suiviconso_eqLogic_id].hchp + ' - cmd hc : ' + data.result[suiviconso_eqLogic_id].hchc, level: 'success'});
+        //    $('#div_alert').showAlert({message: 'Suivi Conso type : ' + data.result[suiviconso_eqLogic_id].type, level: 'success'});
 
-            $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HP]').value(data.result[suiviconso_eqLogic_id].hchp_human);
-            $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HC]').value(data.result[suiviconso_eqLogic_id].hchc_human);
+            if(data.result[suiviconso_eqLogic_id].type == "electricity"){
 
-          }
+            //  $('#div_alert').showAlert({message: 'Configuration chargée, merci de vérifier !', level: 'success'});
+              $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HP]').value(data.result[suiviconso_eqLogic_id].hchp_human);
+              $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HC]').value(data.result[suiviconso_eqLogic_id].hchc_human);
+              $('.eqLogicAttr[data-l1key=configuration][data-l2key=coef_thermique]').value(data.result[suiviconso_eqLogic_id].hchp_unity);
+
+            } else {
+              $('#div_alert').showAlert({message: 'Merci de choisir un équipement de type \'Electricité\'', level: 'danger'});
+              $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HP]').value('');
+              $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HC]').value('');
+              $('.eqLogicAttr[data-l1key=configuration][data-l2key=coef_thermique]').value('');
+            }
+          }// fin success ajax
     });
 
-  } else {
+  } else { // on choisi de ne pas reprendre la conf suivi conso, on remet les valeurs a blanc
+    $('#div_alert').hide();
     $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HP]').value('');
     $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HC]').value('');
+    $('.eqLogicAttr[data-l1key=configuration][data-l2key=coef_thermique]').value('');
   }
 
 
@@ -278,10 +291,24 @@ function addCmdToTable(_cmd) {
     tr += '<span class="cmdAttr" data-l1key="id" style="display:none;"></span>';
     tr += '<input class="cmdAttr form-control input-sm" data-l1key="name" style="width : 140px;" placeholder="{{Nom}}">';
     tr += '</td>';
+
+//    tr += '<td>';
+//    tr += '<span class="type" type="' + init(_cmd.type) + '">' + jeedom.cmd.availableType() + '</span>';
+//    tr += '<span class="subType" subType="' + init(_cmd.subType) + '"></span>';
+//    tr += '</td>';
+
     tr += '<td>';
-    tr += '<span class="type" type="' + init(_cmd.type) + '">' + jeedom.cmd.availableType() + '</span>';
-    tr += '<span class="subType" subType="' + init(_cmd.subType) + '"></span>';
+    tr += '<span><label class="checkbox-inline"><input type="checkbox" class="cmdAttr checkbox-inline" data-l1key="isVisible" checked/>{{Afficher}}</label></span> ';
+    tr += '<span><label class="checkbox-inline"><input type="checkbox" class="cmdAttr checkbox-inline" data-l1key="isHistorized" checked/>{{Historiser}}</label></span> ';
     tr += '</td>';
+
+    tr += '<td>';
+    tr += '<input class="cmdAttr form-control input-sm" data-l1key="unite" placeholder="Unité" title="{{Unité}}">';
+    tr += '<input class="cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="minValue" placeholder="{{Min}}" title="{{Min}}" style="margin-top : 5px;"> ';
+    tr += '<input class="cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="maxValue" placeholder="{{Max}}" title="{{Max}}" style="margin-top : 5px;">';
+
+    tr += '</td>';
+
     tr += '<td>';
     if (is_numeric(_cmd.id)) {
         tr += '<a class="btn btn-default btn-xs cmdAction" data-action="configure"><i class="fa fa-cogs"></i></a> ';

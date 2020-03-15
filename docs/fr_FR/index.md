@@ -1,7 +1,7 @@
 Présentation
 ============
 
-Ce plugin suiviCO2 pour Jeedom a 2 fonctions principales :
+Ce plugin suiviCO2 pour Jeedom a deux fonctions principales :
 - Disposer de la valeur actuelle de gCO2 par kWh électrique produit, émis en France, en temps réel. De façon à pouvoir conditionner ses équipements facultatifs (retarder un peu le chauffe-eau en HC par exemple)
 - Visualiser ses émissions de CO2 liées à sa consommation électrique, de gaz, fioul ou autre (ainsi que la consommation et les coûts associé) :
 
@@ -28,27 +28,34 @@ Pour que cet équipement soit visible dans le panneau desktop, il faut l'assigne
 La case "Visible" permet de définir la visibilité du widget sur le dashboard Jeedom :
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/widget.png)
 
-Cliquer sur la commande permet de visualiser son historique :
-![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/historique.png)
-
 ### Configuration pour équipement électrique :
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/OngletEquipementElec.png)
 - Choisir Type d'énergie "Electricité"
-- Index de consommation à fournir en Wh (unité de base de la téléinformation). Si vous n'avez pas d'heures creuses, laisser le champs vide. Si votre consommation n'est pas en Wh, vous pouvez remplir le champ "Coefficient" permettant de réaliser la conversion d'unité.
-- Remplir vos coûts d'abonnement et de consommation par kWh
+- Si vous avez le plugin Suivi Conso installé et actif sur votre Jeedom, le plugin vous proposera de choisir un équipement suiviconso pour configurer suiviCO2. La configuration reprise sera les commandes d'index HP et HC ainsi que le coefficient si besoin.
+- Index de consommation : à fournir en Wh (unité de base de la téléinformation). Si vous n'avez pas d'heures creuses, laisser le champs HC vide. Si votre consommation n'est pas en Wh, vous pouvez remplir le champ "Coefficient" permettant de réaliser la conversion d'unité.
 
 ### Configuration pour équipement de type gaz, fioul ou autre :
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/OngletEquipementOther.png)
 - Choisir Type d'énergie voulu
 - Fournir la valeur de g de CO2 émis par kWh consommé. Ce champs n'est pas à fournir pour l'électricité car l'information provient alors d'une API avec actualisation toutes les 15 min. Cette valeur usuelle pour votre type d'énergie se trouve sur internet.
-- Index de consommation à fournir en Wh. Si vous n'avez pas d'heures creuses, laisser le champs vide. Si votre consommation n'est pas en Wh, vous pouvez remplir le champ "Coefficient" permettant de réaliser la conversion d'unité. Ce Coefficient est normalement donné sur votre facture, il dépend notamment de votre région.
-- Remplir vos coûts d'abonnement et de consommation par kWh.
+- Index de consommation à fournir en Wh. Si vous n'avez pas d'heures creuses, laisser le champs HC vide. Si votre consommation n'est pas en Wh, vous pouvez remplir le champ "Coefficient" permettant de réaliser la conversion d'unité. Ce Coefficient est normalement donné sur votre facture, il dépend notamment de votre région.
+
+Onglet Coûts
+-----------------
+
+![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/OngletCout.png)
+- Remplir vos coûts d'abonnement et de consommation par kWh
+
+Laissez les champs vide pour ne pas afficher les calculs et graphiques de coûts sur le panel.
 
 Onglet Commandes
 -----------------
 
-Les commandes sont automatiquement créées à la sauvegarde de l'équipement. Vous pouvez éventuellement aller dans les paramètres de chaque commande pour définir leur visibilité sur le dashboard.
+![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/OngletCommandes.png)
+
+Les commandes sont automatiquement créées à la sauvegarde de l'équipement.
 Les commandes présentes dépendront du type d'énergie choisi et de votre configuration HP/HC.
+Vous pouvez définir leur visibilité et min/max pour affichage sur le dashboard. Il est recommandé de ne pas changer l'historisation des commandes.
 Les commandes disponibles à afficher sur le widget sont :
 - Le total gCO2 du jour (depuis minuit)
 - Le total gCO2 de la semaine (depuis minuit lundi)
@@ -59,6 +66,10 @@ Les commandes disponibles à afficher sur le widget sont :
 
 Onglet Historique
 --------------
+
+L'onglet historique sera différent selon le type d'énergie et si vous disposez ou non du plugin suivi conso.
+
+Au maximum :
 
 ![](https://raw.githubusercontent.com/AgP42/suiviCO2/dev/docs/assets/images/OngletHistorique.png)
 
@@ -76,7 +87,9 @@ Il est possible de relancer l'historique sur des dates déjà enregistrées.
 
 Lors de la création de l'équipement, il est possible que la 1ere valeur de consommation HP/HC soit manquante, vous pouvez alors relancer l'historisation des données sur cette journée pour la récupérer.
 
--  Récupérer historique de ma conso électrique via le plugin SUIVI CONSO : si vous avez le plugin Suivi Conso installé et actif sur votre Jeedom, vous pouvez choisir l'équipement suivi conso correspondant et recupérer les historiques enregistrés via ce plugin.
+Si vous avez le plugin suivi conso installé, actif, et uniquement pour les équipements de type "électrique" :
+
+-  Récupérer historique de ma conso électrique via le plugin SUIVI CONSO : vous pouvez choisir l'équipement suivi conso correspondant et recupérer les historiques enregistrés via ce plugin.
 
 Utilisation du panneau desktop
 ======================

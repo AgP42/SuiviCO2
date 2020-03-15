@@ -55,18 +55,24 @@ $dateCo2_def = array(
   </div>
 
   <div class="col-xs-12 eqLogic" style="display: none;">
+
 		<div class="input-group pull-right" style="display:inline-flex">
 			<span class="input-group-btn">
 				<a class="btn btn-default btn-sm eqLogicAction roundedLeft" data-action="configure"><i class="fa fa-cogs"></i> {{Configuration avancée}}</a><a class="btn btn-default btn-sm eqLogicAction" data-action="copy"><i class="fas fa-copy"></i> {{Dupliquer}}</a><a class="btn btn-sm btn-success eqLogicAction" data-action="save"><i class="fas fa-check-circle"></i> {{Sauvegarder}}</a><a class="btn btn-danger btn-sm eqLogicAction roundedRight" data-action="remove"><i class="fas fa-minus-circle"></i> {{Supprimer}}</a>
 			</span>
 		</div>
-  <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" data-action="returnToThumbnailDisplay"><i class="fa fa-arrow-circle-left"></i></a></li>
-    <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Equipement}}</a></li>
-    <li role="presentation"><a href="#commandtab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i> {{Commandes}}</a></li>
-    <li role="presentation"><a href="#historytab" aria-controls="history" role="tab" data-toggle="tab"><i class="fa fa-history"></i> {{Historique}}</a></li>
-  </ul>
+
+    <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" data-action="returnToThumbnailDisplay"><i class="fa fa-arrow-circle-left"></i></a></li>
+      <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Equipement}}</a></li>
+      <li role="presentation"><a href="#costtab" aria-controls="cost" role="tab" data-toggle="tab"><i class="fa fa-euro-sign"></i> {{Coûts}}</a></li>
+      <li role="presentation"><a href="#commandtab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i> {{Commandes}}</a></li>
+      <li role="presentation"><a href="#historytab" aria-controls="history" role="tab" data-toggle="tab"><i class="fa fa-history"></i> {{Historique}}</a></li>
+    </ul>
+
   <div class="tab-content" style="height:calc(100% - 50px);overflow:auto;overflow-x: hidden;">
+
+    <!-- Tab equipement -->
     <div role="tabpanel" class="tab-pane active" id="eqlogictab">
       <br/>
     <form class="form-horizontal">
@@ -121,11 +127,13 @@ $dateCo2_def = array(
         <fieldset>
           <legend><i class="fas fa-bolt"></i> {{Type d'énergie}}</legend>
 
+
           <div class="form-group">
             <label class="col-sm-2 control-label">{{Type d'énergie}}
             </label>
             <div class="col-sm-2">
               <select class="eqLogicAttr form-control tooltips" data-l1key="configuration" data-l2key="conso_type">
+                <option value="" selected></option>
                 <option value="elec">Electricité</option>
                 <option value="gaz">Gaz</option>
                 <option value="fioul">Fioul</option>
@@ -133,32 +141,6 @@ $dateCo2_def = array(
               </select>
             </div>
 
-            <?php
-
-            $pluginSuiviConso = plugin::byId('conso');
-
-            if($pluginSuiviConso && $pluginSuiviConso->isActive()) {
-
-              ?>
-
-              <label class="col-sm-2 control-label type_elec" >{{Configuration via le plugin Suivi Conso }}</label>
-              <div class="col-sm-2 type_elec">
-                <select class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="suiviconso_eqLogic_id">
-                  <option value="">{{Non}}</option>
-                  <?php
-                    $allObject = jeeObject::buildTree();
-                    foreach ($allObject as $object_li) {
-                      foreach ($object_li->getEqLogic(true, false, 'conso') as $eqLogic) {
-                        echo '<option value="' . $eqLogic->getId() . '">' . $eqLogic->getHumanName() . '</option>';
-                      }
-                    }
-                    ?>
-                </select>
-              </div>
-
-            <?php
-            }
-            ?>
 
           </div>
 
@@ -174,12 +156,49 @@ $dateCo2_def = array(
         </fieldset>
       </form>
 
+      <?php
+
+      $pluginSuiviConso = plugin::byId('conso');
+
+      if($pluginSuiviConso && $pluginSuiviConso->isActive()) {
+
+        ?>
+
+        <form class="form-horizontal type_elec">
+          <fieldset>
+            <legend><i class="fas fa-chart-bar"></i> {{Plugin Suivi Conso détecté, l'utiliser pour la configuration ? }}</legend>
+            <div class="form-group">
+
+              <label class="col-sm-2 control-label type_elec" >{{Choisir l'équipement Suivi Conso }}</label>
+              <div class="col-sm-2 type_elec">
+                <select class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="suiviconso_eqLogic_id">
+                  <option value="">{{Ne pas utiliser Suivi Conso}}</option>
+                  <?php
+                    $allObject = jeeObject::buildTree();
+                    foreach ($allObject as $object_li) {
+                      foreach ($object_li->getEqLogic(true, false, 'conso') as $eqLogic) {
+                        echo '<option value="' . $eqLogic->getId() . '">' . $eqLogic->getHumanName() . '</option>';
+                      }
+                    }
+                    ?>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+        </form>
+
+        <?php
+      }
+      ?>
+
+
+      <!-- Les index -->
       <form class="form-horizontal">
         <fieldset>
           <legend><i class="fas fa-bolt"></i> {{Index consommation}}</legend>
 
           <div class="form-group">
-            <label class="col-sm-2 control-label">{{Index total ou HP, en Wh}}<sup><i class="fas fa-question-circle tooltips" title="{{En Wh ou m³ avec un coefficient thermique ou L avec un coefficient thermique}}"></i></sup></label>
+            <label class="col-sm-2 control-label">{{Index total ou HP, en Wh}}<sup><i class="fas fa-question-circle tooltips" title="{{En Wh ou m³ avec un coefficient ou L avec un coefficient}}"></i></sup></label>
             <div class="col-sm-4">
               <div class="input-group">
                 <input type="text" class="eqLogicAttr form-control tooltips roundedLeft" data-l1key="configuration" data-l2key="index_HP"/>
@@ -191,7 +210,7 @@ $dateCo2_def = array(
           </div>
 
           <div class="form-group">
-            <label class="col-sm-2 control-label">{{Index HC (facultatif), en Wh}}<sup><i class="fas fa-question-circle tooltips" title="{{En Wh ou m³ avec un coefficient thermique ou L avec un coefficient thermique. Ne pas remplir si vous n'avez pas d'index HC}}"></i></sup></label>
+            <label class="col-sm-2 control-label">{{Index HC (facultatif), en Wh}}<sup><i class="fas fa-question-circle tooltips" title="{{En Wh ou m³ avec un coefficient ou L avec un coefficient. Ne pas remplir si vous n'avez pas d'index HC}}"></i></sup></label>
               <div class="col-sm-4">
                 <div class="input-group">
                   <input type="text" class="eqLogicAttr form-control tooltips roundedLeft" data-l1key="configuration" data-l2key="index_HC"/>
@@ -203,7 +222,7 @@ $dateCo2_def = array(
             </div>
 
             <div class="form-group">
-              <label class="col-sm-2 control-label">{{Coefficient}}<sup><i class="fas fa-question-circle tooltips" title="{{Il s'agit du coefficient entre l'unité de la commande à gauche vers des Wh. Par exemple pour le gaz il s'agit de passer de m³ à Wh, le coefficient thermique étant donné sur votre facture. S'appliquera aux HP et HC. Vous pouvez aussi mettre un coefficient de 1000 pour passer de kWh à Wh}}"></i></sup></label>
+              <label class="col-sm-2 control-label">{{Coefficient}}<sup><i class="fas fa-question-circle tooltips" title="{{Il s'agit du coefficient entre l'unité de la commande ci-dessus vers des Wh. Par exemple pour le gaz il s'agit de passer de m³ à Wh, le coefficient thermique étant donné sur votre facture. S'appliquera aux HP et HC. Vous pouvez aussi mettre un coefficient de 1000 pour passer de kWh à Wh}}"></i></sup></label>
               <div class="col-sm-2">
                 <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="coef_thermique" />
               </div>
@@ -211,46 +230,56 @@ $dateCo2_def = array(
 
           </fieldset>
         </form>
+      </div>
+      <!-- fin tab equipement -->
 
-        <br>
+      <!-- tab couts -->
+      <div role="tabpanel" class="tab-pane" id="costtab">
+      <br>
 
-        <form class="form-horizontal">
-          <fieldset>
-            <legend><i class="fas fa-euro-sign"></i> {{Coût}}</legend>
+      <form class="form-horizontal">
+        <fieldset>
+          <legend><i class="fas fa-euro-sign"></i> {{Coût}}</legend>
 
-            <div class="form-group">
-              <label class="col-sm-2 control-label">{{Abonnement (€ TTC / mois)}}</label>
-              <div class="col-sm-2">
-                <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="costAbo" />
-              </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{Abonnement (€ TTC / mois)}}</label>
+            <div class="col-sm-2">
+              <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="costAbo" />
             </div>
+          </div>
 
-            <div class="form-group">
-              <label class="col-sm-2 control-label">{{Tarif total ou HP (€ TTC / kWh)}}</label>
-              <div class="col-sm-2">
-                <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="costHP" />
-              </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{Tarif total ou HP (€ TTC / kWh)}}</label>
+            <div class="col-sm-2">
+              <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="costHP" />
             </div>
+          </div>
 
-            <div class="form-group">
-              <label class="col-sm-2 control-label">{{Tarif HC (€ TTC / kWh)}}</label>
-              <div class="col-sm-2">
-                <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="costHC" />
-              </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{Tarif HC (€ TTC / kWh)}}</label>
+            <div class="col-sm-2">
+              <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="costHC" />
             </div>
+          </div>
 
-            </fieldset>
-          </form>
-
+          </fieldset>
+        </form>
 
       </div>
+      <!-- fin tab couts -->
 
+      <!-- tab cmd -->
       <div role="tabpanel" class="tab-pane" id="commandtab">
-        <a class="btn btn-success btn-sm cmdAction pull-right" data-action="add" style="margin-top:5px;"><i class="fa fa-plus-circle"></i> {{Commandes}}</a><br/><br/>
+        <!-- <a class="btn btn-success btn-sm cmdAction pull-right" data-action="add" style="margin-top:5px;"><i class="fa fa-plus-circle"></i> {{Commandes}}</a> --> <!-- bouton d'ajout de cmd qui sert a rien ici -->
+
+        <br/><br/>
         <table id="table_cmd" class="table table-bordered table-condensed">
             <thead>
                 <tr>
-                    <th>{{Nom}}</th><th>{{Type}}</th><th>{{Action}}</th>
+                    <th>{{Nom}}</th>
+                    <th>{{Paramètres}}</th>
+                    <th>{{Options}}</th>
+                    <th>{{Action}}</th>
                 </tr>
             </thead>
             <tbody>
@@ -258,6 +287,7 @@ $dateCo2_def = array(
         </table>
       </div>
 
+      <!-- tab historique -->
       <div role="tabpanel" class="tab-pane" id="historytab">
         <br>
         <form class="form-horizontal">
@@ -293,7 +323,7 @@ $dateCo2_def = array(
               <div>
                 {{Période du}} <input class="form-control input-sm in_datepicker" id='in_startDate' style="display : inline-block; width: 150px;" value='<?php echo $date['start'] ?>'/> {{au}}
                 <input class="form-control input-sm in_datepicker" id='in_endDate' style="display : inline-block; width: 150px;" value='<?php echo $date['end'] ?>'/>
-                <a class="btn btn-success btn-sm tooltips" id='bt_historykWh' title="{{Merci d'enregistrer avant d'appeller l\'historique}}"><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
+                <a class="btn btn-success btn-sm tooltips" id='bt_historykWh' title="{{Merci d'enregistrer avant d'appeller l'historique}}"><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
               </div>
             </span>
             </div>
@@ -337,7 +367,7 @@ $dateCo2_def = array(
                   <input class="form-control input-sm in_datepicker" id='in_endDateSuiviConso' style="display : inline-block; width: 150px;" value='<?php
                   echo $date['end']
                   ?>'/>
-                  <a class="btn btn-success btn-sm tooltips" id='bt_importSuiviConso' title="{{Merci d'enregistrer avant d'appeller l\'historique}}"><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
+                  <a class="btn btn-success btn-sm tooltips" id='bt_importSuiviConso' title="{{Merci d'enregistrer avant d'appeller l'historique}}"><i class="fas fa-database"></i>{{ Récupérer historique}}</a>
                 </div>
               </span>
               </div>
@@ -371,9 +401,10 @@ $dateCo2_def = array(
         </form>
 
       </div>
+      <!-- fin tab historique -->
 
 
-    </div>
+    </div> <!-- fin du tabcontent -->
 
   </div>
 </div>
