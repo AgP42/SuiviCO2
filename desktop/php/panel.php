@@ -28,7 +28,7 @@ if (jeedom::version() < "4.0.0") {
 
 if (init('eqLogic_id') == '') { // on cherche le 1er equipement a afficher quand on arrive sur le panel, quand &eqLogic_id n'est pas dans l'URL
 
-  //TODO - ca marche, mais ya pas plus simple ??
+  //TODO - ca marche, mais ya pas plus simple ?? Et ca implique que l'equipement soit relié a un objet jeedom
   $allObject = jeeObject::buildTree();
   foreach ($allObject as $object_li) {
     if ($object_li->getIsVisible() == 1) {
@@ -45,7 +45,7 @@ if (init('eqLogic_id') == '') { // on cherche le 1er equipement a afficher quand
 }
 
 if (!isset($eqLogic_id)) {
-  throw new Exception('{{Aucun équipement suiviCO2 actif}}');
+  throw new Exception('{{Aucun équipement suiviCO2 actif associé à un objet parent}}');
 }
 
 sendVarToJs('eqLogic_id', $eqLogic_id);

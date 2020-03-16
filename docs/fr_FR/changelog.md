@@ -47,7 +47,7 @@
 
 - Ajout possibilité d'importer les historiques de conso via le plugin SuiviConso, si présent
 
-# 1.0.3 - beta 4
+# 1.0.4 - beta 4
 
 - Correction bug courbe en jeedom v4, merci @Titi_Titi
 - Implementation de l'utilisation de la configuration du plugin Suivi Conso pour la configuration de SuiviCO2
@@ -55,3 +55,9 @@
 - Update affichage page de configuration
 - Correction bug sur calcul total CO2 semaine
 - update doc
+
+# 2.0.0
+
+- Toutes les fonctions des beta précédentes, principalement les interfaces avec le plugin SuiviConso
+- Debug cas plugin suivi conso inexistant
+- Tests en v3 et v4 avec le plugin suivi conso stable du 16/03/2020

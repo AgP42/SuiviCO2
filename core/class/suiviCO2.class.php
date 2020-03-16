@@ -233,7 +233,12 @@ class suiviCO2 extends eqLogic {
 
         if ($cmdTotalWeek->getIsVisible()){
 
-          $startDate = date('Y-m-d 00:00:00', strtotime('last Monday ' . date('Y-m-d H:00:00'))); // 00:00 lundi de cette semaine
+          if (date('N') > 6){ // on test si on est dimanche, dans ce cas il faut prendre le lundi d'avant sinon ca renvoie le lundi du lendemain...
+            $startDate = date('Y-m-d 00:00:00', strtotime('last Monday ' . date('Y-m-d H:00:00')));
+          }else{
+            $startDate = date('Y-m-d 00:00:00', strtotime('Monday ' . date('Y-m-d H:00:00'))); // 00:00 lundi de cette semaine
+          }
+
           $endDate = date('Y-m-d H:i:00');
 
           $totalCO2 = $this->calculTotauxCo2Periode($startDate, $endDate);
