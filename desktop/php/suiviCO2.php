@@ -158,38 +158,43 @@ $dateCo2_def = array(
 
       <?php
 
-      $pluginSuiviConso = plugin::byId('conso');
+      try {
+        $pluginSuiviConso = plugin::byId('conso');
+        if ($pluginSuiviConso->isActive()){
 
-      if($pluginSuiviConso && $pluginSuiviConso->isActive()) {
+          ?>
 
-        ?>
+          <form class="form-horizontal type_elec">
+            <fieldset>
+              <legend><i class="fas fa-chart-bar"></i> {{Plugin Suivi Conso détecté, l'utiliser pour la configuration ? }}</legend>
+              <div class="form-group">
 
-        <form class="form-horizontal type_elec">
-          <fieldset>
-            <legend><i class="fas fa-chart-bar"></i> {{Plugin Suivi Conso détecté, l'utiliser pour la configuration ? }}</legend>
-            <div class="form-group">
-
-              <label class="col-sm-2 control-label type_elec" >{{Choisir l'équipement Suivi Conso }}</label>
-              <div class="col-sm-2 type_elec">
-                <select class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="suiviconso_eqLogic_id">
-                  <option value="">{{Ne pas utiliser Suivi Conso}}</option>
-                  <?php
-                    $allObject = jeeObject::buildTree();
-                    foreach ($allObject as $object_li) {
-                      foreach ($object_li->getEqLogic(true, false, 'conso') as $eqLogic) {
-                        echo '<option value="' . $eqLogic->getId() . '">' . $eqLogic->getHumanName() . '</option>';
+                <label class="col-sm-2 control-label type_elec" >{{Choisir l'équipement Suivi Conso }}</label>
+                <div class="col-sm-2 type_elec">
+                  <select class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="suiviconso_eqLogic_id">
+                    <option value="">{{Ne pas utiliser Suivi Conso}}</option>
+                    <?php
+                      $allObject = jeeObject::buildTree();
+                      foreach ($allObject as $object_li) {
+                        foreach ($object_li->getEqLogic(true, false, 'conso') as $eqLogic) {
+                          echo '<option value="' . $eqLogic->getId() . '">' . $eqLogic->getHumanName() . '</option>';
+                        }
                       }
-                    }
-                    ?>
-                </select>
+                      ?>
+                  </select>
+                </div>
               </div>
-            </div>
-          </fieldset>
-        </form>
+            </fieldset>
+          </form>
 
-        <?php
+          <?php
+        }
       }
+      catch(Exception $e) {}
+
       ?>
+
+
 
 
       <!-- Les index -->
@@ -333,13 +338,13 @@ $dateCo2_def = array(
 
           <!-- Import des datas via le plugin suivi conco - uniquement si le plugin est présent ! -->
 
-          <?php
+      <?php
 
-          $pluginSuiviConso = plugin::byId('conso');
+      try {
+        $pluginSuiviConso = plugin::byId('conso');
+        if ($pluginSuiviConso->isActive()){
 
-          if($pluginSuiviConso && $pluginSuiviConso->isActive()) {
-
-            ?>
+          ?>
 
             <legend class='type_elec'><i class="fas fa-history"></i> {{Récupérer historique de ma conso électrique via le plugin SUIVI CONSO}}</legend>
 
@@ -374,8 +379,11 @@ $dateCo2_def = array(
             </div>
 
           <?php
-          }
-          ?>
+        }
+      }
+      catch(Exception $e) {}
+
+      ?>
 
           <!-- Pour DEBUG - Activer pour tester la fonction de recuperation des totaux CO2 à destination de suivi Conso
           <legend><i class="fas fa-history"></i> {{DEBUG - Test interface plugin Suivi Conso}}</legend>
