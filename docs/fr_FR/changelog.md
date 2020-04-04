@@ -61,3 +61,8 @@
 - Toutes les fonctions des beta précédentes, principalement les interfaces avec le plugin SuiviConso
 - Debug cas plugin suivi conso inexistant
 - Tests en v3 et v4 avec le plugin suivi conso stable du 16/03/2020
+
+# 2.0.1
+
+- Changement icône
+- Vérif datas après le changement d'heure : all good !
