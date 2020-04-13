@@ -66,3 +66,7 @@
 
 - Changement icône
 - Vérif datas après le changement d'heure : all good !
+
+# 2.0.2
+
+- Changement calcul pour total par semaine

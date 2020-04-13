@@ -233,11 +233,13 @@ class suiviCO2 extends eqLogic {
 
         if ($cmdTotalWeek->getIsVisible()){
 
-          if (date('N') > 6){ // on test si on est dimanche, dans ce cas il faut prendre le lundi d'avant sinon ca renvoie le lundi du lendemain...
-            $startDate = date('Y-m-d 00:00:00', strtotime('last Monday ' . date('Y-m-d H:00:00')));
+          if (date('N') == 1){ // on test si on est lundi, dans ce cas il faut prendre le lundi courant sinon ca renvoie le lundi d'avant...
+            $startDate = date('Y-m-d 00:00:00', strtotime('Monday ' . date('Y-m-d H:00:00')));
           }else{
-            $startDate = date('Y-m-d 00:00:00', strtotime('Monday ' . date('Y-m-d H:00:00'))); // 00:00 lundi de cette semaine
+            $startDate = date('Y-m-d 00:00:00', strtotime('last Monday ' . date('Y-m-d H:00:00'))); // 00:00 lundi de cette semaine
           }
+
+      //    log::add('suiviCO2', 'error', 'Date : ' . date('Y-m-d H:00:00') . ' - jour de la semaine : ' . date('N') . ' - Monday : ' . date('Y-m-d 00:00:00', strtotime('Monday ' . date('Y-m-d H:00:00'))) . ' - Last Monday : ' . date('Y-m-d 00:00:00', strtotime('last Monday ' . date('Y-m-d H:00:00'))));
 
           $endDate = date('Y-m-d H:i:00');
 
