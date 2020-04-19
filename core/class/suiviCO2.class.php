@@ -481,7 +481,7 @@ class suiviCO2 extends eqLogic {
         $content = $request_http->exec(30);
 
         if ($content === false) {
-          log::add('suiviCO2', 'error', 'Erreur lors de l appel API CO2, URL : ' . $url);
+          log::add('suiviCO2', 'warning', 'Erreur lors de l appel API CO2, URL : ' . $url);
           return;
         }
 

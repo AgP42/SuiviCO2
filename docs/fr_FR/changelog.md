@@ -70,3 +70,7 @@
 # 2.0.2
 
 - Changement calcul pour total par semaine
+
+# 2.0.3 - avril 2020
+
+- Update doc pour nouveaux liens Jeedom
