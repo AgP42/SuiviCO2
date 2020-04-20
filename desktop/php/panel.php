@@ -26,7 +26,7 @@ if (jeedom::version() < "4.0.0") {
   </style>';
 }
 
-if (init('eqLogic_id') == '') { // on cherche le 1er equipement a afficher quand on arrive sur le panel, quand &eqLogic_id n'est pas dans l'URL
+/*if (init('eqLogic_id') == '') { // on cherche le 1er equipement a afficher quand on arrive sur le panel, quand &eqLogic_id n'est pas dans l'URL
 
   //TODO - ca marche, mais ya pas plus simple ?? Et ca implique que l'equipement soit relié a un objet jeedom
   $allObject = jeeObject::buildTree();
@@ -42,6 +42,18 @@ if (init('eqLogic_id') == '') { // on cherche le 1er equipement a afficher quand
   }
 } else { //si on a &eqLogic_id dans l'URL
   $eqLogic_id = init('eqLogic_id');
+}*/
+
+if (init('eqLogic_id') == '') { // on cherche le 1er equipement a afficher quand on arrive sur le panel, quand &eqLogic_id n'est pas dans l'URL
+    $eqLogics = eqLogic::byType('suiviCO2');
+    foreach ($eqLogics as $eqLogic) {
+        if ($eqLogic->getIsVisible() == 1 && $eqLogic->getIsEnable() == 1) {
+            $eqLogic_id = $eqLogic->getId();
+            break; // sort des qu'on a trouvé notre 1er equipement
+        }
+    }
+} else { //si on a &eqLogic_id dans l'URL
+    $eqLogic_id = init('eqLogic_id');
 }
 
 if (!isset($eqLogic_id)) {
@@ -103,7 +115,19 @@ if (init('groupBy', 'day') == 'year') { // quand on selectionne "year", on prend
         <li class="nav-header">{{Liste objets}}</li>
         <li class="filter" style="margin-bottom: 5px;"><input class="filter form-control input-sm" placeholder="{{Rechercher}}" style="width: 100%"/></li>
         <?php
-        $allObject = jeeObject::buildTree();
+
+          $eqLogics = eqLogic::byType('suiviCO2');
+          foreach ($eqLogics as $eqLogic) {
+              if ($eqLogic->getIsVisible() == 1 && $eqLogic->getIsEnable() == 1) {
+                  if ($eqLogic->getId() == $eqLogic_id) {
+                    echo '<li class="cursor li_object active" ><a href="index.php?v=d&m=suiviCO2&p=panel&eqLogic_id=' . $eqLogic->getId() . '" style="position:relative;left:' . $margin*2 . 'px;">' . $eqLogic->getHumanName(true) . '</a></li>';
+                  } else {
+                    echo '<li class="cursor li_object" ><a href="index.php?v=d&m=suiviCO2&p=panel&eqLogic_id=' . $eqLogic->getId() . '" style="position:relative;left:' . $margin*2 . 'px;">' . $eqLogic->getHumanName(true) . '</a></li>';
+                  }
+              }
+          }
+
+/*        $allObject = jeeObject::buildTree();
         foreach ($allObject as $object_li) {
           if ($object_li->getIsVisible() == 1) {
             $margin = 15 * $object_li->parentNumber();
@@ -115,7 +139,7 @@ if (init('groupBy', 'day') == 'year') { // quand on selectionne "year", on prend
               }
             }
           }
-        }
+        }*/
         ?>
       </ul>
     </div>

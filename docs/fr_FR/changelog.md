@@ -73,4 +73,6 @@
 
 # 2.0.3 - avril 2020
 
-- Update doc pour nouveaux liens Jeedom
+- Update arborescence panel (ajout visibilité des équipements non liés à un objet)
+- Debug page de configuration lorsque suiviconso est présent mais qu'on ne souhaite pas l'utiliser
+- Update doc (dont nouveaux liens Jeedom)

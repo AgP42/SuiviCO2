@@ -76,18 +76,18 @@ $('.eqLogicAttr[data-l1key=configuration][data-l2key=suiviconso_eqLogic_id]').ch
 
             } else {
               $('#div_alert').showAlert({message: 'Merci de choisir un équipement de type \'Electricité\'', level: 'danger'});
-              $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HP]').value('');
+/*              $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HP]').value('');
               $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HC]').value('');
-              $('.eqLogicAttr[data-l1key=configuration][data-l2key=coef_thermique]').value('');
+              $('.eqLogicAttr[data-l1key=configuration][data-l2key=coef_thermique]').value('');*/
             }
           }// fin success ajax
     });
 
   } else { // on choisi de ne pas reprendre la conf suivi conso, on remet les valeurs a blanc
     $('#div_alert').hide();
-    $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HP]').value('');
+/*    $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HP]').value('');
     $('.eqLogicAttr[data-l1key=configuration][data-l2key=index_HC]').value('');
-    $('.eqLogicAttr[data-l1key=configuration][data-l2key=coef_thermique]').value('');
+    $('.eqLogicAttr[data-l1key=configuration][data-l2key=coef_thermique]').value('');*/
   }
 
 
