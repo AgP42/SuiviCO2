@@ -100,7 +100,7 @@ class suiviCO2 extends eqLogic {
           //si cette consommation est >0, on va la stocker en base - NON, il faut stocker les 0 sinon l'archivage de l'historique fait n'importe quoi... dommage de stocker des 0...
           // TODO a ameliorer...
 
-          if ($consumption < 1000) { //1000 kWh c'est environ 170€, si on consomme ca par heure c'est qu'on a un gros probleme... Ce test permet de ne pas sauvegarder l'index entier lors de la 1ere boucle apres la creation de l'objet.
+          if ($consumption < 1000000) { //1000 kWh c'est environ 170€, si on consomme ca par heure c'est qu'on a un gros probleme... Ce test permet de ne pas sauvegarder l'index entier lors de la 1ere boucle apres la creation de l'objet.
             $cmd = $this->getCmd(null, 'consumption' . $_type);
             if (is_object($cmd)) {
               $cmd->setCollectDate($datetime);
