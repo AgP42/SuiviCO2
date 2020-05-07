@@ -77,6 +77,6 @@
 - Debug page de configuration lorsque suiviconso est présent mais qu'on ne souhaite pas l'utiliser
 - Update doc (dont nouveaux liens Jeedom)
 
-# 2.0.4 (beta) - avril 2020
+# 2.0.4 - mai 2020
 
-- Correction boucle de calcul ligne 103 class.php => pour tests
+- Correction boucle de calcul ligne 103 class.php qui bridait les conso trop élevées
