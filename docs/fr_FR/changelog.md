@@ -86,3 +86,7 @@
 - Changement des dates d'enregistrement des calculs de conso pour enregistrer en début de période calculées et non en fin de période. Ceci permet d'avoir des totaux sur la journée correct, autrement la conso de 23h à minuit était prise en compte le lendemain. (Pour les fonctions cronHourly et les historiques). Merci @Francois pour l'analyse et la solution !
 - Debug sur date d'enregistrement de la derniere valeur co2parkWh disponible. (à 13h00 on dispose de la valeur de 12h45, c'est donc 12h45 qui est maintenant enregistré et non plus 13h)
 - Vérification des calculs manuellement
+
+# 2.0.6 - 12 mai 2020
+
+- ajout d'un cron dédié toutes les heures + 1 min pour l'appel API (pour @jpty...)

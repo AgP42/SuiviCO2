@@ -19,15 +19,48 @@
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
 function suiviCO2_install() {
+  $cron = cron::byClassAndFunction('suiviCO2', 'getAndRecordDataCo2'); // cherche le cron qui correspond exactement à "ce plugin, cette fonction"
+
+  if (!is_object($cron)) {
+      $cron = new cron();
+      $cron->setClass('suiviCO2');
+      $cron->setFunction('getAndRecordDataCo2');
+      $cron->setEnable(1);
+      $cron->setTimeout(5); //minutes
+      $cron->setSchedule('1 * * * *');
+      $cron->save();
+  }
 
 }
 
 function suiviCO2_update() {
 
+  $cron = cron::byClassAndFunction('suiviCO2', 'getAndRecordDataCo2'); // cherche le cron qui correspond exactement à "ce plugin, cette fonction"
+
+  if (!is_object($cron)) {
+      $cron = new cron();
+      $cron->setClass('suiviCO2');
+      $cron->setFunction('getAndRecordDataCo2');
+      $cron->setEnable(1);
+      $cron->setTimeout(5); //minutes
+      $cron->setSchedule('1 * * * *');
+      $cron->save();
+  }
+
 }
 
 function suiviCO2_remove() {
 
+  $cron = cron::byClassAndFunction('suiviCO2', 'getAndRecordDataCo2');
+  if (is_object($cron)) {
+      $cron->remove();
+  }
+
 }
 
 ?>
+
+
+
+
+
