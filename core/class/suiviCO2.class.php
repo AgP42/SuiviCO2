@@ -73,11 +73,10 @@ class suiviCO2 extends eqLogic {
      //*/
 
 
-      public function calculConso($_type = 'HP'){
+      public function calculConso($_type = 'HP', $_datetime_data){
 
           //on va chercher l'info index_HP ou HC via la conf utilisateur
           $index = jeedom::evaluateExpression($this->getConfiguration('index_' . $_type));
-
 
           //on recupere la precedente valeur stockée, selon HP ou HC
           $lastValue = $this->getConfiguration('lastValue' . $_type);
@@ -97,15 +96,12 @@ class suiviCO2 extends eqLogic {
             $consumption = $consumption*$coef_thermique;
           }
 
-          //si cette consommation est >0, on va la stocker en base - NON, il faut stocker les 0 sinon l'archivage de l'historique fait n'importe quoi... dommage de stocker des 0...
-          // TODO a ameliorer...
-
           if ($consumption < 1000000) { //1000 kWh c'est environ 170€, si on consomme ca par heure c'est qu'on a un gros probleme... Ce test permet de ne pas sauvegarder l'index entier lors de la 1ere boucle apres la creation de l'objet.
             $cmd = $this->getCmd(null, 'consumption' . $_type);
             if (is_object($cmd)) {
-              $cmd->setCollectDate($datetime);
-              log::add('suiviCO2', 'debug', 'eqLogic_id : ' . $this->getId() . ' - Index now ' . $_type . ' : ' . $index . ' - Prev Index '  . $_type . ' : ' . $lastValue . ' = conso ' . $_type . ' (Wh) : ' . $consumption);
-              $cmd->event($consumption);
+          //    $cmd->setCollectDate($datetime);
+              log::add('suiviCO2', 'debug', 'eqLogic_id : ' . $this->getId() . ' - Index now ' . $_type . ' : ' . $index . ' - Prev Index '  . $_type . ' : ' . $lastValue . ' = conso ' . $_type . ' (Wh) : ' . $consumption . ' date de valeur à stocker :' . $_datetime_data);
+              $cmd->event($consumption, $_datetime_data);
             }
           }
 
@@ -211,7 +207,7 @@ class suiviCO2 extends eqLogic {
 
       }
 
-       public function calculTotauxCo2(){ // appellé par le cron Hourly, pour les calculs de totaux sur le dashboard
+       public function calculTotauxCo2($_datetime_data){ // appellé par le cron Hourly, pour les calculs de totaux sur le dashboard
 
   //      $calculstarttime = date('H:i:s');
 
@@ -226,12 +222,11 @@ class suiviCO2 extends eqLogic {
 
           $totalCO2 = $this->calculTotauxCo2Periode($startDate, $endDate);
 
-          $cmdTotalDay->setCollectDate($datetime);
-          $cmdTotalDay->event($totalCO2);
+          $cmdTotalDay->event($totalCO2, $_datetime_data);
 
         } // fin calcul jour
 
-        if ($cmdTotalWeek->getIsVisible()){
+        if (is_object($cmdTotalWeek) && $cmdTotalWeek->getIsVisible()){
 
           if (date('N') == 1){ // on test si on est lundi, dans ce cas il faut prendre le lundi courant sinon ca renvoie le lundi d'avant...
             $startDate = date('Y-m-d 00:00:00', strtotime('Monday ' . date('Y-m-d H:00:00')));
@@ -245,20 +240,18 @@ class suiviCO2 extends eqLogic {
 
           $totalCO2 = $this->calculTotauxCo2Periode($startDate, $endDate);
 
-          $cmdTotalWeek->setCollectDate($datetime);
-          $cmdTotalWeek->event($totalCO2);
+          $cmdTotalWeek->event($totalCO2, $_datetime_data);
 
         }
 
-        if ($cmdTotalMonth->getIsVisible()){
+        if (is_object($cmdTotalMonth) && $cmdTotalMonth->getIsVisible()){
 
           $startDate = date('Y-m-01 00:00:00');
           $endDate = date('Y-m-d H:i:00');
 
           $totalCO2 = $this->calculTotauxCo2Periode($startDate, $endDate);
 
-          $cmdTotalMonth->setCollectDate($datetime);
-          $cmdTotalMonth->event($totalCO2);
+          $cmdTotalMonth->event($totalCO2, $_datetime_data);
         }
 
     //    log::add('suiviCO2', 'debug', 'Calculs totaux CO2 pour le dashboard, start à ' . $calculstarttime . ' fin à : ' . date('H:i:s')); // ca va, tout en moins d'1s, acceptable
@@ -293,12 +286,14 @@ class suiviCO2 extends eqLogic {
             $nb = 0;
             foreach ($historyIndex as $history) {
               $value = $history->getValue();
+              $valueDateTime = $history->getDatetime(); // on enregistrera dans l'history en début de période et non en fin
               if ($nb != 0) {
-                $valueDateTime = $history->getDatetime();
                 $conso = round($value * $coef_thermique - $prevHisto * $coef_thermique, 0);
-                $cmd->addHistoryValue($conso, $valueDateTime);
+                $cmd->addHistoryValue($conso, $valueDateTimePrev);
                 $nbdataimportees++;
+              //  log::add('suiviCO2', 'debug', 'Calculs import pour ' . $_type . ' value : ' . $value . ' - valuePrev : ' . $prevHisto . ' = conso : ' . $conso . ' - periode : ' . $valueDateTimePrev . ' - ' . $valueDateTime);
               }
+              $valueDateTimePrev = $valueDateTime;
               $prevHisto = $value;
               $nb++;
             }
@@ -453,9 +448,10 @@ class suiviCO2 extends eqLogic {
               if ($nb != 0 && $data['rec_time'] != '00:00:00') {
                 $valueDateTime = $data['rec_date'] . ' ' . $data['rec_time'];
                 $conso = round($value - $prevHisto, 0);
-                $cmd->addHistoryValue($conso, $valueDateTime);
+                $cmd->addHistoryValue($conso, $valueDateTimePrev);
                 $nbdataimportees++;
               }
+              $valueDateTimePrev = $valueDateTime;
               $prevHisto = $value;
               $nb++;
             }
@@ -515,8 +511,8 @@ class suiviCO2 extends eqLogic {
               foreach (self::byType('suiviCO2',true) as $suiviCO2) {
                 $cmd = $suiviCO2->getCmd(null, 'co2kwhfromApi');
                 if (is_object($cmd)) {
-                  $cmd->setCollectDate($datetime);
-                  $cmd->event($record_tauxco2);
+            //      $cmd->setCollectDate($datetime);
+                  $cmd->event($record_tauxco2, $datetimerecord);
                   log::add('suiviCO2', 'debug', 'co2kwhfromApi : ' . $record_tauxco2);
                 }
               }
@@ -610,10 +606,13 @@ class suiviCO2 extends eqLogic {
 
       // Fonction exécutée automatiquement toutes les heures par Jeedom
       public static function cronHourly() {
-        $datetime = date('Y-m-d H:i:00');
+        // $datetime = date('Y-m-d H:i:00');
+        //  fb 8/5/20  decale le temps de 1 heure pour éviter le decalage des données à minuit ....
+        $datetime_data = date('Y-m-d H:i:00', time() - 3600);
+
         $elec_present = false;
 
-        log::add('suiviCO2', 'debug', '#################### CRON Hourly à ' . $datetime . ' ###################');
+        log::add('suiviCO2', 'debug', '#################### CRON Hourly à ' . date('Y-m-d H:i:00') . ' pour calcul enregistré à ' . $datetime_data . ' ###################');
 
         //pour chaque equipement declaré par l'utilisateur
         foreach (self::byType('suiviCO2',true) as $suiviCO2) {
@@ -626,15 +625,15 @@ class suiviCO2 extends eqLogic {
           }
 
           /* Traitement HP */
-          $suiviCO2->calculConso('HP');
+          $suiviCO2->calculConso('HP', $datetime_data);
 
           /* Traitement HC */
           if($suiviCO2->getConfiguration('index_HC')!=''){ //si on a un index HC
-            $suiviCO2->calculConso('HC');
+            $suiviCO2->calculConso('HC', $datetime_data);
           }
 
           /* Calculs des totaux pour le dashboard */
-          $suiviCO2->calculTotauxCo2();
+          $suiviCO2->calculTotauxCo2($datetime_data);
 
         } // fin foreach equipement
 
