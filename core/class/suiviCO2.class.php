@@ -498,12 +498,13 @@ class suiviCO2 extends eqLogic {
 
             /************ Mise à jour de la derniere valeur dispo ************/
 
-            // on cherche la valeur de l'heure courante -15min (parce que c'est la derniere dispo via l'API...)
-            $datetimecherchee = date('Y-m-d H:i', strtotime('-15 min ' . date('Y-m-d H:00')));
+            // on cherche la valeur de l'heure courante -15min (parce que c'est la derniere dispo via l'API...) - Pas toujours, parfois elle manque, donc on va juste prendre la plus recente disponible (la premiere à etre lue, vu qu'on a demandé nos datas dans l'ordre chronologique)
+      //      $datetimecherchee = date('Y-m-d H:i', strtotime('-15 min ' . date('Y-m-d H:00')));
             $datetimerecord = $record_date . ' ' . $record_time;
       //      log::add('suiviCO2', 'debug', 'datetimecherchee : ' . $datetimecherchee . 'datetimerecord : ' . $datetimerecord);
 
-            if($datetimecherchee == $datetimerecord){
+      //      if($datetimecherchee == $datetimerecord){
+            if($nbRecordsTraites == 0){ // le 1ere avec une valeur de CO2
 
       //        log::add('suiviCO2', 'debug', 'Trouvee, on la garde : ' . $record_tauxco2);
 

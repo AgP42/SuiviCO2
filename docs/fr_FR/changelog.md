@@ -90,3 +90,5 @@
 # 2.0.6 - 12 mai 2020
 
 - ajout d'un cron dédié toutes les heures + 1 min pour l'appel API (pour @jpty...)
+- changement enregistrement de la derniere valeur co2parkWh disponible, on prend la derniere disponible, meme si ce n'est pas une xxh45 (qui n'est pas toujours dispo via l'API...)
+- Attention, les fonctions d'integration avec suivi Conso semblent HS, debug en cours...
