@@ -470,7 +470,8 @@ class suiviCO2 extends eqLogic {
         */
 
         //on va chercher les $_nbRecordsAPI dernieres data.
-        $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-tr&rows=' . $_nbRecordsAPI . '&sort=date_heure';
+        //$url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-tr&rows=' . $_nbRecordsAPI . '&sort=date_heure';
+        $url = 'https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-national-tr/records?limit=' . $_nbRecordsAPI . '&order_by=date_heure%20DESC&group_by=date_heure%2C%20date%2C%20heure%2C%20taux_co2&where=taux_co2>0'; // Sans "group_by", on est limités à 100 résultats contre 20000 avec
         log::add('suiviCO2', 'debug', 'Appel API CO2, URL : ' . $url);
 
         $request_http = new com_http($url);
@@ -485,16 +486,16 @@ class suiviCO2 extends eqLogic {
         $json = json_decode($content, true);
 
         //on va chercher dans le tableau les infos qui nous interessent (les 'records')
-        $apirecords = $json['records'];
+        $apirecords = $json['results'];
 
         $nbRecordsTraites = 0;
 
         foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
-          if (isset($record['fields']['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
+          if (isset($record['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
 
-            $record_date = $record['fields']['date']; // recu au format Y-m-d, ce qui demande Jeedom, donc c'est parfait
-            $record_time = $record['fields']['heure']; // recu au format H:i
-            $record_tauxco2 = $record['fields']['taux_co2'];
+            $record_date = $record['date']; // recu au format Y-m-d, ce qui demande Jeedom, donc c'est parfait
+            $record_time = $record['heure']; // recu au format H:i
+            $record_tauxco2 = $record['taux_co2'];
 
             /************ Mise à jour de la derniere valeur dispo ************/
 
@@ -562,7 +563,8 @@ class suiviCO2 extends eqLogic {
         $calculstarttime = date('H:i:s');
 
         //on va chercher les $_nbRecordsAPI dernieres data.
-        $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-cons-def&rows=' . $_nbRecordsAPI . '&sort=date_heure&refine.date_heure=' . $_date;
+        //$url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-cons-def&rows=' . $_nbRecordsAPI . '&sort=date_heure&refine.date_heure=' . $_date;
+        $url = 'https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-national-cons-def/records?limit=' . $_nbRecordsAPI . '&order_by=date_heure%20DESC&group_by=date_heure%2C%20date%2C%20heure%2C%20taux_co2&where=taux_co2>0&refine.date_heure=' . $_date; // Sans "group_by", on est limités à 100 résultats contre 20000 avec
         log::add('suiviCO2', 'debug', 'Appel API CO2, URL : ' . $url);
 
         $request_http = new com_http($url);
@@ -577,16 +579,16 @@ class suiviCO2 extends eqLogic {
         $json = json_decode($content, true);
 
         //on va chercher dans le tableau les infos qui nous interessent (les 'records')
-        $apirecords = $json['records'];
+        $apirecords = $json['results'];
 
         $nbRecordsTraites = 0;
 
         foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
-          if (isset($record['fields']['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
+          if (isset($record['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
 
-            $record_date = $record['fields']['date']; // recu au format Y-m-d, ce qui demande Jeedom, donc c'est parfait
-            $record_time = $record['fields']['heure']; // recu au format H:i
-            $record_tauxco2 = $record['fields']['taux_co2'];
+            $record_date = $record['date']; // recu au format Y-m-d, ce qui demande Jeedom, donc c'est parfait
+            $record_time = $record['heure']; // recu au format H:i
+            $record_tauxco2 = $record['taux_co2'];
 
             /************ Enregistrement des datas en base de donnee ************/
 
