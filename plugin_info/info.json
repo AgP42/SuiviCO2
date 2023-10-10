@@ -11,5 +11,11 @@
 	"hasOwnDeamon" : false,
 	"maxDependancyInstallTime" : 0,
 	"changelog" : "https://agp42.github.io/suiviCO2/#language#/changelog",
-	"documentation" : "https://agp42.github.io/suiviCO2/#language#"
+	"documentation" : "https://agp42.github.io/suiviCO2/#language#",
+	"link" : {
+		"forum":"https://community.jeedom.com/t/plugin-tiers-plugin-suivico2-new-plugin-cherche-beta-testeur/19069",
+		"video" : "Lien vers une video"
+	},
+	"language" : ["fr_FR","en_US","de_DE","sp_SP"],
+	"compatibility" : ["miniplus","smart","rpi","docker","diy"]
 }
