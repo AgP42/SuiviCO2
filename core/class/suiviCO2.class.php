@@ -508,7 +508,7 @@ class suiviCO2 extends eqLogic {
       //      if($datetimecherchee == $datetimerecord){
             if($nbRecordsTraites == 0){ // le 1ere avec une valeur de CO2
 
-              log::add('suiviCO2', 'debug', 'Trouvee, on la garde : ' . $record_tauxco2);
+              //log::add('suiviCO2', 'debug', 'Trouvee, on la garde : ' . $record_tauxco2);
 
               //pour chaque equipement declaré par l'utilisateur, on met a jour la cmd
               foreach (self::byType('suiviCO2',true) as $suiviCO2) {
