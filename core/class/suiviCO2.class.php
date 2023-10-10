@@ -492,7 +492,6 @@ class suiviCO2 extends eqLogic {
         $nbRecordsTraites = 0;
 
         foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
-	      log::add('suiviCO2', 'debug', 'taux_co2 : ' . $record['taux_co2']);
           if (isset($record['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
 
             $record_date = $record['date']; // recu au format Y-m-d, ce qui demande Jeedom, donc c'est parfait
