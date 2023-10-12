@@ -460,7 +460,7 @@ class suiviCO2 extends eqLogic {
         } //*/
       }
 
-      public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 14, $_eqLogic_id = NULL){ // fct appellée soit par l'AJAX, soit par le crouHourly
+      public function getAndRecordDataCo2($_nbRecordsAPI = 220, $_nbRecordsATraiterDB = 96, $_eqLogic_id = NULL){ // fct appellée soit par l'AJAX, soit par le crouHourly
 
         /* *************** Infos sur l'API opendata.reseaux-energies.fr
         96 données par jours
@@ -470,11 +470,13 @@ class suiviCO2 extends eqLogic {
         */
 
         //on va chercher les $_nbRecordsAPI dernieres data.
-        $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-tr&rows=' . $_nbRecordsAPI . '&sort=date_heure';
+        $date = date("Y-m-d");
+        //$url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-tr&rows=' . $_nbRecordsAPI . '&sort=date_heure';
+        $url = 'https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-national-tr/records?select=taux_co2%2Cdate%2Cheure&where=date%3D%27'.$date.'%27&order_by=date%20desc%2Cheure&limit=96&offset=0&timezone=Europe%2FParis&include_links=false&include_app_metas=false';
         log::add('suiviCO2', 'debug', 'Appel API CO2, URL : ' . $url);
 
         $request_http = new com_http($url);
-        $content = $request_http->exec(30);
+        $content = $request_http->exec(30,1);
 
         if ($content === false) {
           log::add('suiviCO2', 'warning', 'Erreur lors de l appel API CO2, URL : ' . $url);
@@ -482,31 +484,31 @@ class suiviCO2 extends eqLogic {
         }
 
         //on decode le retour de l'API pour en faire un tableau
+		log::add('suiviCO2', 'debug', 'content:'.$content);
         $json = json_decode($content, true);
 
         //on va chercher dans le tableau les infos qui nous interessent (les 'records')
-        $apirecords = $json['records'];
-
+        $apirecords = $json['results'];
         $nbRecordsTraites = 0;
 
         foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
-          if (isset($record['fields']['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
+          if (isset($record['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
 
-            $record_date = $record['fields']['date']; // recu au format Y-m-d, ce qui demande Jeedom, donc c'est parfait
-            $record_time = $record['fields']['heure']; // recu au format H:i
-            $record_tauxco2 = $record['fields']['taux_co2'];
+            $record_date = $record['date']; // recu au format Y-m-d, ce qui demande Jeedom, donc c'est parfait
+            $record_time = $record['heure']; // recu au format H:i
+            $record_tauxco2 = $record['taux_co2'];
 
             /************ Mise à jour de la derniere valeur dispo ************/
 
             // on cherche la valeur de l'heure courante -15min (parce que c'est la derniere dispo via l'API...) - Pas toujours, parfois elle manque, donc on va juste prendre la plus recente disponible (la premiere à etre lue, vu qu'on a demandé nos datas dans l'ordre chronologique)
       //      $datetimecherchee = date('Y-m-d H:i', strtotime('-15 min ' . date('Y-m-d H:00')));
             $datetimerecord = $record_date . ' ' . $record_time;
-      //      log::add('suiviCO2', 'debug', 'datetimecherchee : ' . $datetimecherchee . 'datetimerecord : ' . $datetimerecord);
+            //log::add('suiviCO2', 'debug', 'datetimecherchee : ' . $datetimecherchee . 'datetimerecord : ' . $datetimerecord);
 
       //      if($datetimecherchee == $datetimerecord){
             if($nbRecordsTraites == 0){ // le 1ere avec une valeur de CO2
 
-      //        log::add('suiviCO2', 'debug', 'Trouvee, on la garde : ' . $record_tauxco2);
+              //log::add('suiviCO2', 'debug', 'Trouvee, on la garde : ' . $record_tauxco2);
 
               //pour chaque equipement declaré par l'utilisateur, on met a jour la cmd
               foreach (self::byType('suiviCO2',true) as $suiviCO2) {
@@ -528,7 +530,7 @@ class suiviCO2 extends eqLogic {
               // pour pas traiter inutilement, on coupe apres x valeur API avec un taux_co2 traitées
               $nbRecordsTraites++;
               if ($nbRecordsTraites > $_nbRecordsATraiterDB){
-          //      log::add('suiviCO2', 'debug', 'Quota de: ' . $_nbRecordsATraiterDB . ' atteint, on break la boucle');
+                log::add('suiviCO2', 'debug', 'Quota de: ' . $_nbRecordsATraiterDB . ' atteint, on break la boucle');
                 break;
               }
 
@@ -539,7 +541,7 @@ class suiviCO2 extends eqLogic {
                 $suiviCO2_id = $suiviCO2->getId();
                 if(!isset($_eqLogic_id) || $_eqLogic_id == $suiviCO2_id){
 
-       //           log::add('suiviCO2', 'debug', 'Id de l équipement dans lequel on va enregistrer : ' . $suiviCO2_id);
+                  log::add('suiviCO2', 'debug', 'Id de l équipement dans lequel on va enregistrer : ' . $suiviCO2_id);
 
                   // on enregistre les infos dans la DB history avec la date donnéee dans le json
                   // pas besoin de verifier que la valeur existe pas encore, la DB gere unicité paire datetime/cmd
@@ -561,47 +563,57 @@ class suiviCO2 extends eqLogic {
         $nbdataimportees = 0;
         $calculstarttime = date('H:i:s');
 
-        //on va chercher les $_nbRecordsAPI dernieres data.
-        $url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-cons-def&rows=' . $_nbRecordsAPI . '&sort=date_heure&refine.date_heure=' . $_date;
-        log::add('suiviCO2', 'debug', 'Appel API CO2, URL : ' . $url);
+        $start = new DateTime($_date.'-01');
+	    $dateDepartTimestamp = strtotime($_date.'-01');
 
-        $request_http = new com_http($url);
-        $content = $request_http->exec(30);
+        //on calcule la date de fin
+        $end = date('Y-m-d', strtotime('+1 month', $dateDepartTimestamp ));
+        $end = new DateTime($end);
+       	foreach (new DatePeriod($start, new DateInterval('P1D') /* pas d'un jour */, $end) as $dt) {
+			$date = date_format($dt,"Y-m-d");
 
-        if ($content === false) {
-          log::add('suiviCO2', 'error', 'Erreur lors de l appel API CO2, URL : ' . $url);
-          return;
+			//on va chercher les $_nbRecordsAPI dernieres data.
+			//$url = 'https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=eco2mix-national-cons-def&rows=' . $_nbRecordsAPI . '&sort=date_heure&refine.date_heure=' . $_date;
+			$url = 'https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-national-tr/records?select=taux_co2%2Cdate%2Cheure&where=date%3D%27'.$date.'%27&order_by=date%20desc%2Cheure&limit=96&offset=0&timezone=Europe%2FParis&include_links=false&include_app_metas=false';
+			log::add('suiviCO2', 'debug', 'Appel API CO2, URL : ' . $url);
+
+			$request_http = new com_http($url);
+			$content = $request_http->exec(30,1);
+
+			if ($content === false) {
+			  log::add('suiviCO2', 'error', 'Erreur lors de l appel API CO2, URL : ' . $url);
+			  return;
+			}
+
+			//on decode le retour de l'API pour en faire un tableau
+			$json = json_decode($content, true);
+
+			//on va chercher dans le tableau les infos qui nous interessent (les 'records')
+			$apirecords = $json['results'];
+
+			$nbRecordsTraites = 0;
+
+			foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
+			  if (isset($record['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
+
+			    $record_date = $record['date']; // recu au format Y-m-d, ce qui demande Jeedom, donc c'est parfait
+			    $record_time = $record['heure']; // recu au format H:i
+			    $record_tauxco2 = $record['taux_co2'];
+
+			    /************ Enregistrement des datas en base de donnee ************/
+
+			 // on enregistre les infos dans la DB history avec la date donnéee dans le json
+			 // pas besoin de verifier que la valeur existe pas encore, la DB gere unicité paire datetime/cmd
+			    $cmd = $this->getCmd(null, 'co2kwhfromApi');
+			    if (is_object($cmd)) {
+			      $cmd->addHistoryValue($record_tauxco2, $record_date . ' ' . $record_time . ':00');
+			      log::add('suiviCO2', 'debug', 'eqLogic_id : ' . $suiviCO2_id . ' - Taux_Co2 : ' . $record_tauxco2 . ' à : ' . $record_date . ' ' . $record_time . ':00');
+			      $nbdataimportees++;
+			    }
+
+			  } // fin if on est dans un noeud avec un taux co2
+			} //fin boucle dans toutes les datas recuperées
         }
-
-        //on decode le retour de l'API pour en faire un tableau
-        $json = json_decode($content, true);
-
-        //on va chercher dans le tableau les infos qui nous interessent (les 'records')
-        $apirecords = $json['records'];
-
-        $nbRecordsTraites = 0;
-
-        foreach ($apirecords as $position => $record) {// pour chaque position dans 'records' on prend le noeud et on cherche taux_co2
-          if (isset($record['fields']['taux_co2'])) {// quand on a un noeud avec le taux_co2, on choppe les infos
-
-            $record_date = $record['fields']['date']; // recu au format Y-m-d, ce qui demande Jeedom, donc c'est parfait
-            $record_time = $record['fields']['heure']; // recu au format H:i
-            $record_tauxco2 = $record['fields']['taux_co2'];
-
-            /************ Enregistrement des datas en base de donnee ************/
-
-         // on enregistre les infos dans la DB history avec la date donnéee dans le json
-         // pas besoin de verifier que la valeur existe pas encore, la DB gere unicité paire datetime/cmd
-            $cmd = $this->getCmd(null, 'co2kwhfromApi');
-            if (is_object($cmd)) {
-              $cmd->addHistoryValue($record_tauxco2, $record_date . ' ' . $record_time . ':00');
-              log::add('suiviCO2', 'debug', 'eqLogic_id : ' . $suiviCO2_id . ' - Taux_Co2 : ' . $record_tauxco2 . ' à : ' . $record_date . ' ' . $record_time . ':00');
-              $nbdataimportees++;
-            }
-
-          } // fin if on est dans un noeud avec un taux co2
-        } //fin boucle dans toutes les datas recuperées
-
         log::add('suiviCO2', 'debug', 'Import data, date : ' . $_date . ', start à ' . $calculstarttime . ' fin à : ' . date('H:i:s') . ', nb data importées : ' . $nbdataimportees);
       } //fin fonction
 
