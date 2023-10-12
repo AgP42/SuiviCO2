@@ -92,3 +92,8 @@
 - ajout d'un cron dédié toutes les heures + 1 min pour l'appel API (pour @jpty...)
 - changement enregistrement de la derniere valeur co2parkWh disponible, on prend la derniere disponible, meme si ce n'est pas une xxh45 (qui n'est pas toujours dispo via l'API...)
 - Attention, les fonctions d'integration avec suivi Conso semblent HS, debug en cours...
+
+# 2.0.7 - 10 octobre 2023
+
+- Correction appel API qui ne fonctionnait plus
+- Utilisation version 2.1 API pour récupérer les infos et adaptation du code en conséquence
