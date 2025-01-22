@@ -10,8 +10,8 @@
 	"hasDependency" : false,
 	"hasOwnDeamon" : false,
 	"maxDependancyInstallTime" : 0,
-	"changelog" : "https://agp42.github.io/suiviCO2/#language#/changelog",
-	"documentation" : "https://agp42.github.io/suiviCO2/#language#",
+	"changelog" : "https://superbricolo.github.io/superbricoloDocs/suiviCO2/#language#/changelog",
+	"documentation" : "https://superbricolo.github.io/superbricoloDocs/suiviCO2/fr_FR/#language#",
 	"link" : {
 		"forum":"https://community.jeedom.com/t/plugin-tiers-plugin-suivico2-new-plugin-cherche-beta-testeur/19069",
 		"video" : "Lien vers une video"
