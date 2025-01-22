@@ -97,3 +97,7 @@
 
 - Correction appel API qui ne fonctionnait plus
 - Utilisation version 2.1 API pour récupérer les infos et adaptation du code en conséquence
+
+# 2.0.8 - 22 janvier 2024
+
+- Correction erreur 401 en profil utilisateur
